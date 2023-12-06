@@ -1,0 +1,22 @@
+{
+    "name": "trinity-devs/framework",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "src\\": "src/",
+            "Psr\\": "src/contracts"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*",
+        "robmorgan/phinx": "^0.15.4"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^6.3",
+        "codeception/codeception": "^5.0",
+        "codeception/module-phpbrowser": "*",
+        "codeception/module-asserts": "*",
+        "codeception/module-rest": "^3.3"
+    }
+}
