@@ -1,0 +1,15 @@
+{
+  "name": "trinity-devs/framework",
+  "version": "0.0.1",
+  "autoload": {
+    "psr-4": {
+      "src\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.2"
+  },
+  "require-dev": {
+
+  }
+}
