@@ -2,7 +2,7 @@
 
 namespace src\console;
 
-use src\console\options\Option;
+use RuntimeException;
 use src\contracts\ConsoleCommandInterface;
 use src\contracts\ConsoleInputInterface;
 use InvalidArgumentException;
@@ -126,5 +126,16 @@ class ConsoleInput implements ConsoleInputInterface
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function hasOption(string $optionName): bool
+    {
+        foreach ($this->options as $option) {
+            if ($option->getOption() === $optionName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

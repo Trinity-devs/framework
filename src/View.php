@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework;
+namespace src;
 
 use src\contracts\RouterInterface;
 use src\contracts\ViewRendererInterface;

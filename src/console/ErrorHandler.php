@@ -5,7 +5,7 @@ namespace src\console;
 use src\exception\baseException\Exception;
 use Throwable;
 
-class ErrorHandler extends \Framework\errorHandler\ErrorHandler
+class ErrorHandler extends \src\errorHandler\ErrorHandler
 {
     /**
      * @param Throwable $exception

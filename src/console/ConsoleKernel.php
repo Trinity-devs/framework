@@ -2,29 +2,32 @@
 
 namespace src\console;
 
-use src\contracts\ConsoleInputInterface;
-use src\contracts\ConsoleKernelInterface;
-use src\contracts\KernelPluginInterface;
 use src\DIContainer;
-use src\exception\baseException\Exception;
-use src\exception\consoleException\UnknownCommandException;
 use InvalidArgumentException;
 use ReflectionException;
+use src\contracts\ConsoleInputInterface;
+use src\contracts\ConsoleKernelInterface;
+use src\contracts\ConsoleOutputInterface;
+use src\contracts\eventsContracts\EventDispatcherInterface;
 use src\Event;
+use src\eventDispatcher\Message;
+use src\exception\baseException\Exception;
+use src\exception\consoleException\UnknownCommandException;
 
 class ConsoleKernel implements ConsoleKernelInterface
 {
     private string $defaultCommandName = 'list';
     private array $commandMap = [];
-    private array $plugins = [];
 
     /**
      * @param ConsoleInputInterface $input
      * @param ErrorHandler $errorHandler
      */
     public function __construct(
-        private readonly ConsoleInputInterface $input,
+        private ConsoleInputInterface $input,
+        private ConsoleOutputInterface $output,
         private ErrorHandler $errorHandler,
+        private EventDispatcherInterface $eventDispatcher,
         private DIContainer $container,
     )
     {
@@ -114,17 +117,20 @@ class ConsoleKernel implements ConsoleKernelInterface
     {
         try {
 
+            $this->eventDispatcher->trigger(Event::CONSOLE_INPUT_READY->value, new Message($this->input));
+
             $commandName = $this->input->getNameCommand() ?? $this->defaultCommandName;
             $commandClassName = $this->commandMap[$commandName]['name']
                 ?? throw new UnknownCommandException("Команда $commandName не найдена");
 
-            $this->init(Event::COMMAND_START->value);
+            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_STARTED->value, new Message(''));
             $this->container->build($commandClassName)->execute();
-            $this->init(Event::COMMAND_DONE->value);
+            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_DONE->value, new Message(''));
 
         } catch (Exception $exception) {
 
             $this->errorHandler->handleException($exception);
+
         }
 
         return 0;
@@ -138,35 +144,10 @@ class ConsoleKernel implements ConsoleKernelInterface
         return $this->commandMap;
     }
 
-    public function init(string $event): void
-    {
-        if (isset($this->plugins[$event]) === false) {
-            return;
-        }
-
-        foreach ($this->plugins[$event] as $plugin) {
-            $plugin->init();
-        }
-        $this->plugins[$event]->init();
-    }
-
-    public function addPlugin(string $event, KernelPluginInterface $plugin): void
-    {
-        foreach ($this->input->getOptions() as $optionInstance) {
-            if ($optionInstance->getOption() !== $plugin->getOptionSignature()) {
-                throw new \Exception('Неизвестная опция' . $optionInstance->getOption());
-            }
-
-            if ($optionInstance->getOption() === $plugin->getOptionSignature()) {
-                $this->plugins[$event] = $plugin;
-            }
-        }
-    }
-
     public function registerPlugins(array $plugins): void
     {
-        foreach ($plugins as $value) {
-            $this->addPlugin(...$value);
+        foreach ($plugins as $pluginClassName) {
+            (new $pluginClassName($this->eventDispatcher, $this, $this->input, $this->output))->init();
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework;
+namespace src;
 
 use src\contracts\RequestInterface;
 use src\contracts\StreamInterface;

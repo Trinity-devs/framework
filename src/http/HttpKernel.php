@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Http;
+namespace src\http;
 
 use src\apiResponses\CreateResponse;
 use src\apiResponses\DeleteResponse;

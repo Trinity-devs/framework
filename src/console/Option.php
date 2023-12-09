@@ -1,6 +1,6 @@
 <?php
 
-namespace src\console\options;
+namespace src\console;
 
 class Option
 {

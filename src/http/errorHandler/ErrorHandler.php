@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Http\errorHandler;
+namespace src\http\errorHandler;
 
 use src\contracts\ResponseInterface;
 use src\exception\baseException\ErrorException;
@@ -10,7 +10,7 @@ use src\exception\httpException\HttpException;
 use src\View;
 use Throwable;
 
-class ErrorHandler extends \Framework\errorHandler\ErrorHandler
+class ErrorHandler extends \src\errorHandler\ErrorHandler
 {
     public string $traceLine = '{html}';
     private int $maxSourceLines = 19;
