@@ -1,11 +1,11 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
-use src\exception\baseException\Exception;
+use trinity\exception\baseException\Exception;
 use Throwable;
 
-class ErrorHandler extends \src\errorHandler\ErrorHandler
+class ErrorHandler extends \trinity\errorHandler\ErrorHandler
 {
     /**
      * @param Throwable $exception

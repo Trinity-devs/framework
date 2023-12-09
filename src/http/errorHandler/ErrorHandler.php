@@ -1,16 +1,16 @@
 <?php
 
-namespace src\http\errorHandler;
+namespace trinity\http\errorHandler;
 
-use src\contracts\ResponseInterface;
-use src\exception\baseException\ErrorException;
-use src\exception\baseException\LogicException;
-use src\exception\baseException\UnknownMethodException;
-use src\exception\httpException\HttpException;
-use src\View;
+use trinity\contracts\ResponseInterface;
+use trinity\exception\baseException\ErrorException;
+use trinity\exception\baseException\LogicException;
+use trinity\exception\baseException\UnknownMethodException;
+use trinity\exception\httpException\HttpException;
+use trinity\View;
 use Throwable;
 
-class ErrorHandler extends \src\errorHandler\ErrorHandler
+class ErrorHandler extends \trinity\errorHandler\ErrorHandler
 {
     public string $traceLine = '{html}';
     private int $maxSourceLines = 19;

@@ -1,17 +1,17 @@
 <?php
 
-namespace src\http;
+namespace trinity\http;
 
-use src\apiResponses\CreateResponse;
-use src\apiResponses\DeleteResponse;
-use src\apiResponses\HtmlResponse;
-use src\apiResponses\JsonResponse;
-use src\apiResponses\UpdateResponse;
-use src\contracts\HttpKernelInterface;
-use src\contracts\ResponseInterface;
-use src\contracts\RouterInterface;
-use src\exception\baseException\Exception;
-use src\Http\errorHandler\ErrorHandler;
+use trinity\apiResponses\CreateResponse;
+use trinity\apiResponses\DeleteResponse;
+use trinity\apiResponses\HtmlResponse;
+use trinity\apiResponses\JsonResponse;
+use trinity\apiResponses\UpdateResponse;
+use trinity\contracts\HttpKernelInterface;
+use trinity\contracts\ResponseInterface;
+use trinity\contracts\RouterInterface;
+use trinity\exception\baseException\Exception;
+use trinity\Http\errorHandler\ErrorHandler;
 use Throwable;
 
 class HttpKernel implements HttpKernelInterface

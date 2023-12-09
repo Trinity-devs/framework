@@ -1,9 +1,9 @@
 <?php
 
-namespace src;
+namespace trinity;
 
-use src\contracts\ContainerInterface;
-use src\exception\baseException\LogicException;
+use trinity\contracts\ContainerInterface;
+use trinity\exception\baseException\LogicException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;

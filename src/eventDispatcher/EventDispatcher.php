@@ -1,10 +1,10 @@
 <?php
 
-namespace src\eventDispatcher;
+namespace trinity\eventDispatcher;
 
-use src\contracts\eventsContracts\EventDispatcherInterface;
-use src\contracts\ObserverInterface;
-use src\exception\baseException\LogicException;
+use trinity\contracts\eventsContracts\EventDispatcherInterface;
+use trinity\contracts\ObserverInterface;
+use trinity\exception\baseException\LogicException;
 
 class EventDispatcher implements EventDispatcherInterface
 {

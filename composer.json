@@ -1,10 +1,23 @@
 {
     "name": "trinity-devs/framework",
     "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Roman Alborov",
+            "email": "r.alborov@efko.ru"
+        },
+        {
+            "name": "Artur Ushakov",
+            "email": "a.ushakov@efko.ru"
+        },
+        {
+            "name": "Danil Babykin",
+            "email": "d.babykin@efko.ru"
+        }
+    ],
     "autoload": {
         "psr-4": {
-            "src\\": "src/",
-            "Psr\\": "src/contracts"
+            "trinity\\": "src"
         }
     },
     "require": {

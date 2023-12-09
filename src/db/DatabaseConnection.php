@@ -1,8 +1,8 @@
 <?php
 
-namespace src\db;
+namespace trinity\db;
 
-use src\contracts\DatabaseConnectionInterface;
+use trinity\contracts\DatabaseConnectionInterface;
 use PDO;
 
 class DatabaseConnection implements DatabaseConnectionInterface

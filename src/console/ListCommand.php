@@ -1,10 +1,10 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
-use src\contracts\ConsoleCommandInterface;
-use src\contracts\ConsoleKernelInterface;
-use src\contracts\ConsoleOutputInterface;
+use trinity\contracts\ConsoleCommandInterface;
+use trinity\contracts\ConsoleKernelInterface;
+use trinity\contracts\ConsoleOutputInterface;
 
 class ListCommand implements ConsoleCommandInterface
 {

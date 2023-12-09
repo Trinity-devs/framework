@@ -1,10 +1,10 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
 use RuntimeException;
-use src\contracts\ConsoleCommandInterface;
-use src\contracts\ConsoleInputInterface;
+use trinity\contracts\ConsoleCommandInterface;
+use trinity\contracts\ConsoleInputInterface;
 use InvalidArgumentException;
 use UnexpectedValueException;
 

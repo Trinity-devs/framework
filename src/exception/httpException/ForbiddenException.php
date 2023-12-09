@@ -1,6 +1,6 @@
 <?php
 
-namespace src\exception\httpException;
+namespace trinity\exception\httpException;
 
 class ForbiddenException extends HttpException
 {

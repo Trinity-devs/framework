@@ -1,10 +1,10 @@
 <?php
 
-namespace src;
+namespace trinity;
 
-use src\contracts\ResponseInterface;
-use src\exception\baseException\InvalidArgumentException;
-use src\exception\httpException\HttpException;
+use trinity\contracts\ResponseInterface;
+use trinity\exception\baseException\InvalidArgumentException;
+use trinity\exception\httpException\HttpException;
 use Throwable;
 
 class Response implements ResponseInterface

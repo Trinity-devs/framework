@@ -1,10 +1,10 @@
 <?php
 
-namespace src;
+namespace trinity;
 
-use src\contracts\RouterInterface;
-use src\contracts\ViewRendererInterface;
-use src\exception\baseException\LogicException;
+use trinity\contracts\RouterInterface;
+use trinity\contracts\ViewRendererInterface;
+use trinity\exception\baseException\LogicException;
 
 const VIEW_PATH = __DIR__ . '/views/';
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace src;
+namespace trinity;
 
-use src\contracts\UriInterface;
+use trinity\contracts\UriInterface;
 
 class Uri implements UriInterface
 {

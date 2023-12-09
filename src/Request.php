@@ -1,12 +1,12 @@
 <?php
 
-namespace src;
+namespace trinity;
 
-use src\contracts\RequestInterface;
-use src\contracts\StreamInterface;
-use src\contracts\UriInterface;
-use src\exception\baseException\Exception;
-use src\exception\httpException\NotFoundHttpException;
+use trinity\contracts\RequestInterface;
+use trinity\contracts\StreamInterface;
+use trinity\contracts\UriInterface;
+use trinity\exception\baseException\Exception;
+use trinity\exception\httpException\NotFoundHttpException;
 
 class Request implements RequestInterface
 {

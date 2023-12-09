@@ -1,6 +1,6 @@
 <?php
 
-namespace src\contracts;
+namespace trinity\contracts;
 
 interface ConsoleKernelInterface
 {

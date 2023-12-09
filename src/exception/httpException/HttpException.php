@@ -1,9 +1,9 @@
 <?php
 
-namespace src\exception\httpException;
+namespace trinity\exception\httpException;
 
-use src\exception\baseException\Exception;
-use src\Response;
+use trinity\exception\baseException\Exception;
+use trinity\Response;
 use Throwable;
 
 class HttpException extends Exception

@@ -1,8 +1,8 @@
 <?php
 
-namespace src\eventDispatcher;
+namespace trinity\eventDispatcher;
 
-use src\contracts\eventsContracts\MessageInterface;
+use trinity\contracts\eventsContracts\MessageInterface;
 
 readonly class Message implements MessageInterface
 {

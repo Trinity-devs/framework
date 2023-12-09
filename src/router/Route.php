@@ -1,6 +1,6 @@
 <?php
 
-namespace src\router;
+namespace trinity\router;
 
 class Route
 {

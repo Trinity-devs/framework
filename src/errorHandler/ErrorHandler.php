@@ -1,11 +1,9 @@
 <?php
 
-namespace src\errorHandler;
+namespace trinity\errorHandler;
 
 use Exception;
-use src\contracts\ConsoleKernelInterface;
-use src\DIContainer;
-use src\exception\baseException\ErrorException;
+use trinity\exception\baseException\ErrorException;
 use Throwable;
 
 abstract class ErrorHandler

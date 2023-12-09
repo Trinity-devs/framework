@@ -1,12 +1,12 @@
 <?php
 
-namespace src\router;
+namespace trinity\router;
 
-use src\exception\baseException\LogicException;
-use src\exception\httpException\NotFoundHttpException;
+use trinity\exception\baseException\LogicException;
+use trinity\exception\httpException\NotFoundHttpException;
 use ReflectionException;
-use src\contracts\{RequestInterface, RouterInterface, RoutesCollectionInterface, UriInterface};
-use src\DIContainer;
+use trinity\contracts\{RequestInterface, RouterInterface, RoutesCollectionInterface, UriInterface};
+use trinity\DIContainer;
 
 
 final class Router implements RouterInterface

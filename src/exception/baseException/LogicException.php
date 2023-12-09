@@ -1,6 +1,6 @@
 <?php
 
-namespace src\exception\baseException;
+namespace trinity\exception\baseException;
 
 class LogicException extends Exception
 {

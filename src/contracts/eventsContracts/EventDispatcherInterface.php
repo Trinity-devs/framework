@@ -1,9 +1,9 @@
 <?php
 
-namespace src\contracts\eventsContracts;
+namespace trinity\contracts\eventsContracts;
 
-use src\contracts\ObserverInterface;
-use src\eventDispatcher\Message;
+use trinity\contracts\ObserverInterface;
+use trinity\eventDispatcher\Message;
 
 interface EventDispatcherInterface
 {

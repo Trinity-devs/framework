@@ -1,6 +1,6 @@
 <?php
 
-namespace src\apiResponses;
+namespace trinity\apiResponses;
 
 readonly class UpdateResponse
 {

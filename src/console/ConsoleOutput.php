@@ -1,8 +1,8 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
-use src\contracts\ConsoleOutputInterface;
+use trinity\contracts\ConsoleOutputInterface;
 
 class ConsoleOutput implements ConsoleOutputInterface
 {

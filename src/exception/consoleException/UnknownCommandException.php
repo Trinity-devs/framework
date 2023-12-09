@@ -1,8 +1,8 @@
 <?php
 
-namespace src\exception\consoleException;
+namespace trinity\exception\consoleException;
 
-use src\exception\baseException\Exception;
+use trinity\exception\baseException\Exception;
 
 class UnknownCommandException extends Exception
 {

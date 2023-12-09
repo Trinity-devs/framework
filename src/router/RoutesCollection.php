@@ -1,8 +1,8 @@
 <?php
 
-namespace src\router;
+namespace trinity\router;
 
-use src\contracts\RoutesCollectionInterface;
+use trinity\contracts\RoutesCollectionInterface;
 
 class RoutesCollection implements RoutesCollectionInterface
 {

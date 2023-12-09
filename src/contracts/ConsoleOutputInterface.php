@@ -1,8 +1,8 @@
 <?php
 
-namespace src\contracts;
+namespace trinity\contracts;
 
-use src\console\ConsoleColors;
+use trinity\console\ConsoleColors;
 
 interface ConsoleOutputInterface
 {

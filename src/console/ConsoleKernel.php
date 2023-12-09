@@ -1,18 +1,18 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
-use src\DIContainer;
+use trinity\DIContainer;
 use InvalidArgumentException;
 use ReflectionException;
-use src\contracts\ConsoleInputInterface;
-use src\contracts\ConsoleKernelInterface;
-use src\contracts\ConsoleOutputInterface;
-use src\contracts\eventsContracts\EventDispatcherInterface;
-use src\Event;
-use src\eventDispatcher\Message;
-use src\exception\baseException\Exception;
-use src\exception\consoleException\UnknownCommandException;
+use trinity\contracts\ConsoleInputInterface;
+use trinity\contracts\ConsoleKernelInterface;
+use trinity\contracts\ConsoleOutputInterface;
+use trinity\contracts\eventsContracts\EventDispatcherInterface;
+use trinity\Event;
+use trinity\eventDispatcher\Message;
+use trinity\exception\baseException\Exception;
+use trinity\exception\consoleException\UnknownCommandException;
 
 class ConsoleKernel implements ConsoleKernelInterface
 {

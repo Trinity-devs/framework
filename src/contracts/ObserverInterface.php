@@ -1,8 +1,8 @@
 <?php
 
-namespace src\contracts;
+namespace trinity\contracts;
 
-use src\eventDispatcher\Message;
+use trinity\eventDispatcher\Message;
 
 interface ObserverInterface
 {

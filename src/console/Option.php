@@ -1,6 +1,6 @@
 <?php
 
-namespace src\console;
+namespace trinity\console;
 
 class Option
 {

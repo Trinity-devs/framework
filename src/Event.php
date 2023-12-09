@@ -1,6 +1,6 @@
 <?php
 
-namespace src;
+namespace trinity;
 
 enum Event: string
 {

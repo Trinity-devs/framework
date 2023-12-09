@@ -1,6 +1,6 @@
 <?php
 
-namespace src\contracts\eventsContracts;
+namespace trinity\contracts\eventsContracts;
 
 interface MessageInterface
 {
