@@ -1,18 +1,18 @@
 {
     "name": "trinity-devs/framework",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "authors": [
         {
             "name": "Roman Alborov",
-            "email": "r.alborov@efko.ru"
+            "email": "lamole4@gmail.com"
         },
         {
             "name": "Artur Ushakov",
-            "email": "a.ushakov@efko.ru"
+            "email": "ush.as@yandex.ru"
         },
         {
             "name": "Danil Babykin",
-            "email": "d.babykin@efko.ru"
+            "email": "l.yophen.l@gmail.com"
         }
     ],
     "autoload": {
@@ -22,14 +22,6 @@
     },
     "require": {
         "php": "^8.2",
-        "ext-pdo": "*",
-        "robmorgan/phinx": "^0.15.4"
-    },
-    "require-dev": {
-        "symfony/var-dumper": "^6.3",
-        "codeception/codeception": "^5.0",
-        "codeception/module-phpbrowser": "*",
-        "codeception/module-asserts": "*",
-        "codeception/module-rest": "^3.3"
+        "ext-pdo": "*"
     }
 }
