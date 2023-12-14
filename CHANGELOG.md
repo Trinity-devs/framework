@@ -5,6 +5,14 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.1.1](https://github.com/Trinity-devs/framework/releases/tag/0.1.1) ] - 14.12.2023
+
+- Исправлено
+  - Исправлено пространство имен в HttpKernel
+
+- Удалено
+  - Удален не использующийся метод в плагин интерфейсе
+
 ## [ [0.1.0](https://github.com/Trinity-devs/framework/releases/tag/0.1.0) ] - 14.12.2023
 
 - Реализовано

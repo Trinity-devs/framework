@@ -11,7 +11,7 @@ use trinity\contracts\HttpKernelInterface;
 use trinity\contracts\ResponseInterface;
 use trinity\contracts\RouterInterface;
 use trinity\exception\baseException\Exception;
-use trinity\Http\errorHandler\ErrorHandler;
+use trinity\http\errorHandler\ErrorHandler;
 use Throwable;
 
 class HttpKernel implements HttpKernelInterface
