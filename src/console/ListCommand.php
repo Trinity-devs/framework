@@ -81,7 +81,7 @@ class ListCommand implements ConsoleCommandInterface
 
     private function printFrameworkInfo(): void
     {
-          $this->output->ansiFormat('ЭФКО Фреймворк 0.0.1', ConsoleColors::CYAN);
+          $this->output->ansiFormat('ЭФКО Фреймворк 0.1.3', ConsoleColors::CYAN);
           $this->output->writeLn(2);
           $this->output->ansiFormat(
             'Фреймворк создан разработчиками компании ЭФКО Цифровые решения.',
