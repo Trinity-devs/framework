@@ -14,7 +14,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Конфигурирует EventDispatcher с использованием предоставленного массива конфигурации
      *
-     * @param array $config Массив конфигурации, где каждый элемент представляет собой массив [Event $event, ObserverInterface $observer]
+     * @param array $config Массив конфигурации, где каждый элемент представляет собой массив [UnitEnum $event, ObserverInterface $observer]
      * @throws LogicException Если EventDispatcher уже был сконфигурирован ранее
      */
     public function configure(array $config): void
@@ -31,7 +31,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Подписывает наблюдателя к определенному событию
      *
-     * @param UnitEnum $event Имя события, к которому присоединяется наблюдатель
+     * @param UnitEnum $event Событие, к которому присоединяется наблюдатель
      * @param ObserverInterface $observer Наблюдатель, который будет присоединен
      */
     public function attach(UnitEnum $event, ObserverInterface $observer): void
@@ -42,7 +42,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Отписывает наблюдателя от определенного события
      *
-     * @param UnitEnum $event имя события, от которого отсоединяется наблюдатель
+     * @param UnitEnum $event Событие, от которого отсоединяется наблюдатель
      */
     public function detach(UnitEnum $event): void
     {
@@ -56,7 +56,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Запускает событие и уведомляет соответствующего наблюдателя с переданным сообщением
      *
-     * @param UnitEnum $event Имя события, которое будет запущено
+     * @param UnitEnum $event Событие, которое будет запущено
      * @param Message $message Сообщение, передаваемое наблюдателю
      */
     public function trigger(UnitEnum $event, Message $message): void
