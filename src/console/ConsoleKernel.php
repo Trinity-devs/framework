@@ -21,7 +21,10 @@ class ConsoleKernel implements ConsoleKernelInterface
 
     /**
      * @param ConsoleInputInterface $input
+     * @param ConsoleOutputInterface $output
      * @param ErrorHandler $errorHandler
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param DIContainer $container
      */
     public function __construct(
         private ConsoleInputInterface $input,

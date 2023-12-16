@@ -65,7 +65,7 @@ class EventDispatcher implements EventDispatcherInterface
             return;
         }
 
-        $message->eventName = $eventName;
+        $message->eventName = $event->value;
 
         $this->eventObservers[$event->value]->observe($message);
     }
