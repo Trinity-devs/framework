@@ -4,12 +4,14 @@ namespace trinity\eventDispatcher;
 
 use trinity\contracts\eventsContracts\MessageInterface;
 
-readonly class Message implements MessageInterface
+class Message implements MessageInterface
 {
+    public string $eventName;
+
     /**
      * @param mixed $message
      */
-    public function __construct(public mixed $message)
+    public function __construct(readonly public mixed $message)
     {
     }
 
