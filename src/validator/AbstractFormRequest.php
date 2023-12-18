@@ -12,9 +12,9 @@ abstract class AbstractFormRequest
         $this->data = $this->request->post();
     }
 
-    public function getDataValue(string $field): string|array
+    public function getDataValue(): string|array
     {
-        return $this->data[$field];
+        return $this->data;
     }
 
     public function setDataValue(string $field, mixed $value): void

@@ -25,7 +25,7 @@ class Validator
                     }
                 }
 
-                $ruleName = $ruleItem[0];
+                $ruleName = $ruleItem['rule'];
                 $params = array_slice($ruleItem, 1);
 
                 if ($this->validateField($field, $ruleName, $params) === false) {
@@ -39,9 +39,9 @@ class Validator
         return true;
     }
 
-    public function getDataValue(string $field): string|array
+    public function getDataValue(): string|array
     {
-        return $this->form->getDataValue($field);
+        return $this->form->getDataValue();
     }
 
     public function setDataValue(string $field, mixed $value): void
@@ -59,7 +59,7 @@ class Validator
 
         $validator = new $classValidator();
 
-        return $validator->validate($field, $this, $params);
+        return $validator->validate($field, $params, $this);
     }
 
     public function addError($field, $message): void

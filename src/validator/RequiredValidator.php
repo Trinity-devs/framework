@@ -8,6 +8,10 @@ class RequiredValidator implements ValidatorInterface
 {
     public function validate(string $field, array $params, Validator $validator): bool
     {
+        if (array_key_exists($field, $validator->getDataValue()) === false) {
+            $validator->addError($field, 'Поле обязательно для заполнения');
+        }
+
         $value = $validator->getDataValue($field);
 
         if (is_array($value) === true) {
