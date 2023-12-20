@@ -11,47 +11,70 @@ class Validator
     public function validate(AbstractFormRequest $form): bool
     {
         $this->form = $form;
-        $rules = $this->form->rules();
+        $rulesItems = $this->form->rules();
 
-        foreach ($rules as $field => $rule) {
-            foreach ($rule as $ruleItem) {
-                if (is_callable($ruleItem) === true) {
-                    $value = $form->getDataValue($field);
+        foreach ($rulesItems as $ruleItem) {
+            $fields = $ruleItem[0];
+            $rule = $ruleItem[1];
+            $params = [];
 
-                    if (call_user_func($ruleItem, $value, $form) === false) {
-                        $this->addError($field, $ruleItem[1]);
+            if (isset($ruleItem[2]) === true) {
+                $params = array_slice($ruleItem, 2);
+            }
 
-                        return false;
-                    }
+            if (is_string($fields) === true) {
+                $this->validateField($fields, $rule, $params);
+
+                continue;
+            }
+
+            foreach ($fields as $field) {
+                if (is_callable($rule) === true) {
+                    $this->validateCallbackRule($rule, $field, $params);
+
+                    continue;
                 }
 
-                $ruleName = $ruleItem['rule'];
-                $params = array_slice($ruleItem, 1);
-
-                if ($this->validateField($field, $ruleName, $params) === false) {
-                    $this->addError($field, $ruleName . ' - ' . $ruleItem[1]);
-
-                    return false;
-                }
+                $this->validateField($field, $rule, $params);
             }
         }
 
-        return true;
+        if (empty($this->errors) === true) {
+            return true;
+        }
+
+        return false;
     }
 
-    public function getDataValue(): string|array
+    public function validateCallbackRule(callable $callback, string $field, array $params = []): void
     {
-        return $this->form->getDataValue();
+        $value = $this->getDataValue($field);
+
+        if ($callback($value, $params) === false) {
+            $this->addError($field, 'callback');
+        }
+    }
+
+    public function getDataValues(): array|string
+    {
+        return $this->form->getData();
+    }
+
+    public function getDataValue(string $field): string
+    {
+        return $this->form->getData()[$field];
     }
 
     public function setDataValue(string $field, mixed $value): void
     {
-        $this->form->setDataValue($field, $value);
+        $data = $this->form->getData();
+        $data[$field] = $value;
+        $this->form->setData($data);
     }
 
-    private function validateField(string $field, string $ruleName, array $params): bool
+    private function validateField(string $field, string $ruleItem, array $params = []): void
     {
-        $classValidator = __NAMESPACE__ . '\\' . ucfirst($ruleName) . 'Validator';
+        $classValidator = __NAMESPACE__ . '\\' . ucfirst($ruleItem) . 'Validator';
 
         if (class_exists($classValidator) === false) {
             throw new ('Класс ' . $classValidator . ' не найден');
@@ -59,20 +82,22 @@ class Validator
 
         $validator = new $classValidator();
 
-        return $validator->validate($field, $params, $this);
+        $validator->validate($field, $params, $this);
     }
 
-    public function addError($field, $message): void
+    public function addError(string $field, string $message): void
     {
-        if (isset($this->errors[$field]) === false) {
-            $this->errors[$field] = [];
+        $this->errors[$field] = $message;
+    }
+
+    public function getErrors(): string
+    {
+        $answer = '';
+
+        foreach ($this->errors as $key => $value) {
+            $answer .= $key . ' - ' . $value . PHP_EOL;
         }
-        $this->errors[$field][] = $message;
-    }
 
-    public function getErrors(): array
-    {
-        return $this->errors;
+        return $answer;
     }
-
 }

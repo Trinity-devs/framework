@@ -6,20 +6,21 @@ use trinity\contracts\RequestInterface;
 
 abstract class AbstractFormRequest
 {
-    private array $data;
+    private array $data = [];
+
     public function __construct(private readonly RequestInterface $request)
     {
         $this->data = $this->request->post();
     }
 
-    public function getDataValue(): string|array
+    public function setData(array $data): void
     {
-        return $this->data;
+        $this->data = $data;
     }
 
-    public function setDataValue(string $field, mixed $value): void
+    public function getData(): array
     {
-        $this->data[$field] = $value;
+        return $this->data;
     }
 
     abstract public function rules(): array;

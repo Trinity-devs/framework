@@ -6,12 +6,14 @@ use trinity\contracts\ValidatorInterface;
 
 class TrimValidator implements ValidatorInterface
 {
-    public function validate(string $field, array $params, Validator $validator): bool
+    public function validate(string $field, array $params, Validator $validator): void
     {
         $value = trim($validator->getDataValue($field));
 
         $validator->setDataValue($field, $value);
-
-        return true;
+        
+        if (is_string($value) === false) {
+            $validator->addError($field, 'Значение должно быть строкой');
+        }
     }
 }

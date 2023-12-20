@@ -6,10 +6,12 @@ use trinity\contracts\ValidatorInterface;
 
 class RequiredValidator implements ValidatorInterface
 {
-    public function validate(string $field, array $params, Validator $validator): bool
+    public function validate(string $field, array $params, Validator $validator): void
     {
-        if (array_key_exists($field, $validator->getDataValue()) === false) {
+        if (isset($validator->getDataValues()[$field]) === false) {
             $validator->addError($field, 'Поле обязательно для заполнения');
+
+            return;
         }
 
         $value = $validator->getDataValue($field);
@@ -18,16 +20,14 @@ class RequiredValidator implements ValidatorInterface
             if (count($value) === 0) {
                 $validator->addError($field, 'Поле обязательно для заполнения');
 
-                return false;
+                return;
             }
         }
 
         if ($value === null || $value === '') {
             $validator->addError($field, 'Поле обязательно для заполнения');
 
-            return false;
+            return;
         }
-
-        return true;
     }
 }

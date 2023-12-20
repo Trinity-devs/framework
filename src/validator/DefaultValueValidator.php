@@ -7,16 +7,14 @@ use trinity\contracts\ValidatorInterface;
 class DefaultValueValidator implements ValidatorInterface
 {
 
-    public function validate(string $field, array $params, Validator $validator): bool
+    public function validate(string $field, array $params, Validator $validator): void
     {
         $value = $validator->getDataValue($field) ?? $params[0];
 
         if (is_callable($value) === true) {
-            $value = call_user_func($value);
-
-            $validator->setDataValue($field, $value);
-
-            return true;
+            $validator->setDataValue($field, $value());
+            
+            return;
         }
 
         if (is_array($value) === true) {
@@ -29,10 +27,6 @@ class DefaultValueValidator implements ValidatorInterface
             }, $value);
 
             $validator->setDataValue($field, $value);
-
-            return true;
         }
-
-        return true;
     }
 }
