@@ -2,11 +2,10 @@
 
 namespace trinity;
 
+use trinity\contracts\FileHandlerInterface;
 use trinity\contracts\RouterInterface;
 use trinity\contracts\ViewRendererInterface;
 use trinity\exception\baseException\LogicException;
-
-const VIEW_PATH = __DIR__ . '/views/';
 
 class View implements ViewRendererInterface
 {
@@ -26,8 +25,8 @@ class View implements ViewRendererInterface
 
     public function __construct(
         private RouterInterface $router,
-    )
-    {
+        private FileHandlerInterface $fileHandler,
+    ) {
     }
 
     /**
@@ -51,7 +50,7 @@ class View implements ViewRendererInterface
      */
     public function render(string $view, array $params = []): string
     {
-       $controller = $this->router->getControllerName();
+        $controller = $this->router->getControllerName();
 
         preg_match('/\\\\([a-zA-Z]+)Controller$/', $controller, $matches);
 
@@ -72,12 +71,11 @@ class View implements ViewRendererInterface
     private function getViewFile(string $view, string $controller = ''): ?string
     {
         $viewParts = explode('/', $view);
-
         if ($viewParts[0] === "errorHandler") {
-            return VIEW_PATH . $view . '.php';
+            return $this->fileHandler->getAlias('@viewsTrinity') . "$view" . '.php';
         }
 
-        return PROJECT_ROOT . "views/$controller/" . $view . '.php';
+        return $this->fileHandler->getAlias('@views') . "$controller/" . $view . '.php';
     }
 
     /**

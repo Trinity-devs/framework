@@ -21,7 +21,10 @@ class ConsoleKernel implements ConsoleKernelInterface
 
     /**
      * @param ConsoleInputInterface $input
+     * @param ConsoleOutputInterface $output
      * @param ErrorHandler $errorHandler
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param DIContainer $container
      */
     public function __construct(
         private ConsoleInputInterface $input,
@@ -117,15 +120,15 @@ class ConsoleKernel implements ConsoleKernelInterface
     {
         try {
 
-            $this->eventDispatcher->trigger(Event::CONSOLE_INPUT_READY->value, new Message($this->input));
+            $this->eventDispatcher->trigger(Event::CONSOLE_INPUT_READY, new Message($this->input));
 
             $commandName = $this->input->getNameCommand() ?? $this->defaultCommandName;
             $commandClassName = $this->commandMap[$commandName]['name']
                 ?? throw new UnknownCommandException("Команда $commandName не найдена");
 
-            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_STARTED->value, new Message(''));
+            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_STARTED, new Message(''));
             $this->container->build($commandClassName)->execute();
-            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_DONE->value, new Message(''));
+            $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_DONE, new Message(''));
 
         } catch (Exception $exception) {
 
