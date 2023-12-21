@@ -24,7 +24,6 @@ class View implements ViewRendererInterface
     public array $metaTags = [];
 
     public function __construct(
-        private RouterInterface $router,
         private FileHandlerInterface $fileHandler,
     ) {
     }
@@ -50,11 +49,13 @@ class View implements ViewRendererInterface
      */
     public function render(string $view, array $params = []): string
     {
-        $controller = $this->router->getControllerName();
+        $filePath  = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
 
-        preg_match('/\\\\([a-zA-Z]+)Controller$/', $controller, $matches);
+        $filename = basename($filePath, '.php');
 
-        $viewFile = $this->getViewFile($view, lcfirst($matches[1]));
+        $className = lcfirst(str_replace('Controller', '', $filename));
+
+        $viewFile = $this->getViewFile($view, $className);
 
         if ($viewFile === null || file_exists($viewFile) === false) {
             throw new LogicException("Файл представления не существует: $view");

@@ -6,5 +6,5 @@ interface RouterInterface
 {
     public function dispatch(): object;
 
-    public function getControllerName(): string;
+    public function getTypeResponse(): string;
 }
