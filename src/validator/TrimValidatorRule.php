@@ -2,11 +2,11 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\ValidatorInterface;
+use trinity\contracts\ValidatorRuleInterface;
 
-class TrimValidator implements ValidatorInterface
+class TrimValidatorRule implements ValidatorRuleInterface
 {
-    public function validate(string $field, array $params, Validator $validator): void
+    public function validateRule(string $field, array $params, Validator $validator): void
     {
         $value = trim($validator->getDataValue($field));
 
