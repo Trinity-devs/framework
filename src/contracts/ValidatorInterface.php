@@ -2,9 +2,9 @@
 
 namespace trinity\contracts;
 
-use trinity\validator\Validator;
+use trinity\validator\AbstractFormRequest;
 
 interface ValidatorInterface
 {
-    public function validate(string $field, array $params, Validator $validator): void;
+    public function validate(AbstractFormRequest $form): void;
 }
