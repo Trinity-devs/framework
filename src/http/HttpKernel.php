@@ -2,11 +2,11 @@
 
 namespace trinity\http;
 
-use trinity\apiResponses\CreateResponse;
-use trinity\apiResponses\DeleteResponse;
-use trinity\apiResponses\HtmlResponse;
-use trinity\apiResponses\JsonResponse;
-use trinity\apiResponses\UpdateResponse;
+use trinity\api\responses\CreateResponse;
+use trinity\api\responses\DeleteResponse;
+use trinity\api\responses\HtmlResponse;
+use trinity\api\responses\JsonResponse;
+use trinity\api\responses\UpdateResponse;
 use trinity\contracts\HttpKernelInterface;
 use trinity\contracts\ResponseInterface;
 use trinity\contracts\RouterInterface;

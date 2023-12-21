@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\apiResponses;
+namespace trinity\api\responses;
 
 readonly class HtmlResponse
 {

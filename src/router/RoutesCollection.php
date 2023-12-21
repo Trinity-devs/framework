@@ -3,6 +3,8 @@
 namespace trinity\router;
 
 use trinity\contracts\RoutesCollectionInterface;
+use trinity\exception\httpException\NotFoundHttpException;
+use trinity\services\UrlParsingService;
 
 class RoutesCollection implements RoutesCollectionInterface
 {
@@ -31,8 +33,8 @@ class RoutesCollection implements RoutesCollectionInterface
 
         $middlewares = array_merge($middlewares, $middleware);
 
-        $routeInstance = new Route($this->parseUri($route), $method, $controllerAction, $middlewares);
-        $this->routes[$method][$routeInstance->getUri()['path']] = $routeInstance;
+        $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction, $middlewares);
+        $this->routes[$method][$routeInstance->getUrl()['path']] = $routeInstance;
     }
 
     /**
@@ -137,32 +139,35 @@ class RoutesCollection implements RoutesCollectionInterface
     }
 
     /**
-     * @param string $uri
+     * @param string $url
      * @return array
+     * @throws NotFoundHttpException
      */
-    private function parseUri(string $uri): array
+    private function parseUrl(string $url): array
     {
-        $path = parse_url($uri, PHP_URL_PATH);
-        $params = array_key_exists('query', parse_url($uri)) ? parse_url($uri)['query'] : '';
-        $paramArray = explode('{', $params);
+        $params = UrlParsingService::parseParams($url);
+        $matches = UrlParsingService::parseQuery($url);
+        $path = UrlParsingService::parsePath($url, $params);
 
         $requiredParams = [];
         $optionalParams = [];
 
-        foreach ($paramArray as $param) {
-            if (str_contains($param, '}') === true) {
-                $paramName = substr($param, 0, strpos($param, '}'));
+        foreach ($matches as $param) {
+            if (str_contains($param, '?') === true) {
+                $optionalParams[] = substr($param, 1);
 
-                if (str_contains($param, '?') === true) {
-                    $optionalParams[] = substr($paramName, 1);
-                    continue;
-                }
-
-                $requiredParams[] = $paramName;
+                continue;
             }
+
+            $requiredParams[] = $param;
         }
 
-        return ['path' => $path, 'requiredParams' => $requiredParams, 'optionalParams' => $optionalParams];
+        return [
+            'path' => $path,
+            'params' => $params,
+            'requiredParams' => $requiredParams,
+            'optionalParams' => $optionalParams
+        ];
     }
 
     /**
@@ -196,5 +201,52 @@ class RoutesCollection implements RoutesCollectionInterface
     public function getGlobalMiddlewares(): array
     {
         return $this->globalMiddlewares;
+    }
+
+    /**
+     * @param string $route
+     * @param string $controllerName
+     * @param array $middleware
+     *
+     * @return void
+     */
+    public function addResource(string $route, string $controllerName, array $middleware = []): void
+    {
+        $routesMap = [
+            [
+                'method' => 'GET',
+                'route' => $route,
+                'controllerAction' => $controllerName . '::actionList',
+            ],
+            [
+                'method' => 'GET',
+                'route' => $route . '/{id}',
+                'controllerAction' => $controllerName . '::actionListItem',
+            ],
+            [
+                'method' => 'POST',
+                'route' => $route,
+                'controllerAction' => $controllerName . '::actionCreate',
+            ],
+            [
+                'method' => 'PUT',
+                'route' => $route . '/{id}',
+                'controllerAction' => $controllerName . '::actionUpdate',
+            ],
+            [
+                'method' => 'PATCH',
+                'route' => $route . '/{id}',
+                'controllerAction' => $controllerName . '::actionPatch',
+            ],
+            [
+                'method' => 'DELETE',
+                'route' => $route . '/{id}',
+                'controllerAction' => $controllerName . '::actionDelete',
+            ],
+        ];
+
+        foreach ($routesMap as $item) {
+            $this->setRoute($item['route'], $item['method'], $item['controllerAction'], $middleware);
+        }
     }
 }
