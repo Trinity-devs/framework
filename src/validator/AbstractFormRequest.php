@@ -8,9 +8,11 @@ use trinity\exception\baseException\ValidationError;
 abstract class AbstractFormRequest
 {
     private array $errors = [];
-
     private array $attributes = [];
 
+    /**
+     * @param RequestInterface $request
+     */
     public function __construct(private readonly RequestInterface $request)
     {
         $this->attributes = $this->request->post();
@@ -44,7 +46,7 @@ abstract class AbstractFormRequest
             return $this->attributes[$field];
         }
 
-        throw new ValidationError('Атрибута ' . $field . '  не существует');
+        throw new ValidationError('Атрибута ' . $field . ' не существует');
     }
 
     /**
@@ -66,6 +68,9 @@ abstract class AbstractFormRequest
         return array_key_exists($field, $this->attributes);
     }
 
+    /**
+     * @return string
+     */
     public function getErrors(): string
     {
         $answer = '';

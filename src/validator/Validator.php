@@ -16,9 +16,10 @@ class Validator implements ValidatorInterface
     public function validate(AbstractFormRequest $form): void
     {
         foreach ($form->rules() as $ruleItem) {
+
             $this->prepareValidatableRules($ruleItem);
 
-            foreach ($this->validateData['fields'] as $field) {
+            foreach ($this->validateData['field'] as $field) {
 
                 try {
 
@@ -28,8 +29,7 @@ class Validator implements ValidatorInterface
                         continue;
                     }
 
-                    $value = $form->getAttribute($this->validateData['fields']);
-
+                    $value = $form->getAttribute($field);
                     $this->validateField(
                         $this->validateData['rule'],
                         $value,
@@ -45,14 +45,14 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param array $rules
+     * @param array $ruleItem
      * @return void
      */
-    private function prepareValidatableRules(array $rules): void
+    private function prepareValidatableRules(array $ruleItem): void
     {
-        $this->validateData['fields'] = is_array($rules[0]) ? $rules[0] : [$rules[0]];
-        $this->validateData['rule'] = $rules[1];
-        $this->validateData['settings'] = isset($rules[2]) ? array_slice($rules, 2) : [];
+        $this->validateData['field'] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
+        $this->validateData['rule'] = $ruleItem[1];
+        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2) : [];
     }
 
     /**
@@ -63,7 +63,7 @@ class Validator implements ValidatorInterface
      */
     private function validateField(string $rule, mixed $value, array $settings = []): void
     {
-        $customClassRule = __NAMESPACE__ . '\\' . ucfirst($rule) . 'Validator';
+        $customClassRule = __NAMESPACE__ . '\\' . ucfirst($rule) . 'ValidatorRule';
 
         if (class_exists($customClassRule) === false) {
             throw new ('Класс ' . $customClassRule . ' не найден');
@@ -71,6 +71,6 @@ class Validator implements ValidatorInterface
 
         $customRule = new $customClassRule($settings);
 
-        $customRule->validate($value);
+        $customRule->validateRule($value);
     }
 }
