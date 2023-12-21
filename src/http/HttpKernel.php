@@ -7,18 +7,18 @@ use trinity\apiResponses\DeleteResponse;
 use trinity\apiResponses\HtmlResponse;
 use trinity\apiResponses\JsonResponse;
 use trinity\apiResponses\UpdateResponse;
+use trinity\contracts\ErrorHandlerInterface;
 use trinity\contracts\HttpKernelInterface;
 use trinity\contracts\ResponseInterface;
 use trinity\contracts\RouterInterface;
 use trinity\exception\baseException\Exception;
-use trinity\http\errorHandler\ErrorHandler;
 use Throwable;
 
 class HttpKernel implements HttpKernelInterface
 {
     public function __construct(
-        private RouterInterface   $router,
-        private ErrorHandler      $errorHandler,
+        private RouterInterface $router,
+        private ErrorHandlerInterface $errorHandler,
         private ResponseInterface $response,
     )
     {
@@ -37,9 +37,9 @@ class HttpKernel implements HttpKernelInterface
             return $this->normalizeResponse($output);
 
         } catch (Throwable $e) {
+            $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
 
-            $this->errorHandler->handleException($e);
-
+            return $this->normalizeResponse($this->errorHandler->handleHttpException($e));
         }
 
         throw new Exception;
@@ -49,7 +49,7 @@ class HttpKernel implements HttpKernelInterface
     {
         $responseHandlers = match (get_class($output)) {
             JsonResponse::class => function ($output) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json');
+                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($output['statusCode'] ?? 200);
             },
 
             HtmlResponse::class => function ($output) {
