@@ -5,6 +5,10 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.2.3](https://github.com/Trinity-devs/framework/releases/tag/0.2.3) ] - 23.12.2023
+- Исправлено
+  - Исправлена работа ресурсов
+
 ## [ [0.2.2](https://github.com/Trinity-devs/framework/releases/tag/0.2.2) ] - 22.12.2023
 
 - Исправлено
