@@ -34,7 +34,7 @@ class RoutesCollection implements RoutesCollectionInterface
         $middlewares = array_merge($middlewares, $middleware);
 
         $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction, $middlewares);
-        $this->routes[$method][$routeInstance->getUrl()['path']] = $routeInstance;
+        $this->routes[][$routeInstance->getUrl()['quoteUrl']] = $routeInstance;
     }
 
     /**
@@ -147,12 +147,20 @@ class RoutesCollection implements RoutesCollectionInterface
     {
         $params = UrlParsingService::parseParams($url);
         $matches = UrlParsingService::parseQuery($url);
-        $path = UrlParsingService::parsePath($url, $params);
+        $path = UrlParsingService::parsePath($url, $matches[0]);
+
+        $matchesUrl = $url;
+        foreach ($matches[0] as $match) {
+            $matchesUrl = str_replace($match, '(.*)', $matchesUrl);
+        }
+
+        $quoteUrl = '/' . preg_quote($matchesUrl, '/') . '/';
+        $quoteUrl = str_replace('\(\.\*\)', '(.*)', $quoteUrl);
 
         $requiredParams = [];
         $optionalParams = [];
 
-        foreach ($matches as $param) {
+        foreach ($matches[1] as $param) {
             if (str_contains($param, '?') === true) {
                 $optionalParams[] = substr($param, 1);
 
@@ -163,7 +171,8 @@ class RoutesCollection implements RoutesCollectionInterface
         }
 
         return [
-            'path' => $path,
+//            'path' => $path,
+            'quoteUrl' => $quoteUrl,
             'params' => $params,
             'requiredParams' => $requiredParams,
             'optionalParams' => $optionalParams

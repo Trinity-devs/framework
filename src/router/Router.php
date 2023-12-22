@@ -56,10 +56,12 @@ final class Router implements RouterInterface
     {
         $matchedRoute = null;
 
-        /** @var Route $route */
-        foreach ($this->routesCollection->getRoutes()[$this->request->getMethod()] as $route) {
-            if ($route->getUrl()['path'] === $this->uri->getRoute()) {
-                $matchedRoute = $route;
+        /** @var Route $item */
+        foreach ($this->routesCollection->getRoutes() as $route) {
+            foreach ($route as $item) {
+                if ($this->request->getMethod() === $item->getMethod() && (bool)preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute()) === true) {
+                    $matchedRoute = $item;
+                }
             }
         }
 

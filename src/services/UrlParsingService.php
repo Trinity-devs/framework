@@ -11,7 +11,7 @@ class UrlParsingService
     {
         preg_match_all("/\{([^{}]+)\}/", $url, $matches);
 
-        return $matches[1];
+        return $matches;
     }
 
     /**
@@ -46,6 +46,10 @@ class UrlParsingService
     {
         if (str_contains($url, '?')) {
             return parse_url($url, PHP_URL_PATH);
+        }
+
+        if (empty($params) && str_contains($url, '{') === false) {
+            return $url;
         }
 
         if (empty($params)) {
