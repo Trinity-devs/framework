@@ -8,14 +8,14 @@ use trinity\exception\baseException\ValidationError;
 abstract class AbstractFormRequest
 {
     private array $errors = [];
-    private array $attributes = [];
+    private array $attributes;
 
     /**
      * @param RequestInterface $request
      */
     public function __construct(private readonly RequestInterface $request)
     {
-        $this->attributes = $this->request->post();
+        $this->attributes = $this->request->post() ?? [];
     }
 
     /**
