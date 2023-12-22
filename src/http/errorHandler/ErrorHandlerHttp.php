@@ -5,8 +5,7 @@ namespace trinity\http\errorHandler;
 use Throwable;
 use trinity\apiResponses\HtmlResponse;
 use trinity\apiResponses\JsonResponse;
-use trinity\contracts\ErrorHandlerInterface;
-use trinity\contracts\ResponseInterface;
+use trinity\contracts\ErrorHandlerHttpInterface;
 use trinity\contracts\ViewRendererInterface;
 use trinity\exception\baseException\ErrorException;
 use trinity\exception\baseException\Exception;
@@ -14,7 +13,7 @@ use trinity\exception\baseException\LogicException;
 use trinity\exception\baseException\UnknownMethodException;
 use trinity\exception\httpException\HttpException;
 
-class ErrorHandlerHttp implements ErrorHandlerInterface
+class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
     private Throwable|null $exception;
     private bool $discardExistingOutput = true;
@@ -25,20 +24,22 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
     private int $maxSourceLines = 19;
     private int $maxTraceSourceLines = 13;
     private string $typeResponse = '';
-
-    private string $debug;
+    private bool $debug = false;
 
     /**
      * @param ViewRendererInterface $view
-     * @param ResponseInterface $response
+     * @param bool $debug
      */
     public function __construct(
         private ViewRendererInterface $view,
-        private ResponseInterface $response,
-        string $debug,
+        bool $debug,
     )
     {
         $this->debug = $debug;
+
+        if ($this->debug === true) {
+            ini_set('display_errors', 1);
+        }
     }
 
     public function register(): void
@@ -51,8 +52,7 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
 
     private function setUpErrorHandlers(): void
     {
-        ini_set('display_errors', false);
-        set_exception_handler([$this, 'handleHttpException']);
+        set_exception_handler([$this, 'handleException']);
         set_error_handler([$this, 'handleError']);
 
         $this->directory = getcwd();
@@ -65,14 +65,18 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
         if (error_reporting() & $code) {
             throw new ErrorException($message, $code, $code, $file, $line);
         }
+
         return false;
     }
 
-    public function handleHttpException(Throwable $exception): object
+    /**
+     * @param Throwable $exception
+     * @return object
+     * @throws Throwable
+     */
+    public function handleException(Throwable $exception): object
     {
         $this->exception = $exception;
-
-        http_response_code(500);
 
         $this->unregister();
 
@@ -98,19 +102,15 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
         }
     }
 
-    private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): void
+    private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): HtmlResponse
     {
-        $msg = "Произошла ошибка при обработке другой ошибки:\n";
+        $msg = 'Произошла ошибка при обработке другой ошибки:<br>';
         $msg .= $exception;
-        $msg .= "\nПредыдущее исключение:\n";
+        $msg .= 'Предыдущее исключение:<br>';
         $msg .= $previousException;
 
-        if ($this->debug === 'true') {
-            echo '<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>';
-        }
-
-        if ($this->debug === 'false') {
-            echo 'Произошла внутренняя ошибка сервера.';
+        if ($this->debug === true) {
+            return new HtmlResponse('<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>');
         }
 
         error_log($msg);
@@ -119,7 +119,7 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
             flush();
         }
 
-        exit(1);
+        return new HtmlResponse('Произошла внутренняя ошибка сервера.');
     }
 
     public function handleFatalError(): void
@@ -197,15 +197,9 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
      */
     private function renderException(Throwable $exception): object
     {
-        $response = $this->response->setStatusCodeByException($exception);
-
-        $useErrorView = $this->debug === 'false' || $exception instanceof HttpException;
+        $useErrorView = $this->debug === false || $exception instanceof HttpException;
 
         $this->view->clear();
-
-        if ($this->debug === 'true') {
-            ini_set('display_errors', 1);
-        }
 
         $file = $useErrorView ? 'errorHandler/error' : 'errorHandler/exception';
 
@@ -228,7 +222,6 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
     {
         $params['handler'] = $this;
 
-        $this->view->clear();
         return $this->view->render($file, $params);
     }
 
@@ -238,11 +231,7 @@ class ErrorHandlerHttp implements ErrorHandlerInterface
      */
     public function getExceptionName(Throwable $exception): string|null
     {
-        if ($exception instanceof ErrorException) {
-            return $exception->getName();
-        }
-
-        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException) {
+        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException) {
             return $exception->getName();
         }
 

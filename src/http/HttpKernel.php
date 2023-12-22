@@ -7,7 +7,7 @@ use trinity\apiResponses\DeleteResponse;
 use trinity\apiResponses\HtmlResponse;
 use trinity\apiResponses\JsonResponse;
 use trinity\apiResponses\UpdateResponse;
-use trinity\contracts\ErrorHandlerInterface;
+use trinity\contracts\ErrorHandlerHttpInterface;
 use trinity\contracts\HttpKernelInterface;
 use trinity\contracts\ResponseInterface;
 use trinity\contracts\RouterInterface;
@@ -18,7 +18,7 @@ class HttpKernel implements HttpKernelInterface
 {
     public function __construct(
         private RouterInterface $router,
-        private ErrorHandlerInterface $errorHandler,
+        private ErrorHandlerHttpInterface $errorHandler,
         private ResponseInterface $response,
     )
     {
@@ -39,10 +39,8 @@ class HttpKernel implements HttpKernelInterface
         } catch (Throwable $e) {
             $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
 
-            return $this->normalizeResponse($this->errorHandler->handleHttpException($e));
+            return $this->normalizeResponse($this->errorHandler->handleException($e));
         }
-
-        throw new Exception;
     }
 
     private function normalizeResponse(object $output): ResponseInterface

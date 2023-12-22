@@ -4,13 +4,13 @@ namespace trinity\contracts;
 
 use Throwable;
 
-interface ErrorHandlerInterface
+interface ErrorHandlerHttpInterface
 {
     function register(): void;
 
     function handleError(int $code, string $message, string $file, int $line): bool;
 
-    function handleHttpException(Throwable $exception): object;
+    function handleException(Throwable $exception): object;
 
     function handleFatalError(): void;
 
@@ -21,4 +21,6 @@ interface ErrorHandlerInterface
     function renderCallStack(Throwable $exception): string;
 
     function isCoreFile(string $file): bool;
+
+    function setTypeResponse(string $typeResponse): void;
 }
