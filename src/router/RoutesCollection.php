@@ -42,7 +42,7 @@ class RoutesCollection implements RoutesCollectionInterface
             $typeResponse = $this->groupTypeResponse;
         }
 
-        $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction,  $typeResponse, $middlewares);
+        $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction, $typeResponse, $middlewares);
         $this->routes[][$routeInstance->getUrl()['quoteUrl']] = $routeInstance;
     }
 
@@ -238,8 +238,12 @@ class RoutesCollection implements RoutesCollectionInterface
      *
      * @return void
      */
-    public function addResource(string $route, string $controllerName, array $middleware = []): void
+    public function addResource(string $route, string $controllerName, string $typeResponse = '', array $middleware = []): void
     {
+        if ($this->groupTypeResponse !== '') {
+            $typeResponse = $this->groupTypeResponse;
+        }
+
         $routesMap = [
             [
                 'method' => 'GET',
@@ -274,7 +278,7 @@ class RoutesCollection implements RoutesCollectionInterface
         ];
 
         foreach ($routesMap as $item) {
-            $this->setRoute($item['route'], $item['method'], $item['controllerAction'], $middleware);
+            $this->setRoute($item['route'], $item['method'], $item['controllerAction'], $typeResponse, $middleware);
         }
     }
 }
