@@ -86,20 +86,16 @@ class Request implements RequestInterface
 
     public function post(string|null $name = null): array|string|null
     {
-        if ($name === null) {
-            return $this->getParsedBody();
-        }
-
         return $this->getParsedBody($name);
     }
 
     private function getParsedBody(string|null $name = null): array|string|null
     {
-        if ($name !== null && $this->contentType === 'application/x-www-form-urlencoded') {
+        if ($this->contentType === 'application/x-www-form-urlencoded') {
             parse_str(file_get_contents('php://input'), $this->input);
         }
 
-        if ($name !== null && $this->contentType === 'application/json') {
+        if ($this->contentType === 'application/json') {
             $this->input = json_decode(file_get_contents('php://input'), true);
         }
 
