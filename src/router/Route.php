@@ -5,14 +5,14 @@ namespace trinity\router;
 class Route
 {
     /**
-     * @param array $uri
+     * @param array $url
      * @param string $method
      * @param mixed $controllerAction
      * @param string $typeResponse
      * @param array $middlewares
      */
     public function __construct(
-        private array  $uri,
+        private array  $url,
         private string $method,
         private mixed  $controllerAction,
         private string $typeResponse,
@@ -24,9 +24,9 @@ class Route
     /**
      * @return array
      */
-    public function getUri(): array
+    public function getUrl(): array
     {
-        return $this->uri;
+        return $this->url;
     }
 
     /**

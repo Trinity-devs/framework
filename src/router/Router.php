@@ -55,9 +55,13 @@ final class Router implements RouterInterface
     private function findMatchedRoutes(): Route
     {
         $matchedRoute = null;
-        foreach ($this->routesCollection->getRoutes()[$this->request->getMethod()] as $route) {
-            if ($route->getUri()['path'] === $this->uri->getRoute()) {
-                $matchedRoute = $route;
+
+        /** @var Route $item */
+        foreach ($this->routesCollection->getRoutes() as $route) {
+            foreach ($route as $item) {
+                if ($this->request->getMethod() === $item->getMethod() && (bool)preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute()) === true) {
+                    $matchedRoute = $item;
+                }
             }
         }
 
