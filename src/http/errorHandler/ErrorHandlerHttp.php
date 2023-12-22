@@ -3,8 +3,8 @@
 namespace trinity\http\errorHandler;
 
 use Throwable;
-use trinity\apiResponses\HtmlResponse;
-use trinity\apiResponses\JsonResponse;
+use trinity\api\responses\HtmlResponse;
+use trinity\api\responses\JsonResponse;
 use trinity\contracts\ErrorHandlerHttpInterface;
 use trinity\contracts\ViewRendererInterface;
 use trinity\exception\baseException\ErrorException;

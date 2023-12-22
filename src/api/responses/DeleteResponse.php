@@ -1,8 +1,8 @@
 <?php
 
-namespace trinity\apiResponses;
+namespace trinity\api\responses;
 
-readonly class JsonResponse
+readonly class DeleteResponse
 {
     /**
      * @param array|null $data
