@@ -1,17 +1,102 @@
 <?php
 
-namespace trinity\errorHandler;
+namespace trinity\console;
 
-use Exception;
-use trinity\exception\baseException\ErrorException;
 use Throwable;
+use trinity\contracts\ErrorHandlerConsoleInterface;
+use trinity\exception\baseException\ErrorException;
+use trinity\exception\baseException\Exception;
 
-abstract class ErrorHandler
+class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
 {
     private Throwable|null $exception;
     private bool $discardExistingOutput = true;
     private bool $registered = false;
     private string|null $directory;
+    private bool $debug = false;
+
+    public function __construct(bool $debug)
+    {
+        $this->debug = $debug;
+    }
+
+    /**
+     * @param Throwable $exception
+     * @return void
+     */
+    private function renderException(Throwable $exception): void
+    {
+        $previous = $exception->getPrevious();
+
+        if ($this->debug === false) {
+            $this->formatMessage($exception->getName() . ': ') . $exception->getMessage();
+        }
+
+        if ($this->debug === true) {
+            $message = $this->formatMessage(
+                '<<------------------------------------------------------------' . PHP_EOL,
+                [ConsoleColors::RED]
+            );
+
+            if ($exception instanceof Exception) {
+                $message .= $this->formatMessage("{$exception->getName()}");
+            }
+
+            if ($exception instanceof Exception === false) {
+                $message .= $this->formatMessage('Exception');
+                $this->formatMessage('Error: ') . $exception->getMessage();
+            }
+
+            $message .= $this->formatMessage(
+                    PHP_EOL . "Class: " . get_class($exception),
+                    [ConsoleColors::BOLD, ConsoleColors::BLUE]
+                )
+                . PHP_EOL . 'With message ' . $this->formatMessage("'{$exception->getMessage()}'", [ConsoleColors::BOLD]
+                )
+                . "\n\nin " . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(
+                    basename($exception->getFile()),
+                    [ConsoleColors::BOLD]
+                )
+                . ':' . $this->formatMessage($exception->getLine(), [ConsoleColors::BOLD, ConsoleColors::YELLOW]
+                ) . "\n";
+
+            if ($previous === null) {
+                $message .= "\n" . ($this->formatMessage("Stack trace:\n", [ConsoleColors::BOLD]
+                    )) . $exception->getTraceAsString();
+            }
+
+            $message .= PHP_EOL . PHP_EOL . $this->formatMessage(
+                    '------------------------------------------------------------>>',
+                    [ConsoleColors::RED]
+                );
+        }
+
+        echo fwrite(STDERR, $message . "\n");
+
+        if ($this->debug === true && $previous !== null) {
+            $causedBy = $this->formatMessage('Caused by: ', [ConsoleColors::BOLD]);
+
+            echo fwrite(STDERR, $causedBy);
+
+            $this->renderException($previous);
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param array $format
+     * @return string
+     */
+    protected function formatMessage(string $message, array $format = [ConsoleColors::RED, ConsoleColors::BOLD]): string
+    {
+        foreach ($format as $key => $value) {
+            $formats[] = $value->value;
+        }
+
+        $code = implode(';', $formats);
+
+        return "\033[0m" . ($code !== '' ? "\033[" . $code . 'm' : '') . $message . "\033[0m";
+    }
 
     public function register(): void
     {
@@ -26,10 +111,6 @@ abstract class ErrorHandler
         ini_set('display_errors', false);
         set_exception_handler([$this, 'handleException']);
         set_error_handler([$this, 'handleError']);
-
-        if (PHP_SAPI !== 'cli') {
-            $this->directory = getcwd();
-        }
 
         register_shutdown_function([$this, 'handleFatalError']);
     }
@@ -46,10 +127,6 @@ abstract class ErrorHandler
     {
         $this->exception = $exception;
 
-        if (PHP_SAPI !== 'cli') {
-            http_response_code(500);
-        }
-
         $this->unregister();
 
         try {
@@ -58,7 +135,7 @@ abstract class ErrorHandler
             }
             $this->renderException($exception);
 
-         exit(1);
+            exit(1);
         } catch (Exception $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         }
@@ -75,8 +152,6 @@ abstract class ErrorHandler
         }
     }
 
-    abstract protected function renderException(Throwable $exception): void;
-
     private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): void
     {
         $msg = "Произошла ошибка при обработке другой ошибки:\n";
@@ -84,17 +159,11 @@ abstract class ErrorHandler
         $msg .= "\nПредыдущее исключение:\n";
         $msg .= $previousException;
 
-        if (getenv('DEBUG') === 'true') {
-            if (PHP_SAPI === 'cli') {
-                echo $msg . "\n";
-            }
-
-            if (PHP_SAPI !== 'cli') {
-                echo '<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>';
-            }
+        if ($this->debug === true) {
+            echo $msg . "\n";
         }
 
-        if (getenv('DEBUG') === 'false') {
+        if ($this->debug === false) {
             echo 'Произошла внутренняя ошибка сервера.';
         }
 
@@ -103,7 +172,7 @@ abstract class ErrorHandler
         if (defined('HHVM_VERSION')) {
             flush();
         }
-       exit(1);
+        exit(1);
     }
 
     public function handleFatalError(): void
@@ -160,7 +229,7 @@ abstract class ErrorHandler
         }
 
         register_shutdown_function(function () {
-           exit(1);
+            exit(1);
         });
     }
 

@@ -129,13 +129,10 @@ final class Router implements RouterInterface
 
     /**
      * @return string
-     * @throws LogicException
      * @throws NotFoundHttpException
      */
-    public function getControllerName(): string
+    public function getTypeResponse(): string
     {
-        $controllerNamespace = $this->findMatchedRoutes()->getControllerAction();
-
-        return $this->verificationAction($controllerNamespace)['controllerName'];
+        return $this->findMatchedRoutes()->getTypeResponse();
     }
 }
