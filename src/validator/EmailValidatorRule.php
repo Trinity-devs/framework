@@ -2,11 +2,11 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\ValidatorInterface;
+use trinity\contracts\ValidatorRuleInterface;
 
-class EmailValidator implements ValidatorInterface
+class EmailValidatorRule implements ValidatorRuleInterface
 {
-    public function validate(string $field, array $params, Validator $validator): void
+    public function validateRule(string $field, array $params, Validator $validator): void
     {
         $value = $validator->getDataValue($field);
 

@@ -9,6 +9,16 @@
   - Добавлен функционал валидации данных
   - Crud api controller
 
+## [ [0.2.0](https://github.com/Trinity-devs/framework/releases/tag/0.2.3) ] - 22.12.2023
+
+- Реализовано
+  - Добавлен функционал валидации данных
+  - Добавлен интерфейс для ErrorHandler
+  - Добавлен функционал получения typeResponse
+  - ErrorHandler отдает ответ в ядро
+  - Добавлены интерфейсы для всех еррор хендлеров
+  - Пересобрана логика отправки ошибок
+
 ## [ [0.1.3](https://github.com/Trinity-devs/framework/releases/tag/0.1.3) ] - 16.12.2023
 
 - Исправлено

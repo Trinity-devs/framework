@@ -2,15 +2,16 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\ValidatorInterface;
+use trinity\contracts\ValidatorRuleInterface;
 
-class RangeValidator implements ValidatorInterface
+class RangeValidatorRule implements ValidatorRuleInterface
 {
-
-    public function validate(string $field, array $params, Validator $validator): void
+    /**
+     * @param mixed $value
+     * @return void
+     */
+    public function validateRule(mixed $value): void
     {
-        $value = $validator->getDataValue($field);
-
         if ($value < $params[0] || $value > $params[1]) {
             $validator->addError($field, 'Значение должно быть в диапазоне от ' . $params[0] . ' до ' . $params[1]);
         }

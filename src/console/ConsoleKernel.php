@@ -2,6 +2,7 @@
 
 namespace trinity\console;
 
+use trinity\contracts\ErrorHandlerConsoleInterface;
 use trinity\DIContainer;
 use InvalidArgumentException;
 use ReflectionException;
@@ -22,15 +23,15 @@ class ConsoleKernel implements ConsoleKernelInterface
     /**
      * @param ConsoleInputInterface $input
      * @param ConsoleOutputInterface $output
-     * @param ErrorHandler $errorHandler
+     * @param ErrorHandlerConsoleInterface $errorHandler
      * @param EventDispatcherInterface $eventDispatcher
      * @param DIContainer $container
      */
     public function __construct(
         private ConsoleInputInterface $input,
         private ConsoleOutputInterface $output,
-        private ErrorHandler $errorHandler,
         private EventDispatcherInterface $eventDispatcher,
+        private ErrorHandlerConsoleInterface $errorHandler,
         private DIContainer $container,
     )
     {

@@ -12,15 +12,20 @@ class RoutesCollection implements RoutesCollectionInterface
     private array $groupPrefixes = [];
     private array $globalMiddlewares = [];
     private array $groupMiddlewares = [];
+    private string $groupTypeResponse = '';
+
+    public const TYPE_RESPONSE_JSON = 'json';
+    public const TYPE_RESPONSE_HTML = 'html';
 
     /**
      * @param string $route
      * @param string $method
      * @param string|callable $controllerAction
+     * @param string $typeResponse
      * @param array $middleware
      * @return void
      */
-    private function setRoute(string $route, string $method, string|callable $controllerAction, array $middleware = []): void
+    private function setRoute(string $route, string $method, string|callable $controllerAction, string $typeResponse = self::TYPE_RESPONSE_HTML, array $middleware = []): void
     {
         if (empty($this->groupPrefixes) === false) {
             $route = $this->getRouteWithGroupPrefix($route);
@@ -33,7 +38,11 @@ class RoutesCollection implements RoutesCollectionInterface
 
         $middlewares = array_merge($middlewares, $middleware);
 
-        $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction, $middlewares);
+        if ($this->groupTypeResponse !== '') {
+            $typeResponse = $this->groupTypeResponse;
+        }
+
+        $routeInstance = new Route($this->parseUrl($route), $method, $controllerAction,  $typeResponse, $middlewares);
         $this->routes[][$routeInstance->getUrl()['quoteUrl']] = $routeInstance;
     }
 
@@ -64,14 +73,20 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param callable $callback
+     * @param string $typeResponse
      * @param array $middleware
      * @return void
      */
-    public function group(string $route, callable $callback, array $middleware = []): void
+    public function group(string $route, callable $callback, string $typeResponse = '', array $middleware = []): void
     {
         $prefix = trim($route, '/');
         $this->groupPrefixes[] = $prefix;
         $this->groupMiddlewares[] = $middleware;
+
+        if ($typeResponse !== '') {
+            $this->groupTypeResponse = $typeResponse;
+        }
+
         $callback($this);
 
         array_pop($this->groupMiddlewares);
@@ -89,12 +104,13 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param string|callable $controllerAction
+     * @param string $typeResponse
      * @param array $middleware
      * @return $this
      */
-    public function post(string $route, string|callable $controllerAction, array $middleware = []): self
+    public function post(string $route, string|callable $controllerAction, string $typeResponse = self::TYPE_RESPONSE_HTML, array $middleware = []): self
     {
-        $this->setRoute($route, 'POST', $controllerAction, $middleware);
+        $this->setRoute($route, 'POST', $controllerAction, $typeResponse, $middleware);
 
         return $this;
     }
@@ -102,12 +118,13 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param string|callable $controllerAction
+     * @param string $typeResponse
      * @param array $middleware
      * @return $this
      */
-    public function get(string $route, string|callable $controllerAction, array $middleware = []): self
+    public function get(string $route, string|callable $controllerAction, string $typeResponse = self::TYPE_RESPONSE_HTML, array $middleware = []): self
     {
-        $this->setRoute($route, 'GET', $controllerAction, $middleware);
+        $this->setRoute($route, 'GET', $controllerAction, $typeResponse, $middleware);
 
         return $this;
     }
@@ -115,12 +132,13 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param string|callable $controllerAction
+     * @param string $typeResponse
      * @param array $middleware
      * @return $this
      */
-    public function delete(string $route, string|callable $controllerAction, array $middleware = []): self
+    public function delete(string $route, string|callable $controllerAction, string $typeResponse = self::TYPE_RESPONSE_HTML, array $middleware = []): self
     {
-        $this->setRoute($route, 'DELETE', $controllerAction, $middleware);
+        $this->setRoute($route, 'DELETE', $controllerAction, $typeResponse, $middleware);
 
         return $this;
     }
@@ -128,12 +146,13 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param string|callable $controllerAction
+     * @param string $typeResponse
      * @param array $middleware
      * @return $this
      */
-    public function put(string $route, string|callable $controllerAction, array $middleware = []): self
+    public function put(string $route, string|callable $controllerAction, string $typeResponse = self::TYPE_RESPONSE_HTML, array $middleware = []): self
     {
-        $this->setRoute($route, 'PUT', $controllerAction, $middleware);
+        $this->setRoute($route, 'PUT', $controllerAction, $typeResponse, $middleware);
 
         return $this;
     }

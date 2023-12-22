@@ -8,7 +8,7 @@ use Throwable;
 
 class HttpException extends Exception
 {
-public int $statusCode;
+    public int $statusCode;
 
     /**
      * @param int $status
@@ -32,5 +32,10 @@ public int $statusCode;
         }
 
         return 'Error';
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
     }
 }
