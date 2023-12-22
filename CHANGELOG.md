@@ -5,9 +5,14 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.2.4](https://github.com/Trinity-devs/framework/releases/tag/0.2.3) ] - 21.12.2023
+- Реализовано
+  - Добавлены интерфейсы для всех еррор хендлеров
+  - Пересобрана логика отправки ошибок
+
 ## [ [0.2.3](https://github.com/Trinity-devs/framework/releases/tag/0.2.3) ] - 21.12.2023
 
--Реализовано
+- Реализовано
   - Добавлен функционал валидации данных
   - Добавлен интерфейс для ErrorHandler
   - Добавлен функционал получения typeResponse
