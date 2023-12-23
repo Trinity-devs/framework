@@ -170,11 +170,11 @@ class RoutesCollection implements RoutesCollectionInterface
 
         $matchesUrl = $url;
         foreach ($matches[0] as $match) {
-            $matchesUrl = str_replace($match, '(.*)', $matchesUrl);
+            $matchesUrl = str_replace($match, '(\d+)', $matchesUrl);
         }
 
         $quoteUrl = '/' . preg_quote($matchesUrl, '/') . '/';
-        $quoteUrl = str_replace('\(\.\*\)', '(.*)', $quoteUrl);
+        $quoteUrl = str_replace('\(\\\d\+\)', '(\d+)', $quoteUrl);
 
         $requiredParams = [];
         $optionalParams = [];
@@ -234,6 +234,7 @@ class RoutesCollection implements RoutesCollectionInterface
     /**
      * @param string $route
      * @param string $controllerName
+     * @param string $typeResponse
      * @param array $middleware
      *
      * @return void
