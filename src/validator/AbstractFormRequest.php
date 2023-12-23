@@ -2,6 +2,7 @@
 
 namespace trinity\validator;
 
+use trinity\contracts\DatabaseConnectionInterface;
 use trinity\contracts\RequestInterface;
 use trinity\exception\baseException\ValidationError;
 
@@ -12,8 +13,12 @@ abstract class AbstractFormRequest
 
     /**
      * @param RequestInterface $request
+     * @param DatabaseConnectionInterface $connection
      */
-    public function __construct(private readonly RequestInterface $request)
+    public function __construct(
+        private readonly RequestInterface $request,
+        protected DatabaseConnectionInterface $connection,
+    )
     {
         $this->attributes = $this->request->post() ?? [];
     }
@@ -42,11 +47,19 @@ abstract class AbstractFormRequest
      */
     public function getAttribute(string $field): mixed
     {
-        if ($this->hasAttribute($field) === true) {
-            return $this->attributes[$field];
+        $findAttribute = null;
+
+        array_walk_recursive($this->attributes, function ($value, $key) use ($field, &$findAttribute) {
+            if ($key === $field) {
+                $findAttribute = $value;
+            }
+        });
+
+        if (is_null($findAttribute) === true) {
+            throw new ValidationError('Атрибута ' . $field . ' не существует');
         }
 
-        throw new ValidationError('Атрибута ' . $field . ' не существует');
+        return $findAttribute;
     }
 
     /**
