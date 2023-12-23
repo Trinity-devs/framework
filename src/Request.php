@@ -21,6 +21,7 @@ class Request implements RequestInterface
     private mixed $requestTarget;
     private array $queryParams;
     private array $input;
+    private array $requestParams = [];
 
     public function __construct(array $server, array $get, array $post)
     {
@@ -77,11 +78,18 @@ class Request implements RequestInterface
      */
     public function get(string|null $name = null): array|string|null
     {
-        if ($name === null) {
-            return $this->queryParams !== [] ? $this->queryParams : null;
+        $queryParams = $this->queryParams !== [] ? $this->queryParams : null;
+        $requestParams = $this->requestParams !== [] ? $this->requestParams : null;
+
+        if ($queryParams === null && $requestParams === null) {
+            return null;
         }
 
-        return $this->queryParams !== [] ? $this->queryParams[$name] : null;
+        if ($name === null) {
+            return $queryParams ?? $requestParams;
+        }
+
+        return $queryParams[$name] ?? $requestParams[$name];
     }
 
     public function post(string|null $name = null): array|string|null
@@ -262,5 +270,14 @@ class Request implements RequestInterface
     public function withUri(UriInterface $uri, $preserveHost = false): static
     {
         // TODO: Implement withUri() method.
+    }
+
+    /**
+     * @param array $params
+     * @return void
+     */
+    public function setRequestParams(array $params): void
+    {
+        $this->requestParams = $params;
     }
 }
