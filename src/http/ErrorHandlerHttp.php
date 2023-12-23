@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\http\errorHandler;
+namespace trinity\http;
 
 use Throwable;
 use trinity\api\responses\HtmlResponse;
@@ -33,8 +33,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function __construct(
         private ViewRendererInterface $view,
         bool $debug,
-    )
-    {
+    ) {
         $this->debug = $debug;
 
         if ($this->debug === true) {
@@ -84,13 +83,12 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             if ($this->discardExistingOutput) {
                 $this->clearOutput();
             }
+            $this->exception = null;
 
             return $this->renderException($exception);
         } catch (Exception $e) {
-            $this->handleFallbackExceptionMessage($e, $exception);
+            return $this->handleFallbackExceptionMessage($e, $exception);
         }
-
-        $this->exception = null;
     }
 
     private function clearOutput(): void
@@ -102,14 +100,20 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
-    private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): HtmlResponse
-    {
+    private function handleFallbackExceptionMessage(
+        Throwable $exception,
+        Throwable $previousException
+    ): JsonResponse|HtmlResponse {
         $msg = 'Произошла ошибка при обработке другой ошибки:<br>';
         $msg .= $exception;
         $msg .= 'Предыдущее исключение:<br>';
         $msg .= $previousException;
 
         if ($this->debug === true) {
+            if ($this->typeResponse === 'json') {
+                return new JsonResponse([$msg]);
+            }
+
             return new HtmlResponse('<pre>' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . '</pre>');
         }
 
@@ -117,6 +121,10 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
         if (defined('HHVM_VERSION')) {
             flush();
+        }
+
+        if ($this->typeResponse === 'html') {
+            return new JsonResponse(['Произошла внутренняя ошибка сервера.']);
         }
 
         return new HtmlResponse('Произошла внутренняя ошибка сервера.');
@@ -192,24 +200,20 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return void
+     * @return object
      * @throws Throwable
      */
     private function renderException(Throwable $exception): object
     {
         $useErrorView = $this->debug === false || $exception instanceof HttpException;
 
-        $this->view->clear();
-
         $file = $useErrorView ? 'errorHandler/error' : 'errorHandler/exception';
-
-        if ($this->typeResponse === 'html') {
-            return new HtmlResponse($this->renderFile($file, ['exception' => $exception]));
-        }
 
         if ($this->typeResponse === 'json') {
             return new JsonResponse($this->dataJsonException($exception));
         }
+
+        return new HtmlResponse($this->renderFile($file, ['exception' => $exception]));
     }
 
     /**
@@ -333,8 +337,8 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         if ($exception instanceof HttpException) {
             return [
-                'code' => $exception->getCode(),
                 'message' => $exception->getMessage(),
+                'error' => $exception->getName(),
                 'statusCode' => $exception->getStatusCode(),
             ];
         }

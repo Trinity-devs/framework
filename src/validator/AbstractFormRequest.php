@@ -16,7 +16,7 @@ abstract class AbstractFormRequest
      * @param DatabaseConnectionInterface $connection
      */
     public function __construct(
-        private readonly RequestInterface $request,
+        protected readonly RequestInterface $request,
         protected DatabaseConnectionInterface $connection,
     )
     {

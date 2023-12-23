@@ -52,7 +52,7 @@ final class Router implements RouterInterface
      * @return Route
      * @throws NotFoundHttpException
      */
-    private function findMatchedRoutes(): Route
+    private function findMatchedRoutes(): Route|false
     {
         $matchedRoute = null;
 
@@ -60,25 +60,20 @@ final class Router implements RouterInterface
         foreach ($this->routesCollection->getRoutes() as $route) {
             foreach ($route as $item) {
                 if ($this->request->getMethod() === $item->getMethod() && (bool)preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute()) === true) {
-                    preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute(), $q);
-                    array_shift($q);
-
-                    $requiredParams = $item->getUrl()['requiredParams'] === [] ? array_combine($item->getUrl()['requiredParams'], $q) : [];
-                    $optionalParams = $item->getUrl()['optionalParams'] === [] ? array_combine($item->getUrl()['requiredParams'], $q) : [];
-
-                    $this->request->setRequestParams(array_merge($requiredParams, $optionalParams));
-                    
                     $matchedRoute = $item;
                 }
+
+                $errorRoute = $item;
             }
         }
 
         if ($matchedRoute === null) {
-            throw new NotFoundHttpException('Страница не найдена');
+            return $errorRoute;
         }
 
         return $matchedRoute;
     }
+
 
     /**
      * @param string|callable $controllersAction
