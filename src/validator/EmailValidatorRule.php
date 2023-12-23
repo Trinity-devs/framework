@@ -3,15 +3,19 @@
 namespace trinity\validator;
 
 use trinity\contracts\ValidatorRuleInterface;
+use trinity\exception\baseException\ValidationError;
 
 class EmailValidatorRule implements ValidatorRuleInterface
 {
-    public function validateRule(string $field, array $params, Validator $validator): void
+    /**
+     * @param mixed $value
+     * @return void
+     * @throws ValidationError
+     */
+    public function validateRule(mixed $value): void
     {
-        $value = $validator->getDataValue($field);
-
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
-            $validator->addError($field, 'Некорректный email');
+            throw new ValidationError('Некорректный email');
         }
     }
 }
