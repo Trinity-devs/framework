@@ -10,7 +10,7 @@ interface ErrorHandlerHttpInterface
 
     function handleError(int $code, string $message, string $file, int $line): bool;
 
-    function handleException(Throwable $exception): object;
+    function handleException(Throwable $exception): mixed;
 
     function handleFatalError(): void;
 
@@ -23,4 +23,6 @@ interface ErrorHandlerHttpInterface
     function isCoreFile(string $file): bool;
 
     function setTypeResponse(string $typeResponse): void;
+
+    public function getStatusCode(Throwable $exception): int;
 }

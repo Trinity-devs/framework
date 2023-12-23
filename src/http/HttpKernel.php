@@ -39,19 +39,19 @@ class HttpKernel implements HttpKernelInterface
         } catch (Throwable $e) {
             $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
 
-            return $this->normalizeResponse($this->errorHandler->handleException($e));
+            return $this->normalizeResponse($this->errorHandler->handleException($e), $this->errorHandler->getStatusCode($e));
         }
     }
 
-    private function normalizeResponse(object $output): ResponseInterface
+    private function normalizeResponse(object $output, int $statusCode = 200): ResponseInterface
     {
         $responseHandlers = match (get_class($output)) {
-            JsonResponse::class => function ($output) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($output['statusCode'] ?? 200, $output['error'] ?? 'OK');
+            JsonResponse::class => function ($output, $statusCode) {
+                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($statusCode ?? 200);
             },
 
-            HtmlResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody($output);
+            HtmlResponse::class => function ($output, $statusCode) {
+                return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody($output)->withStatus($statusCode ?? 200);
             },
 
             CreateResponse::class => function ($output) {
@@ -63,10 +63,10 @@ class HttpKernel implements HttpKernelInterface
             },
 
             UpdateResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(204, 'Successfully updated')->withBody($output);
+                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(200, 'Successfully updated')->withBody($output);
             }
         };
 
-        return $responseHandlers($output->data);
+        return $responseHandlers($output->data, $statusCode);
     }
 }
