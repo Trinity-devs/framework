@@ -2,12 +2,10 @@
 
 namespace trinity\router;
 
-use trinity\exception\baseException\LogicException;
-use trinity\exception\httpException\NotFoundHttpException;
 use ReflectionException;
-use trinity\contracts\{RequestInterface, RouterInterface, RoutesCollectionInterface, UriInterface};
 use trinity\DIContainer;
-
+use trinity\contracts\{RequestInterface, RouterInterface, RoutesCollectionInterface, UriInterface};
+use trinity\exception\baseException\LogicException;
 
 final class Router implements RouterInterface
 {
@@ -15,6 +13,7 @@ final class Router implements RouterInterface
      * @param RequestInterface $request
      * @param UriInterface $uri
      * @param RoutesCollectionInterface $routesCollection
+     * @param DIContainer $container
      */
     public function __construct(
         private RequestInterface          $request,
@@ -26,9 +25,8 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @return mixed
+     * @return object
      * @throws LogicException
-     * @throws NotFoundHttpException
      * @throws ReflectionException
      */
     public function dispatch(): object
@@ -49,8 +47,7 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @return Route
-     * @throws NotFoundHttpException
+     * @return Route|false
      */
     private function findMatchedRoutes(): Route|false
     {
@@ -60,6 +57,14 @@ final class Router implements RouterInterface
         foreach ($this->routesCollection->getRoutes() as $route) {
             foreach ($route as $item) {
                 if ($this->request->getMethod() === $item->getMethod() && (bool)preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute()) === true) {
+                    preg_match($item->getUrl()['quoteUrl'], $this->uri->getRoute(), $q);
+                    array_shift($q);
+
+                    $requiredParams = $item->getUrl()['requiredParams'] === [] ? array_combine($item->getUrl()['requiredParams'], $q) : [];
+                    $optionalParams = $item->getUrl()['optionalParams'] === [] ? array_combine($item->getUrl()['requiredParams'], $q) : [];
+
+                    $this->request->setRequestParams(array_merge($requiredParams, $optionalParams));
+
                     $matchedRoute = $item;
                 }
 
@@ -67,11 +72,7 @@ final class Router implements RouterInterface
             }
         }
 
-        if ($matchedRoute === null) {
-            return $errorRoute;
-        }
-
-        return $matchedRoute;
+        return $matchedRoute ?? $errorRoute;
     }
 
 
@@ -98,7 +99,6 @@ final class Router implements RouterInterface
     /**
      * @param Route $route
      * @return void
-     * @throws LogicException
      * @throws ReflectionException
      */
     private function runMiddlewareAction(Route $route): void
@@ -109,7 +109,7 @@ final class Router implements RouterInterface
     /**
      * @param array $middlewares
      * @return void
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function processMiddleware(array $middlewares): void
     {
@@ -124,9 +124,8 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @param RoutesCollection $routesCollection
+     * @param RoutesCollectionInterface $routesCollection
      * @return void
-     * @throws LogicException
      * @throws ReflectionException
      */
     private function runGlobalMiddlewareAction(RoutesCollectionInterface $routesCollection): void
@@ -136,7 +135,6 @@ final class Router implements RouterInterface
 
     /**
      * @return string
-     * @throws NotFoundHttpException
      */
     public function getTypeResponse(): string
     {
