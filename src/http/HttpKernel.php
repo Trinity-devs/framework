@@ -47,7 +47,7 @@ class HttpKernel implements HttpKernelInterface
     {
         $responseHandlers = match (get_class($output)) {
             JsonResponse::class => function ($output) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($output['statusCode'] ?? 200);
+                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($output['statusCode'] ?? 200, $output['error'] ?? 'OK');
             },
 
             HtmlResponse::class => function ($output) {
