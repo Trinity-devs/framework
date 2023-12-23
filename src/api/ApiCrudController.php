@@ -95,6 +95,7 @@ abstract class ApiCrudController
     }
 
     /**
+     * @return void
      * @throws NotFoundHttpException
      */
     protected function create(): void
@@ -103,25 +104,28 @@ abstract class ApiCrudController
     }
 
     /**
+     * @return void
      * @throws NotFoundHttpException
      */
-    protected function update(): array
+    protected function update(): void
     {
         throw new NotFoundHttpException('Not found');
     }
 
     /**
+     * @return void
      * @throws NotFoundHttpException
      */
-    protected function patch(): array
+    protected function patch(): void
     {
         throw new NotFoundHttpException('Not found');
     }
 
     /**
+     * @return void
      * @throws NotFoundHttpException
      */
-    protected function delete(): array
+    protected function delete(): void
     {
         throw new NotFoundHttpException('Not found');
     }
