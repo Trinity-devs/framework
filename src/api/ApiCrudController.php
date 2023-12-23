@@ -6,10 +6,18 @@ use trinity\api\responses\CreateResponse;
 use trinity\api\responses\DeleteResponse;
 use trinity\api\responses\JsonResponse;
 use trinity\api\responses\UpdateResponse;
+use trinity\contracts\FormRequestFactoryInterface;
 use trinity\exception\httpException\NotFoundHttpException;
+use trinity\validator\AbstractFormRequest;
 
 abstract class ApiCrudController
 {
+    const CREATE = 'create';
+    const UPDATE = 'update';
+    const PATCH = 'patch';
+
+    protected array $forms = [];
+
     /**
      * @return JsonResponse
      * @throws NotFoundHttpException
@@ -33,34 +41,40 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param FormRequestFactoryInterface $formRequestFactory
      * @return CreateResponse
-     * @throws NotFoundHttpException
      */
-    public function actionCreate(): CreateResponse
+    public function actionCreate(FormRequestFactoryInterface $formRequestFactory): CreateResponse
     {
-        $data = $this->create();
+        $form = $formRequestFactory->create($this->forms[self::CREATE]);
+
+        $data = call_user_func_array([$this, self::CREATE], [$form]);
 
         return new CreateResponse($data);
     }
 
     /**
+     * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
-     * @throws NotFoundHttpException
      */
-    public function actionUpdate(): UpdateResponse
+    public function actionUpdate(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
-        $data = $this->update();
+        $form = $formRequestFactory->create($this->forms[self::UPDATE]);
+
+        $data = call_user_func_array([$this, self::UPDATE], [$form]);
 
         return new UpdateResponse($data);
     }
 
     /**
+     * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
-     * @throws NotFoundHttpException
      */
-    public function actionPatch(): UpdateResponse
+    public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
-        $data = $this->patch();
+        $form = $formRequestFactory->create($this->forms[self::PATCH]);
+
+        $data = call_user_func_array([$this, self::PATCH], [$form]);
 
         return new UpdateResponse($data);
     }
@@ -95,28 +109,31 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function create(): void
+    protected function create(AbstractFormRequest $form): void
     {
         throw new NotFoundHttpException('Not found');
     }
 
     /**
+     * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function update(): void
+    protected function update(AbstractFormRequest $form): void
     {
         throw new NotFoundHttpException('Not found');
     }
 
     /**
+     * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function patch(): void
+    protected function patch(AbstractFormRequest $form): void
     {
         throw new NotFoundHttpException('Not found');
     }
