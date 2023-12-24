@@ -8,8 +8,8 @@
 ## [ [0.3.1](https://github.com/Trinity-devs/framework/releases/tag/0.3.1) ] - 24.12.2023
 
 - Изменено
+  - Изменено получение ошибок из формы
   - Правки статус кодов
-
 
 ## [ [0.3.0](https://github.com/Trinity-devs/framework/releases/tag/0.3.0) ] - 23.12.2023
 
