@@ -74,30 +74,33 @@ class Request implements RequestInterface
 
     /**
      * @param string|null $name
-     * @return array|string|null
+     * @return array|string
      */
-    public function get(string|null $name = null): array|string|null
+    public function get(string|null $name = null): array|string
     {
-        $queryParams = $this->queryParams !== [] ? $this->queryParams : null;
-        $requestParams = $this->requestParams !== [] ? $this->requestParams : null;
-
-        if ($queryParams === null && $requestParams === null) {
-            return null;
-        }
-
         if ($name === null) {
-            return $queryParams ?? $requestParams;
+            return $this->queryParams === [] ? $this->requestParams : $this->queryParams;
         }
 
-        return $queryParams[$name] ?? $requestParams[$name];
+        return $this->queryParams[$name] ?? $this->requestParams[$name];
     }
 
-    public function post(string|null $name = null): array|string|null
+    /**
+     * @param string|null $name
+     * @return array|string
+     * @throws NotFoundHttpException
+     */
+    public function post(string|null $name = null): array|string
     {
         return $this->getParsedBody($name);
     }
 
-    private function getParsedBody(string|null $name = null): array|string|null
+    /**
+     * @param string|null $name
+     * @return array|string
+     * @throws NotFoundHttpException
+     */
+    private function getParsedBody(string|null $name = null): array|string
     {
         if ($this->contentType === 'application/x-www-form-urlencoded') {
             parse_str(file_get_contents('php://input'), $this->input);
@@ -108,14 +111,14 @@ class Request implements RequestInterface
         }
 
         if ($name === null) {
-            return $this->input !== [] ? $this->input : null;
+            return $this->input !== [] ? $this->input : [];
         }
 
         if (array_key_exists($name, $this->input) === false) {
             throw new NotFoundHttpException("Параметр $name не найден");
         }
 
-        return $this->input !== [] ? $this->input[$name] : null;
+        return $this->input !== [] ? $this->input[$name] : [];
     }
 
     /**
