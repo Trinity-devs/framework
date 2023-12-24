@@ -22,8 +22,8 @@ abstract class AbstractFormRequest
     {
         $this->attributes = array_merge(
             [
-                $this->request->post() ?? [],
-                $this->request->get() ?? []
+                $this->request->post(),
+                $this->request->get()
             ]
         );
     }
