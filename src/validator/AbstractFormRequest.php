@@ -56,23 +56,23 @@ abstract class AbstractFormRequest
     }
 
     /**
-     * @param $attributes
-     * @param $field
+     * @param array $attributes
+     * @param string $field
      * @return mixed
      * @throws ValidationError
      */
-    private function getAttributeFromArray($attributes, $field): mixed
+    private function getAttributeFromArray(array $attributes, string $field): mixed
     {
         foreach ($attributes as $key => $value) {
             if ($key === $field) {
                 return $value;
             }
             if (is_array($value)) {
-                $result = $this->getAttributeFromArray($value, $field);
+                return $this->getAttributeFromArray($value, $field);
             }
         }
 
-        return $result ?? throw new ValidationError('Атрибута ' . $field . ' не существует');
+        throw new ValidationError('Поле ' . $key . ' не ожидается');
     }
 
     /**
