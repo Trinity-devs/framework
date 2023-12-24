@@ -11,6 +11,7 @@ use trinity\exception\baseException\ErrorException;
 use trinity\exception\baseException\Exception;
 use trinity\exception\baseException\LogicException;
 use trinity\exception\baseException\UnknownMethodException;
+use trinity\exception\baseException\ValidationError;
 use trinity\exception\httpException\HttpException;
 
 class ErrorHandlerHttp implements ErrorHandlerHttpInterface
@@ -73,7 +74,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @return object
      * @throws Throwable
      */
-    public function handleException(Throwable $exception): object
+    public function handleException(Throwable $exception): mixed
     {
         $this->exception = $exception;
 
@@ -84,6 +85,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 $this->clearOutput();
             }
             $this->exception = null;
+
 
             return $this->renderException($exception);
         } catch (Exception $e) {
@@ -335,23 +337,32 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function dataJsonException(Throwable $exception): array
     {
-        if ($exception instanceof HttpException) {
+        if ($this->debug === true) {
             return [
-                'message' => $exception->getMessage(),
-                'error' => $exception->getName(),
-                'statusCode' => $exception->getStatusCode(),
+                'cause' => $exception->getMessage(),
+                'type' => $exception->getName(),
+                'data' => [],
             ];
         }
 
         return [
-            'code' => $exception->getCode(),
-            'message' => $exception->getMessage(),
-            'statusCode' => 500,
+            'cause' => 'An error occurred',
+            'type' => 'Error',
+            'data' => [],
         ];
     }
 
     public function setTypeResponse(string $typeResponse): void
     {
         $this->typeResponse = $typeResponse;
+    }
+
+    public function getStatusCode(Throwable $exception): int
+    {
+        if ($exception instanceof HttpException) {
+            $exceptionStatus = $exception->getStatusCode();
+        }
+
+        return $exceptionStatus ?? 500;
     }
 }
