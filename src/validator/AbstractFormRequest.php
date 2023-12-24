@@ -20,7 +20,12 @@ abstract class AbstractFormRequest
         protected DatabaseConnectionInterface $connection,
     )
     {
-        $this->attributes = $this->request->post() ?? [];
+        $this->attributes = array_merge(
+            [
+                $this->request->post() ?? [],
+                $this->request->get() ?? []
+            ]
+        );
     }
 
     /**
@@ -82,17 +87,11 @@ abstract class AbstractFormRequest
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getErrors(): string
+    public function getErrors(): string|null
     {
-        $answer = '';
-
-        foreach ($this->errors as $key => $value) {
-            $answer .= $key . ' - ' . $value . PHP_EOL;
-        }
-
-        return $answer;
+        return array_shift($this->errors);
     }
 
     /**
