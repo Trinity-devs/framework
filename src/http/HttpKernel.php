@@ -2,6 +2,7 @@
 
 namespace trinity\http;
 
+use trinity\api\responses\AuthResponse;
 use trinity\api\responses\CreateResponse;
 use trinity\api\responses\DeleteResponse;
 use trinity\api\responses\HtmlResponse;
@@ -52,6 +53,10 @@ class HttpKernel implements HttpKernelInterface
 
             HtmlResponse::class => function ($output, $statusCode) {
                 return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody($output)->withStatus($statusCode ?? 200);
+            },
+
+            AuthResponse::class => function ($output) {
+                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(201, 'Successful entry')->withBody(json_encode($output));
             },
 
             CreateResponse::class => function ($output) {
