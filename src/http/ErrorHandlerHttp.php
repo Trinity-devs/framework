@@ -2,6 +2,7 @@
 
 namespace trinity\http;
 
+use PDOException;
 use Throwable;
 use trinity\api\responses\HtmlResponse;
 use trinity\api\responses\JsonResponse;
@@ -337,7 +338,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function dataJsonException(Throwable $exception): array
     {
-        if ($this->debug === true) {
+        if ($this->debug === true && $exception instanceof PDOException === false) {
             return [
                 'cause' => $exception->getMessage(),
                 'type' => $exception->getName(),
