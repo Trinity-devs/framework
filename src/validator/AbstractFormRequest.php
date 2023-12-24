@@ -87,9 +87,9 @@ abstract class AbstractFormRequest
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getErrors(): string
+    public function getErrors(): string|null
     {
         return array_shift($this->errors);
     }
