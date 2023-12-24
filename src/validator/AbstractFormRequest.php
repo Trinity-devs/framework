@@ -52,19 +52,27 @@ abstract class AbstractFormRequest
      */
     public function getAttribute(string $field): mixed
     {
-        $findAttribute = null;
+        return $this->getAttributeFromArray($this->attributes, $field);
+    }
 
-        array_walk_recursive($this->attributes, function ($value, $key) use ($field, &$findAttribute) {
+    /**
+     * @param $attributes
+     * @param $field
+     * @return mixed
+     * @throws ValidationError
+     */
+    private function getAttributeFromArray($attributes, $field): mixed
+    {
+        foreach ($attributes as $key => $value) {
             if ($key === $field) {
-                $findAttribute = $value;
+                return $value;
             }
-        });
-
-        if (is_null($findAttribute) === true) {
-            throw new ValidationError('Атрибута ' . $field . ' не существует');
+            if (is_array($value)) {
+                $result = $this->getAttributeFromArray($value, $field);
+            }
         }
 
-        return $findAttribute;
+        return $result ?? throw new ValidationError('Атрибута ' . $field . ' не существует');
     }
 
     /**

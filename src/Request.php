@@ -78,18 +78,11 @@ class Request implements RequestInterface
      */
     public function get(string|null $name = null): array|string
     {
-        $queryParams = $this->queryParams !== [] ? $this->queryParams : [];
-        $requestParams = $this->requestParams !== [] ? $this->requestParams : [];
-
-        if ($queryParams === [] && $requestParams === []) {
-            return [];
-        }
-
         if ($name === null) {
-            return $queryParams === [] ? $queryParams : $requestParams;
+            return $this->queryParams === [] ? $this->requestParams : $this->queryParams;
         }
 
-        return $queryParams[$name] ?? $requestParams[$name];
+        return $this->queryParams[$name] ?? $this->requestParams[$name];
     }
 
     /**
