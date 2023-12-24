@@ -11,6 +11,7 @@ use trinity\exception\baseException\ErrorException;
 use trinity\exception\baseException\Exception;
 use trinity\exception\baseException\LogicException;
 use trinity\exception\baseException\UnknownMethodException;
+use trinity\exception\baseException\ValidationError;
 use trinity\exception\httpException\HttpException;
 
 class ErrorHandlerHttp implements ErrorHandlerHttpInterface
@@ -336,7 +337,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function dataJsonException(Throwable $exception): array
     {
-        if ($exception instanceof HttpException && $this->debug === true) {
+        if ($this->debug === true) {
             return [
                 'cause' => $exception->getMessage(),
                 'type' => $exception->getName(),
@@ -344,7 +345,11 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             ];
         }
 
-        return ['Произошла внутреняя ошибка сервера'];
+        return [
+            'cause' => 'An error occurred',
+            'type' => 'Error',
+            'data' => [],
+        ];
     }
 
     public function setTypeResponse(string $typeResponse): void
