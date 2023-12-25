@@ -29,12 +29,34 @@ abstract class AbstractFormRequest
     }
 
     /**
-     * @param array $attributes
+     * @param $field
+     * @param $newValue
      * @return void
      */
-    public function setAttributes(array $attributes): void
+    public function setAttribute($field, $newValue): void
     {
-        $this->attributes = $attributes;
+        $this->setAttributeRecursive($field, $newValue, $this->attributes);
+    }
+
+    /**
+     * @param $field
+     * @param $newValue
+     * @param $attributes
+     * @return void
+     */
+    private function setAttributeRecursive($field, $newValue, &$attributes = null)
+    {
+        foreach ($attributes as $key => &$value) {
+            if ($key === $field) {
+                $value = $newValue;
+
+                return;
+            }
+
+            if (is_array($value) === true) {
+                $this->setAttributeRecursive($field, $newValue, $value);
+            }
+        }
     }
 
     /**
@@ -52,7 +74,7 @@ abstract class AbstractFormRequest
      */
     public function getAttribute(string $field): mixed
     {
-        return $this->getAttributeFromArray($this->attributes, $field);
+        return $this->getAttributeRecursive($this->attributes, $field);
     }
 
     /**
@@ -61,14 +83,14 @@ abstract class AbstractFormRequest
      * @return mixed
      * @throws ValidationError
      */
-    private function getAttributeFromArray(array $attributes, string $field): mixed
+    private function getAttributeRecursive(array $attributes, string $field): mixed
     {
         foreach ($attributes as $key => $value) {
             if ($key === $field) {
                 return $value;
             }
             if (is_array($value)) {
-                return $this->getAttributeFromArray($value, $field);
+                return $this->getAttributeRecursive($value, $field);
             }
         }
 
@@ -99,7 +121,11 @@ abstract class AbstractFormRequest
      */
     public function getErrors(): string|null
     {
-        return array_shift($this->errors);
+        if ($this->errors === []) {
+            return null;
+        }
+
+        return array_values($this->errors)[0];
     }
 
     /**
