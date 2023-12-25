@@ -16,7 +16,7 @@ abstract class AbstractFormRequest
      * @param DatabaseConnectionInterface $connection
      */
     public function __construct(
-        protected readonly RequestInterface $request,
+        protected readonly RequestInterface   $request,
         protected DatabaseConnectionInterface $connection,
     )
     {
@@ -74,14 +74,19 @@ abstract class AbstractFormRequest
      */
     public function getAttribute(string $field): mixed
     {
-        return $this->getAttributeRecursive($this->attributes, $field);
+        $result = $this->getAttributeRecursive($this->attributes, $field);
+
+        if ($result === null) {
+            throw new ValidationError('Поле ' . $field . ' не ожидается');
+        }
+
+        return $result;
     }
 
     /**
      * @param array $attributes
      * @param string $field
      * @return mixed
-     * @throws ValidationError
      */
     private function getAttributeRecursive(array $attributes, string $field): mixed
     {
@@ -89,12 +94,17 @@ abstract class AbstractFormRequest
             if ($key === $field) {
                 return $value;
             }
-            if (is_array($value)) {
-                return $this->getAttributeRecursive($value, $field);
+
+            if (is_array($value) === true) {
+                $result = $this->getAttributeRecursive($value, $field);
+
+                if ($result !== null) {
+                    return $result;
+                }
             }
         }
 
-        throw new ValidationError('Поле ' . $key . ' не ожидается');
+        return null;
     }
 
     /**
