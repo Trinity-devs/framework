@@ -99,7 +99,7 @@ abstract class AbstractFormRequest
      */
     public function getErrors(): string|null
     {
-        return array_shift($this->errors);
+        return $this->errors === [] ? null : array_values($this->errors)[0];
     }
 
     /**
