@@ -338,8 +338,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function dataJsonException(Throwable $exception): array
     {
-        $fullClassName = get_class($exception);
-        $classNameParts = explode('\\', $fullClassName);
+        $classNameParts = explode('\\', get_class($exception));
         $errorName = end($classNameParts);
 
         if ($this->debug === true) {
