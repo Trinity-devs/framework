@@ -338,10 +338,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function dataJsonException(Throwable $exception): array
     {
-        if ($this->debug === true && $exception instanceof PDOException === false) {
+        $fullClassName = get_class($exception);
+        $classNameParts = explode('\\', $fullClassName);
+        $errorName = end($classNameParts);
+
+        if ($this->debug === true) {
             return [
                 'cause' => $exception->getMessage(),
-                'type' => $exception->getName(),
+                'type' => $errorName,
                 'data' => [],
             ];
         }
