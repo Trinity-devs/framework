@@ -4,10 +4,15 @@ namespace trinity\db;
 
 use trinity\contracts\DatabaseConnectionInterface;
 use PDO;
+use trinity\exception\databaseException\PDOException;
 
 class DatabaseConnection implements DatabaseConnectionInterface
 {
     private PDO|null $pdo;
+    private string $select = '';
+    private string $table = '';
+    private string $where = '';
+    private array $bindings = [];
 
     /**
      * @param array $pdoConfiguration
@@ -15,6 +20,124 @@ class DatabaseConnection implements DatabaseConnectionInterface
     public function __construct(array $pdoConfiguration)
     {
         $this->pdo = new PDO(...$pdoConfiguration);
+    }
+
+
+    /**
+     * @param array $columns
+     * @return $this
+     */
+    public function select(array $columns = ['*']): self
+    {
+        $this->select = implode(', ', $columns);
+
+        return $this;
+    }
+
+    /**
+     * @param string $table
+     * @return $this
+     */
+    public function from(string $table): self
+    {
+        $this->table = trim($table);
+
+        return $this;
+    }
+
+    /**
+     * @param array $conditions
+     * @return DatabaseConnection|false
+     */
+    public function where(array $conditions): self|false
+    {
+        $this->bindings = $conditions;
+
+        $whereClause = '';
+        if (count($conditions) === 1) {
+            $column = key($conditions);
+            $whereClause = "$column = :$column";
+        }
+
+        if (count($conditions) > 1) {
+            $preparedConditions = [];
+            foreach ($conditions as $column => $value) {
+                $preparedConditions[] = "$column = :$column";
+            }
+
+            $whereClause = implode(' AND ', $preparedConditions);
+        }
+
+        $this->where = "$whereClause";
+
+        return $this;
+    }
+
+    public function andWhere(array $conditions): self
+    {
+        $this->bindings = array_merge($this->bindings, $conditions);
+
+        $whereClause = '';
+        if (count($conditions) === 1) {
+            $column = key($conditions);
+            $whereClause = "$column = :$column";
+        }
+
+        if (count($conditions) > 1) {
+            $preparedConditions = [];
+            foreach ($conditions as $column => $value) {
+                $preparedConditions[] = "$column = :$column";
+            }
+
+            $whereClause = implode(' AND ', $preparedConditions);
+        }
+        if ($this->where !== '') {
+            $this->where .= " AND $whereClause";
+        }
+
+        if ($this->where === '') {
+            $this->where = "$whereClause";
+        }
+
+        return $this;
+    }
+
+    public function one(): array
+    {
+        $query = "SELECT $this->select FROM $this->table WHERE $this->where";
+
+        if ($this->where === '') {
+            $query = "SELECT $this->select FROM $this->table";
+        }
+
+        $statement = $this->pdo->prepare($query);
+
+        $statement->execute($this->bindings);
+
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($result !== []) {
+            return array_shift($result);
+        }
+
+        return $result;
+    }
+
+    public function all(): array
+    {
+        $query = "SELECT $this->select FROM $this->table WHERE $this->where";
+
+        if ($this->where === '') {
+            $query = "SELECT $this->select FROM $this->table";
+        }
+
+        $statement = $this->pdo->prepare($query);
+
+        $statement->execute($this->bindings);
+
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        return $result;
     }
 
     /**
@@ -41,45 +164,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
         $statement->execute($bindings);
 
         return $statement->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * @param string $tableName
-     * @param array $columns
-     * @param string|null $condition
-     * @param array $bindings
-     * @return array|false
-     */
-    public function select(string $tableName, array $columns, string $condition = null, array $bindings = []): array|false
-    {
-        if (empty($columns)) {
-            return false;
-        }
-
-        $query = "SELECT " . implode(", ", $columns) . " FROM " . $tableName;
-        if ($condition !== null) {
-            $query .= " WHERE " . $condition;
-        }
-
-        return $this->execute($query, $bindings);
-    }
-
-    /**
-     * @param string $tableName
-     * @param array $columns
-     * @param string|null $condition
-     * @param array $bindings
-     * @return array|false
-     */
-    public function selectOne(string $tableName, array $columns, string $condition = null, array $bindings = []): array|false
-    {
-        if (empty($columns)) {
-            return false;
-        }
-
-        $result = $this->select($tableName, $columns, $condition, $bindings);
-
-        return empty($result) === true ? false : $result[0];
     }
 
     /**
