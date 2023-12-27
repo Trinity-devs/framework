@@ -13,4 +13,6 @@ interface DatabaseConnectionInterface
     public function andWhere(array $conditions): self;
 
     public function one(): array;
+
+    public function all(): array;
 }
