@@ -22,6 +22,7 @@ class Request implements RequestInterface
     private array $queryParams;
     private array $input;
     private array $requestParams = [];
+    private object|array $identity = [];
 
     public function __construct(array $server, array $get, array $post)
     {
@@ -282,5 +283,22 @@ class Request implements RequestInterface
     public function setRequestParams(array $params): void
     {
         $this->requestParams = $params;
+    }
+
+    /**
+     * @param object $params (param DTO object)
+     * @return void
+     */
+    public function setIdentityParams(object $params): void
+    {
+        $this->identity = $params;
+    }
+
+    /**
+     * @return object|array
+     */
+    public function identity(): object|array
+    {
+        return $this->identity;
     }
 }
