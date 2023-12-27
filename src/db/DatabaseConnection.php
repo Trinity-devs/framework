@@ -105,6 +105,11 @@ class DatabaseConnection implements DatabaseConnectionInterface
     public function one(): array
     {
         $query = "SELECT $this->select FROM $this->table WHERE $this->where";
+
+        if ($this->where === '') {
+            $query = "SELECT $this->select FROM $this->table";
+        }
+
         $statement = $this->pdo->prepare($query);
 
         $statement->execute($this->bindings);
@@ -121,6 +126,11 @@ class DatabaseConnection implements DatabaseConnectionInterface
     public function all(): array
     {
         $query = "SELECT $this->select FROM $this->table WHERE $this->where";
+
+        if ($this->where === '') {
+            $query = "SELECT $this->select FROM $this->table";
+        }
+
         $statement = $this->pdo->prepare($query);
 
         $statement->execute($this->bindings);
