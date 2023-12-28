@@ -89,7 +89,7 @@ class DatabaseConnection implements DatabaseConnectionInterface
         }
 
         if ($this->where === '') {
-            $this->where = "$whereClause";
+            $this->where = $whereClause;
         }
 
         return $this;
