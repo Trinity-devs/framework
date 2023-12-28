@@ -176,7 +176,7 @@ class DatabaseConnection implements DatabaseConnectionInterface
         $whereClause = $this->prepareBindings($bindings);
         $this->values = $values;
 
-        $this->where = "$whereClause";
+        $this->where = $whereClause;
 
         $setValues = [];
         foreach ($values as $column => $value) {
@@ -198,13 +198,15 @@ class DatabaseConnection implements DatabaseConnectionInterface
      * @param array $bindings
      * @return int
      */
-    public function delete(string $tableName, string $condition, array $bindings = []): int
+    public function delete(string $tableName, array $bindings = []): int
     {
-        $query = "DELETE FROM " . $tableName . " WHERE " . $condition;
-        $statement = $this->pdo->prepare($query);
-        $statement->execute($bindings);
+        $this->table = $tableName;
 
-        return $statement->rowCount();
+        $this->where = $this->prepareBindings($bindings);
+
+        $query = "DELETE FROM $this->table WHERE $this->where";
+
+        return $this->fetchCount($query);
     }
 
     public function __destruct()
