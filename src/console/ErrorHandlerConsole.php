@@ -28,8 +28,11 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
     {
         $previous = $exception->getPrevious();
 
+        $classNameParts = explode('\\', get_class($exception));
+        $errorName = end($classNameParts);
+
         if ($this->debug === false) {
-            $this->formatMessage($exception->getName() . ': ') . $exception->getMessage();
+            $this->formatMessage($errorName . ': ') . $exception->getMessage();
         }
 
         if ($this->debug === true) {
@@ -43,26 +46,18 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
             }
 
             if ($exception instanceof Exception === false) {
-                $message .= $this->formatMessage('Exception');
-                $this->formatMessage('Error: ') . $exception->getMessage();
+                $message .= $this->formatMessage($errorName);
+                $this->formatMessage("$errorName: ") . $exception->getMessage();
             }
 
-            $message .= $this->formatMessage(
-                    PHP_EOL . "Class: " . get_class($exception),
-                    [ConsoleColors::BOLD, ConsoleColors::BLUE]
-                )
-                . PHP_EOL . 'With message ' . $this->formatMessage("'{$exception->getMessage()}'", [ConsoleColors::BOLD]
-                )
-                . "\n\nin " . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(
-                    basename($exception->getFile()),
-                    [ConsoleColors::BOLD]
-                )
+            $message .= $this->formatMessage(PHP_EOL . "Class: " . get_class($exception),[ConsoleColors::BOLD, ConsoleColors::BLUE])
+                . PHP_EOL . 'With message ' . $this->formatMessage("'{$exception->getMessage()}'", [ConsoleColors::BOLD])
+                . PHP_EOL . PHP_EOL . 'in ' . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(basename($exception->getFile()),[ConsoleColors::BOLD])
                 . ':' . $this->formatMessage($exception->getLine(), [ConsoleColors::BOLD, ConsoleColors::YELLOW]
-                ) . "\n";
+                ) . PHP_EOL;
 
             if ($previous === null) {
-                $message .= "\n" . ($this->formatMessage("Stack trace:\n", [ConsoleColors::BOLD]
-                    )) . $exception->getTraceAsString();
+                $message .= PHP_EOL . ($this->formatMessage("Stack trace:\n", [ConsoleColors::BOLD])) . $exception->getTraceAsString();
             }
 
             $message .= PHP_EOL . PHP_EOL . $this->formatMessage(
@@ -71,7 +66,7 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
                 );
         }
 
-        echo fwrite(STDERR, $message . "\n");
+        echo fwrite(STDERR, $message . PHP_EOL);
 
         if ($this->debug === true && $previous !== null) {
             $causedBy = $this->formatMessage('Caused by: ', [ConsoleColors::BOLD]);
@@ -154,13 +149,13 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
 
     private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): void
     {
-        $msg = "Произошла ошибка при обработке другой ошибки:\n";
+        $msg = 'Произошла ошибка при обработке другой ошибки:' . PHP_EOL;
         $msg .= $exception;
-        $msg .= "\nПредыдущее исключение:\n";
+        $msg .= PHP_EOL . 'Предыдущее исключение:' . PHP_EOL;
         $msg .= $previousException;
 
         if ($this->debug === true) {
-            echo $msg . "\n";
+            echo $msg . PHP_EOL;
         }
 
         if ($this->debug === false) {

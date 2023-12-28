@@ -33,8 +33,8 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @param bool $debug
      */
     public function __construct(
-        private ViewRendererInterface $view,
-        bool $debug,
+        private readonly ViewRendererInterface $view,
+        bool                                   $debug,
     ) {
         $this->debug = $debug;
 
@@ -87,7 +87,6 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             }
             $this->exception = null;
 
-
             return $this->renderException($exception);
         } catch (Exception $e) {
             return $this->handleFallbackExceptionMessage($e, $exception);
@@ -126,7 +125,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             flush();
         }
 
-        if ($this->typeResponse === 'html') {
+        if ($this->typeResponse === 'json') {
             return new JsonResponse(['Произошла внутренняя ошибка сервера.']);
         }
 
@@ -208,15 +207,15 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function renderException(Throwable $exception): object
     {
-        $useErrorView = $this->debug === false || $exception instanceof HttpException;
-
-        $file = $useErrorView ? 'errorHandler/error' : 'errorHandler/exception';
-
         if ($this->typeResponse === 'json') {
             return new JsonResponse($this->dataJsonException($exception));
         }
 
-        return new HtmlResponse($this->renderFile($file, ['exception' => $exception]));
+        if ($this->debug === true) {
+            return new HtmlResponse($this->renderFile('errorHandler/exception', ['exception' => $exception]));
+        }
+
+        return new HtmlResponse($this->renderFile('errorHandler/error', ['exception' => $exception]));
     }
 
     /**
@@ -238,7 +237,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getExceptionName(Throwable $exception): string|null
     {
-        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException) {
+        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException || $exception instanceof \trinity\exception\databaseException\PDOException) {
             return $exception->getName();
         }
 
@@ -306,6 +305,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
         $line--;
         $lines = file($file);
+
         if ($lines === false || ($lineCount = count($lines)) < $line || $line < 0) {
             return '';
         }
@@ -350,7 +350,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
 
         return [
-            'cause' => 'An error occurred',
+            'cause' => 'Произошла неизвестная ошибка',
             'type' => 'Error',
             'data' => [],
         ];
