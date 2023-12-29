@@ -1,11 +1,11 @@
 <?php
 
-namespace trinity\validator;
+namespace trinity\validator\rules;
 
 use trinity\contracts\ValidatorRuleInterface;
 use trinity\exception\baseException\ValidationError;
 
-class EmailValidatorRule implements ValidatorRuleInterface
+class RequiredValidatorRule implements ValidatorRuleInterface
 {
     /**
      * @param mixed $value
@@ -14,8 +14,8 @@ class EmailValidatorRule implements ValidatorRuleInterface
      */
     public function validateRule(mixed $value): void
     {
-        if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
-            throw new ValidationError('Некорректный email');
+        if ($value === null || $value === '') {
+            throw new ValidationError('Поле обязательно для заполнения');
         }
     }
 }

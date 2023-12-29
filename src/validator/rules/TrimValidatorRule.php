@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\validator;
+namespace trinity\validator\rules;
 
 use trinity\contracts\ValidatorRuleInterface;
 

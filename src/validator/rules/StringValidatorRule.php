@@ -1,11 +1,11 @@
 <?php
 
-namespace trinity\validator;
+namespace trinity\validator\rules;
 
 use trinity\contracts\ValidatorRuleInterface;
 use trinity\exception\baseException\ValidationError;
 
-class BooleanValidatorRule implements ValidatorRuleInterface
+class StringValidatorRule implements ValidatorRuleInterface
 {
     /**
      * @param mixed $value
@@ -14,8 +14,8 @@ class BooleanValidatorRule implements ValidatorRuleInterface
      */
     public function validateRule(mixed $value): void
     {
-        if (is_bool($value) === false) {
-            throw new ValidationError('Значение должно быть булевым');
+        if (is_string($value) === false) {
+            throw new ValidationError('Значение должно быть строкой');
         }
     }
 }

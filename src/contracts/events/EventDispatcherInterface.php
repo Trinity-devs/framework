@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\contracts\eventsContracts;
+namespace trinity\contracts\events;
 
 use trinity\contracts\ObserverInterface;
 use trinity\eventDispatcher\Message;

@@ -9,7 +9,7 @@ use ReflectionException;
 use trinity\contracts\ConsoleInputInterface;
 use trinity\contracts\ConsoleKernelInterface;
 use trinity\contracts\ConsoleOutputInterface;
-use trinity\contracts\eventsContracts\EventDispatcherInterface;
+use trinity\contracts\events\EventDispatcherInterface;
 use trinity\Event;
 use trinity\eventDispatcher\Message;
 use trinity\exception\baseException\Exception;

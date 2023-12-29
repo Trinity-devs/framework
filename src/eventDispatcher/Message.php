@@ -2,7 +2,7 @@
 
 namespace trinity\eventDispatcher;
 
-use trinity\contracts\eventsContracts\MessageInterface;
+use trinity\contracts\events\MessageInterface;
 
 class Message implements MessageInterface
 {
