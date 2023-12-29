@@ -43,6 +43,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @return void
+     */
     public function register(): void
     {
         if ($this->registered === false) {
@@ -51,6 +54,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @return void
+     */
     private function setUpErrorHandlers(): void
     {
         set_exception_handler([$this, 'handleException']);
@@ -61,6 +67,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         register_shutdown_function([$this, 'handleFatalError']);
     }
 
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @return bool
+     * @throws ErrorException
+     */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() & $code) {
@@ -93,6 +107,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @return void
+     */
     private function clearOutput(): void
     {
         for ($level = ob_get_level(); $level > 0; --$level) {
@@ -102,6 +119,11 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @param Throwable $exception
+     * @param Throwable $previousException
+     * @return JsonResponse|HtmlResponse
+     */
     private function handleFallbackExceptionMessage(
         Throwable $exception,
         Throwable $previousException
@@ -132,6 +154,10 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         return new HtmlResponse('Произошла внутренняя ошибка сервера.');
     }
 
+    /**
+     * @return void
+     * @throws Throwable
+     */
     public function handleFatalError(): void
     {
         if (isset($this->directory)) {
@@ -190,6 +216,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         });
     }
 
+    /**
+     * @return void
+     */
     private function unregister(): void
     {
         if ($this->registered) {
@@ -291,14 +320,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @return string
      * @throws Throwable
      */
-    private function renderCallStackItem(
-        string|null $file,
-        int|null $line,
-        string|null $class,
-        string|null $method,
-        array $args,
-        int $index
-    ): string {
+    private function renderCallStackItem(string|null $file, int|null $line, string|null $class, string|null $method, array $args, int $index): string {
         if ($file === null || $line === null) {
             return '';
         }
@@ -336,6 +358,10 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         return $file === null || strpos(realpath($file), PROJECT_ROOT . DIRECTORY_SEPARATOR) === 0;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return array
+     */
     private function dataJsonException(Throwable $exception): array
     {
         $classNameParts = explode('\\', get_class($exception));
@@ -356,11 +382,19 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         ];
     }
 
+    /**
+     * @param string $typeResponse
+     * @return void
+     */
     public function setTypeResponse(string $typeResponse): void
     {
         $this->typeResponse = $typeResponse;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return int
+     */
     public function getStatusCode(Throwable $exception): int
     {
         if ($exception instanceof HttpException) {

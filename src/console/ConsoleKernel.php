@@ -10,7 +10,7 @@ use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
     contracts\console\ConsoleKernelInterface,
     contracts\console\ConsoleOutputInterface,
     contracts\events\EventDispatcherInterface,
-    Event,
+    eventDispatcher\Event,
     eventDispatcher\Message,
     exception\baseException\Exception,
     exception\consoleException\UnknownCommandException};
@@ -148,6 +148,10 @@ class ConsoleKernel implements ConsoleKernelInterface
         return $this->commandMap;
     }
 
+    /**
+     * @param array $plugins
+     * @return void
+     */
     public function registerPlugins(array $plugins): void
     {
         foreach ($plugins as $pluginClassName) {

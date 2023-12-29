@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity;
+namespace trinity\http;
 
 use trinity\{contracts\http\ResponseInterface,
     exception\baseException\InvalidArgumentException,

@@ -86,7 +86,9 @@ class DIContainer implements ContainerInterface
     /**
      * @param string $className
      * @param string $methodName
+     * @param array $args
      * @return mixed
+     * @throws LogicException
      * @throws ReflectionException
      */
     public function call(string $className, string $methodName, array $args = []): mixed

@@ -2,6 +2,7 @@
 
 namespace trinity\http;
 
+use Throwable;
 use trinity\api\{responses\AuthResponse,
     responses\CreateResponse,
     responses\DeleteResponse,
@@ -12,11 +13,14 @@ use trinity\contracts\{handlers\error\ErrorHandlerHttpInterface,
     http\HttpKernelInterface,
     http\ResponseInterface,
     router\RouterInterface};
-use trinity\exception\baseException\Exception;
-use Throwable;
 
 class HttpKernel implements HttpKernelInterface
 {
+    /**
+     * @param RouterInterface $router
+     * @param ErrorHandlerHttpInterface $errorHandler
+     * @param ResponseInterface $response
+     */
     public function __construct(
         private RouterInterface $router,
         private ErrorHandlerHttpInterface $errorHandler,
@@ -27,7 +31,7 @@ class HttpKernel implements HttpKernelInterface
     }
 
     /**
-     * @throws Exception
+     * @return ResponseInterface
      */
     public function handle(): ResponseInterface
     {
@@ -44,6 +48,11 @@ class HttpKernel implements HttpKernelInterface
         }
     }
 
+    /**
+     * @param object $output
+     * @param int $statusCode
+     * @return ResponseInterface
+     */
     private function normalizeResponse(object $output, int $statusCode = 200): ResponseInterface
     {
         $responseHandlers = match (get_class($output)) {

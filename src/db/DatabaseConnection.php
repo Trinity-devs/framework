@@ -54,7 +54,7 @@ class DatabaseConnection implements DatabaseConnectionInterface
 
     /**
      * @param array $conditions
-     * @return DatabaseConnection|false
+     * @return $this
      */
     public function where(array $conditions): self
     {
@@ -65,6 +65,10 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @param array $conditions
+     * @return $this
+     */
     public function andWhere(array $conditions): self
     {
         $whereClause = $this->prepareBindings(array_merge($this->bindings, $conditions));
@@ -80,6 +84,10 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @param array $conditions
+     * @return $this
+     */
     public function orWhere(array $conditions): self
     {
         $whereClause = $this->prepareBindings(array_merge($this->bindings, $conditions));
@@ -95,6 +103,9 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function one(): array
     {
         $query = $this->prepareQuery();
@@ -108,6 +119,9 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function all(): array
     {
         $query = $this->prepareQuery();
@@ -194,7 +208,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
 
     /**
      * @param string $tableName
-     * @param string $condition
      * @param array $bindings
      * @return int
      */
@@ -214,6 +227,10 @@ class DatabaseConnection implements DatabaseConnectionInterface
         $this->pdo = null;
     }
 
+    /**
+     * @param string $query
+     * @return array
+     */
     private function fetch(string $query): array
     {
         $statement = $this->pdo->prepare($query);
@@ -222,6 +239,9 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @return string
+     */
     private function prepareQuery(): string
     {
         $query = "SELECT $this->select FROM $this->table";
@@ -240,6 +260,10 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $query;
     }
 
+    /**
+     * @param array $conditions
+     * @return string
+     */
     private function prepareBindings(array $conditions = []): string
     {
         $this->bindings = $conditions;
@@ -262,6 +286,10 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $whereClause;
     }
 
+    /**
+     * @param string $query
+     * @return int
+     */
     private function fetchCount(string $query): int
     {
         $statement = $this->pdo->prepare($query);
@@ -271,6 +299,9 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $statement->rowCount();
     }
 
+    /**
+     * @return mixed
+     */
     public function scalar(): mixed
     {
         $query = $this->prepareQuery();
@@ -282,6 +313,11 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return array_shift($resultShift);
     }
 
+    /**
+     * @param string $table
+     * @param array|string $on
+     * @return $this
+     */
     public function join(string $table, array|string $on = ''): self
     {
         $this->resultJoin('JOIN', $table, $on);
@@ -289,6 +325,11 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @param string $table
+     * @param array|string $on
+     * @return $this
+     */
     public function leftJoin(string $table, array|string $on = ''): self
     {
         $this->resultJoin('LEFT JOIN', $table, $on);
@@ -296,6 +337,11 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @param string $table
+     * @param array|string $on
+     * @return $this
+     */
     public function rightJoin(string $table, array|string $on = ''): self
     {
         $this->resultJoin('RIGHT JOIN', $table, $on);
@@ -303,6 +349,12 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $this;
     }
 
+    /**
+     * @param string $type
+     * @param string $table
+     * @param array|string $on
+     * @return void
+     */
     private function resultJoin(string $type, string $table, array|string $on = ''): void
     {
         $this->join[] = ['type' => $type, 'table' => $table, 'on' => $on];

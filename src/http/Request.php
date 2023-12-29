@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity;
+namespace trinity\http;
 
 use trinity\contracts\http\RequestInterface;
 use trinity\contracts\http\StreamInterface;
@@ -23,6 +23,11 @@ class Request implements RequestInterface
     private array $requestParams = [];
     private object|array $identity = [];
 
+    /**
+     * @param array $server
+     * @param array $get
+     * @param array $post
+     */
     public function __construct(array $server, array $get, array $post)
     {
         $this->protocolVersion = $server['SERVER_PROTOCOL'];
@@ -33,6 +38,9 @@ class Request implements RequestInterface
         $this->headers = getallheaders();
     }
 
+    /**
+     * @return string
+     */
     public function getMethod(): string
     {
         return $this->method;

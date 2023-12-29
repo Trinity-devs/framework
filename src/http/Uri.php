@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity;
+namespace trinity\http;
 
 
 use trinity\contracts\http\UriInterface;
@@ -16,6 +16,9 @@ class Uri implements UriInterface
     private array $queryArg = [];
     private array $queryArgsName = [];
 
+    /**
+     * @param array $server
+     */
     public function __construct(array $server)
     {
         $this->hostAndPort = explode(":", $server['HTTP_HOST']);
@@ -34,11 +37,17 @@ class Uri implements UriInterface
         }
     }
 
+    /**
+     * @return array
+     */
     public function getQueryArgsName(): array
     {
         return $this->queryArgsName;
     }
 
+    /**
+     * @return array
+     */
     public function getQueryArg(): array
     {
         return $this->queryArg;
@@ -76,6 +85,9 @@ class Uri implements UriInterface
         return $authority;
     }
 
+    /**
+     * @return bool
+     */
     private function isStandardPort(): bool
     {
         $scheme = $this->getScheme();
@@ -111,6 +123,11 @@ class Uri implements UriInterface
         return '';
     }
 
+    /**
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
+     */
     public function __call(string $method, array $arguments = []): mixed
     {
         if ($method === 'getUser') {
@@ -160,6 +177,9 @@ class Uri implements UriInterface
         return $path;
     }
 
+    /**
+     * @return string
+     */
     public function getRoute(): string
     {
         return parse_url($this->uri)['path'];

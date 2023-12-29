@@ -15,6 +15,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
     private string|null $directory;
     private bool $debug = false;
 
+    /**
+     * @param bool $debug
+     */
     public function __construct(bool $debug)
     {
         $this->debug = $debug;
@@ -93,6 +96,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         return "\033[0m" . ($code !== '' ? "\033[" . $code . 'm' : '') . $message . "\033[0m";
     }
 
+    /**
+     * @return void
+     */
     public function register(): void
     {
         if ($this->registered === false) {
@@ -101,6 +107,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         }
     }
 
+    /**
+     * @return void
+     */
     private function setUpErrorHandlers(): void
     {
         ini_set('display_errors', false);
@@ -110,6 +119,14 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         register_shutdown_function([$this, 'handleFatalError']);
     }
 
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @return bool
+     * @throws ErrorException
+     */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() & $code) {
@@ -118,6 +135,10 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         return false;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return void
+     */
     public function handleException(Throwable $exception): void
     {
         $this->exception = $exception;
@@ -138,6 +159,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         $this->exception = null;
     }
 
+    /**
+     * @return void
+     */
     private function clearOutput(): void
     {
         for ($level = ob_get_level(); $level > 0; --$level) {
@@ -147,7 +171,12 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         }
     }
 
-    private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): void
+    /**
+     * @param Throwable $exception
+     * @param Throwable $previousException
+     * @return never
+     */
+    private function handleFallbackExceptionMessage(Throwable $exception, Throwable $previousException): never
     {
         $msg = 'Произошла ошибка при обработке другой ошибки:' . PHP_EOL;
         $msg .= $exception;
@@ -167,12 +196,16 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         if (defined('HHVM_VERSION')) {
             flush();
         }
+
         exit(1);
     }
 
+    /**
+     * @return void
+     */
     public function handleFatalError(): void
     {
-        if (isset($this->directory)) {
+        if (isset($this->directory) === true) {
             chdir($this->directory);
             unset($this->directory);
         }
@@ -213,13 +246,13 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         unset($error);
 
 
-        if ($this->discardExistingOutput) {
+        if ($this->discardExistingOutput === true) {
             $this->clearOutput();
         }
 
         $this->renderException($this->exception);
 
-        if (defined('HHVM_VERSION')) {
+        if (defined('HHVM_VERSION') === true) {
             flush();
         }
 
@@ -228,9 +261,12 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
         });
     }
 
+    /**
+     * @return void
+     */
     private function unregister(): void
     {
-        if ($this->registered) {
+        if ($this->registered === true) {
             $this->directory = null;
             restore_error_handler();
             restore_exception_handler();

@@ -21,6 +21,9 @@ class View implements ViewRendererInterface
 
     public array $metaTags = [];
 
+    /**
+     * @param FileHandlerInterface $fileHandler
+     */
     public function __construct(
         private FileHandlerInterface $fileHandler,
     ) {
