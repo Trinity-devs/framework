@@ -2,9 +2,9 @@
 
 namespace trinity\console;
 
-use trinity\contracts\ConsoleCommandInterface;
-use trinity\contracts\ConsoleKernelInterface;
-use trinity\contracts\ConsoleOutputInterface;
+use trinity\{contracts\console\ConsoleCommandInterface,
+    contracts\console\ConsoleKernelInterface,
+    contracts\console\ConsoleOutputInterface};
 
 class ListCommand implements ConsoleCommandInterface
 {
@@ -12,6 +12,10 @@ class ListCommand implements ConsoleCommandInterface
     private static string $description = 'Вывод информации о доступных командах';
     private static bool $hidden = true;
 
+    /**
+     * @param ConsoleKernelInterface $kernel
+     * @param ConsoleOutputInterface $output
+     */
     public function __construct(
         private readonly ConsoleKernelInterface $kernel,
         private readonly ConsoleOutputInterface $output,
@@ -19,21 +23,33 @@ class ListCommand implements ConsoleCommandInterface
     {
     }
 
+    /**
+     * @return string
+     */
     public static function getSignature(): string
     {
         return self::$signature;
     }
 
+    /**
+     * @return string
+     */
     public static function getDescription(): string
     {
         return self::$description;
     }
 
+    /**
+     * @return bool
+     */
     public static function getHidden(): bool
     {
         return self::$hidden;
     }
 
+    /**
+     * @return void
+     */
     public function execute(): void
     {
         $this->printFrameworkInfo();
@@ -41,6 +57,9 @@ class ListCommand implements ConsoleCommandInterface
 //        $this->printListOptions();
     }
 
+    /**
+     * @return void
+     */
     private function printListCommands(): void
     {
         $this->output->ansiFormat('Доступные команды:', ConsoleColors::GREEN);
@@ -79,6 +98,9 @@ class ListCommand implements ConsoleCommandInterface
 //        }
 //    }
 
+    /**
+     * @return void
+     */
     private function printFrameworkInfo(): void
     {
           $this->output->ansiFormat('Trinity-devs 0.1.3', ConsoleColors::CYAN);

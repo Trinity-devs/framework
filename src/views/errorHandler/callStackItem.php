@@ -1,5 +1,5 @@
 <?php
-use trinity\http\errorHandler\ErrorHandler;
+use trinity\http\ErrorHandlerHttp;
 
 /**
  * @var string|null $file
@@ -11,7 +11,7 @@ use trinity\http\errorHandler\ErrorHandler;
  * @var int $begin
  * @var int $end
  * @var array $args
- * @var ErrorHandler $handler
+ * @var ErrorHandlerHttp $handler
  */
 ?>
 <li class="<?= $handler->isCoreFile($file) === false ? 'application' : '' ?>  call-stack-item" data-line="<?= ($line - $begin) ?> ">

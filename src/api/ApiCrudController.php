@@ -2,13 +2,13 @@
 
 namespace trinity\api;
 
-use trinity\api\responses\CreateResponse;
-use trinity\api\responses\DeleteResponse;
-use trinity\api\responses\JsonResponse;
-use trinity\api\responses\UpdateResponse;
-use trinity\contracts\FormRequestFactoryInterface;
-use trinity\exception\httpException\NotFoundHttpException;
-use trinity\validator\AbstractFormRequest;
+use trinity\{api\responses\CreateResponse,
+    api\responses\DeleteResponse,
+    api\responses\JsonResponse,
+    api\responses\UpdateResponse,
+    contracts\validator\FormRequestFactoryInterface,
+    exception\httpException\NotFoundHttpException,
+    validator\AbstractFormRequest};
 
 abstract class ApiCrudController
 {

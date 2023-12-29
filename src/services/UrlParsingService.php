@@ -6,7 +6,10 @@ use trinity\exception\httpException\NotFoundHttpException;
 
 class UrlParsingService
 {
-
+    /**
+     * @param string $url
+     * @return array
+     */
     public static function parseQuery(string $url): array
     {
         preg_match_all("/\{([^{}]+)\}/", $url, $matches);

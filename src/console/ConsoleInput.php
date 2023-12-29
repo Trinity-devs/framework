@@ -3,8 +3,8 @@
 namespace trinity\console;
 
 use RuntimeException;
-use trinity\contracts\ConsoleCommandInterface;
-use trinity\contracts\ConsoleInputInterface;
+use trinity\contracts\console\ConsoleCommandInterface;
+use trinity\contracts\console\ConsoleInputInterface;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
@@ -15,6 +15,9 @@ class ConsoleInput implements ConsoleInputInterface
     private array $options = [];
     private Descriptor $descriptor;
 
+    /**
+     * @param array|null $argv
+     */
     public function __construct(array $argv = null)
     {
         array_shift($argv);
@@ -123,11 +126,18 @@ class ConsoleInput implements ConsoleInputInterface
         return $this->arguments[$name];
     }
 
+    /**
+     * @return array
+     */
     public function getOptions(): array
     {
         return $this->options;
     }
 
+    /**
+     * @param string $optionName
+     * @return bool
+     */
     public function hasOption(string $optionName): bool
     {
         foreach ($this->options as $option) {

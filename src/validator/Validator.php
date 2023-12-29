@@ -2,7 +2,7 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\ValidatorInterface;
+use trinity\contracts\validator\ValidatorInterface;
 use trinity\exception\baseException\ValidationError;
 
 class Validator implements ValidatorInterface
@@ -63,7 +63,7 @@ class Validator implements ValidatorInterface
      */
     private function validateField(string $rule, mixed $value, array $settings = []): void
     {
-        $customClassRule = __NAMESPACE__ . '\\' . ucfirst($rule) . 'ValidatorRule';
+        $customClassRule = __NAMESPACE__ . '\\rules\\' . ucfirst($rule) . 'ValidatorRule';
 
         if (class_exists($customClassRule) === false) {
             throw new ('Класс ' . $customClassRule . ' не найден');

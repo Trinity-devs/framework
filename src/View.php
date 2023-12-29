@@ -2,9 +2,7 @@
 
 namespace trinity;
 
-use trinity\contracts\FileHandlerInterface;
-use trinity\contracts\RouterInterface;
-use trinity\contracts\ViewRendererInterface;
+use trinity\contracts\{handlers\file\FileHandlerInterface, view\ViewRendererInterface};
 use trinity\exception\baseException\LogicException;
 
 class View implements ViewRendererInterface
@@ -23,6 +21,9 @@ class View implements ViewRendererInterface
 
     public array $metaTags = [];
 
+    /**
+     * @param FileHandlerInterface $fileHandler
+     */
     public function __construct(
         private FileHandlerInterface $fileHandler,
     ) {
