@@ -4,6 +4,7 @@ namespace trinity;
 
 use trinity\contracts\http\RequestInterface;
 use trinity\contracts\http\StreamInterface;
+use trinity\contracts\http\UriInterface;
 use trinity\exception\{baseException\Exception, httpException\NotFoundHttpException};
 
 class Request implements RequestInterface
