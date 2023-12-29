@@ -2,7 +2,7 @@
 
 namespace trinity\validator\rules;
 
-use trinity\contracts\ValidatorRuleInterface;
+use trinity\contracts\validator\ValidatorRuleInterface;
 
 class LengthValidatorRule implements ValidatorRuleInterface
 {

@@ -2,9 +2,9 @@
 
 namespace trinity;
 
-use trinity\contracts\ResponseInterface;
-use trinity\exception\baseException\InvalidArgumentException;
-use trinity\exception\httpException\HttpException;
+use trinity\{contracts\http\ResponseInterface,
+    exception\baseException\InvalidArgumentException,
+    exception\httpException\HttpException};
 use Throwable;
 
 class Response implements ResponseInterface

@@ -2,8 +2,6 @@
 
 namespace trinity\contracts\events;
 
-use trinity\contracts\ObserverInterface;
-use trinity\eventDispatcher\Message;
 use UnitEnum;
 
 interface EventDispatcherInterface
@@ -12,7 +10,7 @@ interface EventDispatcherInterface
 
     public function detach(UnitEnum $event): void;
 
-    public function trigger(UnitEnum $event, Message $message): void;
+    public function trigger(UnitEnum $event, MessageInterface $message): void;
 
     public function configure(array $config): void;
 }

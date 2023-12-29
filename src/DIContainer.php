@@ -2,7 +2,7 @@
 
 namespace trinity;
 
-use trinity\contracts\ContainerInterface;
+use trinity\contracts\container\ContainerInterface;
 use trinity\exception\baseException\LogicException;
 use ReflectionClass;
 use ReflectionException;

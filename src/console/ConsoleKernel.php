@@ -2,18 +2,18 @@
 
 namespace trinity\console;
 
-use trinity\contracts\ErrorHandlerConsoleInterface;
-use trinity\DIContainer;
 use InvalidArgumentException;
 use ReflectionException;
-use trinity\contracts\ConsoleInputInterface;
-use trinity\contracts\ConsoleKernelInterface;
-use trinity\contracts\ConsoleOutputInterface;
-use trinity\contracts\events\EventDispatcherInterface;
-use trinity\Event;
-use trinity\eventDispatcher\Message;
-use trinity\exception\baseException\Exception;
-use trinity\exception\consoleException\UnknownCommandException;
+use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
+    DIContainer,
+    contracts\console\ConsoleInputInterface,
+    contracts\console\ConsoleKernelInterface,
+    contracts\console\ConsoleOutputInterface,
+    contracts\events\EventDispatcherInterface,
+    Event,
+    eventDispatcher\Message,
+    exception\baseException\Exception,
+    exception\consoleException\UnknownCommandException};
 
 class ConsoleKernel implements ConsoleKernelInterface
 {

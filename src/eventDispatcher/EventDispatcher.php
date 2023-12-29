@@ -2,9 +2,9 @@
 
 namespace trinity\eventDispatcher;
 
-use trinity\contracts\events\EventDispatcherInterface;
-use trinity\contracts\ObserverInterface;
-use trinity\exception\baseException\LogicException;
+use trinity\{contracts\events\EventDispatcherInterface,
+    contracts\events\ObserverInterface,
+    exception\baseException\LogicException};
 use UnitEnum;
 
 class EventDispatcher implements EventDispatcherInterface

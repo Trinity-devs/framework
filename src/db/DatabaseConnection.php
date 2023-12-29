@@ -2,8 +2,8 @@
 
 namespace trinity\db;
 
-use trinity\contracts\DatabaseConnectionInterface;
 use PDO;
+use trinity\contracts\database\DatabaseConnectionInterface;
 use trinity\exception\databaseException\PDOException;
 
 class DatabaseConnection implements DatabaseConnectionInterface

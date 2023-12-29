@@ -2,7 +2,7 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\ValidatorInterface;
+use trinity\contracts\validator\ValidatorInterface;
 use trinity\exception\baseException\ValidationError;
 
 class Validator implements ValidatorInterface

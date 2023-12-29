@@ -2,11 +2,9 @@
 
 namespace trinity;
 
-use trinity\contracts\RequestInterface;
-use trinity\contracts\StreamInterface;
-use trinity\contracts\UriInterface;
-use trinity\exception\baseException\Exception;
-use trinity\exception\httpException\NotFoundHttpException;
+use trinity\contracts\http\RequestInterface;
+use trinity\contracts\http\StreamInterface;
+use trinity\exception\{baseException\Exception, httpException\NotFoundHttpException};
 
 class Request implements RequestInterface
 {

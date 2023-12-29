@@ -2,7 +2,7 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\FormRequestFactoryInterface;
+use trinity\contracts\validator\FormRequestFactoryInterface;
 use trinity\validator\AbstractFormRequest;
 
 class FormRequestFactory implements FormRequestFactoryInterface

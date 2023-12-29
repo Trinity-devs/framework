@@ -2,16 +2,16 @@
 
 namespace trinity\http;
 
-use trinity\api\responses\AuthResponse;
-use trinity\api\responses\CreateResponse;
-use trinity\api\responses\DeleteResponse;
-use trinity\api\responses\HtmlResponse;
-use trinity\api\responses\JsonResponse;
-use trinity\api\responses\UpdateResponse;
-use trinity\contracts\ErrorHandlerHttpInterface;
-use trinity\contracts\HttpKernelInterface;
-use trinity\contracts\ResponseInterface;
-use trinity\contracts\RouterInterface;
+use trinity\api\{responses\AuthResponse,
+    responses\CreateResponse,
+    responses\DeleteResponse,
+    responses\HtmlResponse,
+    responses\JsonResponse,
+    responses\UpdateResponse};
+use trinity\contracts\{handlers\error\ErrorHandlerHttpInterface,
+    http\HttpKernelInterface,
+    http\ResponseInterface,
+    router\RouterInterface};
 use trinity\exception\baseException\Exception;
 use Throwable;
 

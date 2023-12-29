@@ -3,9 +3,9 @@
 namespace trinity\console;
 
 use Throwable;
-use trinity\contracts\ErrorHandlerConsoleInterface;
-use trinity\exception\baseException\ErrorException;
-use trinity\exception\baseException\Exception;
+use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
+    exception\baseException\ErrorException,
+    exception\baseException\Exception};
 
 class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
 {

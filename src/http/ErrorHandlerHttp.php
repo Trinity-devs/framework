@@ -4,16 +4,16 @@ namespace trinity\http;
 
 use PDOException;
 use Throwable;
-use trinity\api\responses\HtmlResponse;
-use trinity\api\responses\JsonResponse;
-use trinity\contracts\ErrorHandlerHttpInterface;
-use trinity\contracts\ViewRendererInterface;
-use trinity\exception\baseException\ErrorException;
-use trinity\exception\baseException\Exception;
-use trinity\exception\baseException\LogicException;
-use trinity\exception\baseException\UnknownMethodException;
-use trinity\exception\baseException\ValidationError;
-use trinity\exception\httpException\HttpException;
+use trinity\{api\responses\HtmlResponse,
+    api\responses\JsonResponse,
+    contracts\handlers\error\ErrorHandlerHttpInterface,
+    contracts\view\ViewRendererInterface,
+    exception\baseException\ErrorException,
+    exception\baseException\Exception,
+    exception\baseException\LogicException,
+    exception\baseException\UnknownMethodException,
+    exception\baseException\ValidationError,
+    exception\httpException\HttpException};
 
 class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {

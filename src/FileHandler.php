@@ -2,7 +2,7 @@
 
 namespace trinity;
 
-use trinity\contracts\FileHandlerInterface;
+use trinity\contracts\handlers\file\FileHandlerInterface;
 
 class FileHandler implements FileHandlerInterface
 {

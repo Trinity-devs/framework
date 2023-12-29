@@ -2,7 +2,7 @@
 
 namespace trinity\validator\rules;
 
-use trinity\contracts\ValidatorRuleInterface;
+use trinity\contracts\validator\ValidatorRuleInterface;
 use trinity\exception\baseException\ValidationError;
 
 class StringValidatorRule implements ValidatorRuleInterface

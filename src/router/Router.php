@@ -3,8 +3,11 @@
 namespace trinity\router;
 
 use ReflectionException;
+use trinity\contracts\{http\RequestInterface,
+    http\UriInterface,
+    router\RouterInterface,
+    router\RoutesCollectionInterface};
 use trinity\DIContainer;
-use trinity\contracts\{RequestInterface, RouterInterface, RoutesCollectionInterface, UriInterface};
 use trinity\exception\baseException\LogicException;
 
 final class Router implements RouterInterface

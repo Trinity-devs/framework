@@ -2,7 +2,7 @@
 
 namespace trinity\console;
 
-use trinity\contracts\ConsoleOutputInterface;
+use trinity\contracts\console\ConsoleOutputInterface;
 
 class ConsoleOutput implements ConsoleOutputInterface
 {

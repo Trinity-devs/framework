@@ -2,9 +2,9 @@
 
 namespace trinity\console;
 
-use trinity\contracts\ConsoleCommandInterface;
-use trinity\contracts\ConsoleKernelInterface;
-use trinity\contracts\ConsoleOutputInterface;
+use trinity\{contracts\console\ConsoleCommandInterface,
+    contracts\console\ConsoleKernelInterface,
+    contracts\console\ConsoleOutputInterface};
 
 class ListCommand implements ConsoleCommandInterface
 {

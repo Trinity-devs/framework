@@ -3,8 +3,8 @@
 namespace trinity\console;
 
 use RuntimeException;
-use trinity\contracts\ConsoleCommandInterface;
-use trinity\contracts\ConsoleInputInterface;
+use trinity\contracts\console\ConsoleCommandInterface;
+use trinity\contracts\console\ConsoleInputInterface;
 use InvalidArgumentException;
 use UnexpectedValueException;
 

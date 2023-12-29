@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\contracts;
+namespace trinity\contracts\console;
 
 use trinity\console\ConsoleColors;
 

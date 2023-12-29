@@ -1,6 +1,6 @@
 <?php
 
-namespace trinity\contracts;
+namespace trinity\contracts\router;
 
 interface RoutesCollectionInterface
 {

@@ -1,6 +1,6 @@
 <?php
 /* @var $exception \Throwable */
-/* @var $handler trinity\http\errorHandler\ErrorHandler */
+/* @var $handler trinity\http\ErrorHandlerhttp */
 
 $code = $exception->getCode();
 $name = $handler->getExceptionName($exception);
