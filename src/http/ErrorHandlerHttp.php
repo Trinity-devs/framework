@@ -4,16 +4,16 @@ namespace trinity\http;
 
 use PDOException;
 use Throwable;
-use trinity\api\responses\HtmlResponse;
-use trinity\api\responses\JsonResponse;
-use trinity\contracts\ErrorHandlerHttpInterface;
-use trinity\contracts\ViewRendererInterface;
-use trinity\exception\baseException\ErrorException;
-use trinity\exception\baseException\Exception;
-use trinity\exception\baseException\LogicException;
-use trinity\exception\baseException\UnknownMethodException;
-use trinity\exception\baseException\ValidationError;
-use trinity\exception\httpException\HttpException;
+use trinity\{api\responses\HtmlResponse,
+    api\responses\JsonResponse,
+    contracts\handlers\error\ErrorHandlerHttpInterface,
+    contracts\view\ViewRendererInterface,
+    exception\baseException\ErrorException,
+    exception\baseException\Exception,
+    exception\baseException\LogicException,
+    exception\baseException\UnknownMethodException,
+    exception\baseException\ValidationError,
+    exception\httpException\HttpException};
 
 class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
@@ -33,8 +33,8 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @param bool $debug
      */
     public function __construct(
-        private ViewRendererInterface $view,
-        bool $debug,
+        private readonly ViewRendererInterface $view,
+        bool                                   $debug,
     ) {
         $this->debug = $debug;
 
@@ -43,6 +43,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @return void
+     */
     public function register(): void
     {
         if ($this->registered === false) {
@@ -51,6 +54,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @return void
+     */
     private function setUpErrorHandlers(): void
     {
         set_exception_handler([$this, 'handleException']);
@@ -61,6 +67,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         register_shutdown_function([$this, 'handleFatalError']);
     }
 
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @return bool
+     * @throws ErrorException
+     */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() & $code) {
@@ -87,13 +101,15 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             }
             $this->exception = null;
 
-
             return $this->renderException($exception);
         } catch (Exception $e) {
             return $this->handleFallbackExceptionMessage($e, $exception);
         }
     }
 
+    /**
+     * @return void
+     */
     private function clearOutput(): void
     {
         for ($level = ob_get_level(); $level > 0; --$level) {
@@ -103,6 +119,11 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
     }
 
+    /**
+     * @param Throwable $exception
+     * @param Throwable $previousException
+     * @return JsonResponse|HtmlResponse
+     */
     private function handleFallbackExceptionMessage(
         Throwable $exception,
         Throwable $previousException
@@ -126,13 +147,17 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             flush();
         }
 
-        if ($this->typeResponse === 'html') {
+        if ($this->typeResponse === 'json') {
             return new JsonResponse(['Произошла внутренняя ошибка сервера.']);
         }
 
         return new HtmlResponse('Произошла внутренняя ошибка сервера.');
     }
 
+    /**
+     * @return void
+     * @throws Throwable
+     */
     public function handleFatalError(): void
     {
         if (isset($this->directory)) {
@@ -191,6 +216,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         });
     }
 
+    /**
+     * @return void
+     */
     private function unregister(): void
     {
         if ($this->registered) {
@@ -208,15 +236,15 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function renderException(Throwable $exception): object
     {
-        $useErrorView = $this->debug === false || $exception instanceof HttpException;
-
-        $file = $useErrorView ? 'errorHandler/error' : 'errorHandler/exception';
-
         if ($this->typeResponse === 'json') {
             return new JsonResponse($this->dataJsonException($exception));
         }
 
-        return new HtmlResponse($this->renderFile($file, ['exception' => $exception]));
+        if ($this->debug === true) {
+            return new HtmlResponse($this->renderFile('errorHandler/exception', ['exception' => $exception]));
+        }
+
+        return new HtmlResponse($this->renderFile('errorHandler/error', ['exception' => $exception]));
     }
 
     /**
@@ -238,7 +266,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getExceptionName(Throwable $exception): string|null
     {
-        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException) {
+        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException || $exception instanceof \trinity\exception\databaseException\PDOException) {
             return $exception->getName();
         }
 
@@ -292,20 +320,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @return string
      * @throws Throwable
      */
-    private function renderCallStackItem(
-        string|null $file,
-        int|null $line,
-        string|null $class,
-        string|null $method,
-        array $args,
-        int $index
-    ): string {
+    private function renderCallStackItem(string|null $file, int|null $line, string|null $class, string|null $method, array $args, int $index): string {
         if ($file === null || $line === null) {
             return '';
         }
 
         $line--;
         $lines = file($file);
+
         if ($lines === false || ($lineCount = count($lines)) < $line || $line < 0) {
             return '';
         }
@@ -336,6 +358,10 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         return $file === null || strpos(realpath($file), PROJECT_ROOT . DIRECTORY_SEPARATOR) === 0;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return array
+     */
     private function dataJsonException(Throwable $exception): array
     {
         $classNameParts = explode('\\', get_class($exception));
@@ -350,17 +376,25 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
 
         return [
-            'cause' => 'An error occurred',
+            'cause' => 'Произошла неизвестная ошибка',
             'type' => 'Error',
             'data' => [],
         ];
     }
 
+    /**
+     * @param string $typeResponse
+     * @return void
+     */
     public function setTypeResponse(string $typeResponse): void
     {
         $this->typeResponse = $typeResponse;
     }
 
+    /**
+     * @param Throwable $exception
+     * @return int
+     */
     public function getStatusCode(Throwable $exception): int
     {
         if ($exception instanceof HttpException) {

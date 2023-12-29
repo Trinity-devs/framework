@@ -2,21 +2,25 @@
 
 namespace trinity\http;
 
-use trinity\api\responses\AuthResponse;
-use trinity\api\responses\CreateResponse;
-use trinity\api\responses\DeleteResponse;
-use trinity\api\responses\HtmlResponse;
-use trinity\api\responses\JsonResponse;
-use trinity\api\responses\UpdateResponse;
-use trinity\contracts\ErrorHandlerHttpInterface;
-use trinity\contracts\HttpKernelInterface;
-use trinity\contracts\ResponseInterface;
-use trinity\contracts\RouterInterface;
-use trinity\exception\baseException\Exception;
 use Throwable;
+use trinity\api\{responses\AuthResponse,
+    responses\CreateResponse,
+    responses\DeleteResponse,
+    responses\HtmlResponse,
+    responses\JsonResponse,
+    responses\UpdateResponse};
+use trinity\contracts\{handlers\error\ErrorHandlerHttpInterface,
+    http\HttpKernelInterface,
+    http\ResponseInterface,
+    router\RouterInterface};
 
 class HttpKernel implements HttpKernelInterface
 {
+    /**
+     * @param RouterInterface $router
+     * @param ErrorHandlerHttpInterface $errorHandler
+     * @param ResponseInterface $response
+     */
     public function __construct(
         private RouterInterface $router,
         private ErrorHandlerHttpInterface $errorHandler,
@@ -27,7 +31,7 @@ class HttpKernel implements HttpKernelInterface
     }
 
     /**
-     * @throws Exception
+     * @return ResponseInterface
      */
     public function handle(): ResponseInterface
     {
@@ -44,6 +48,11 @@ class HttpKernel implements HttpKernelInterface
         }
     }
 
+    /**
+     * @param object $output
+     * @param int $statusCode
+     * @return ResponseInterface
+     */
     private function normalizeResponse(object $output, int $statusCode = 200): ResponseInterface
     {
         $responseHandlers = match (get_class($output)) {

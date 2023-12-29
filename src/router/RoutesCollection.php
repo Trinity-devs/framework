@@ -2,7 +2,7 @@
 
 namespace trinity\router;
 
-use trinity\contracts\RoutesCollectionInterface;
+use trinity\contracts\router\RoutesCollectionInterface;
 use trinity\exception\httpException\NotFoundHttpException;
 use trinity\services\UrlParsingService;
 
