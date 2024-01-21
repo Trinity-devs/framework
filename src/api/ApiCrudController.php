@@ -43,40 +43,43 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return CreateResponse
+     * @throws NotFoundHttpException
      */
     public function actionCreate(FormRequestFactoryInterface $formRequestFactory): CreateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::CREATE]);
 
-        $data = call_user_func_array([$this, self::CREATE], [$form]);
+        $this->update($form);
 
-        return new CreateResponse($data);
+        return new CreateResponse();
     }
 
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws NotFoundHttpException
      */
     public function actionUpdate(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::UPDATE]);
 
-        $data = call_user_func_array([$this, self::UPDATE], [$form]);
+        $this->update($form);
 
-        return new UpdateResponse($data);
+        return new UpdateResponse();
     }
 
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws NotFoundHttpException
      */
     public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::PATCH]);
 
-        $data = call_user_func_array([$this, self::PATCH], [$form]);
+        $this->patch($form);
 
-        return new UpdateResponse($data);
+        return new UpdateResponse();
     }
 
     /**
@@ -85,9 +88,9 @@ abstract class ApiCrudController
      */
     public function actionDelete(): DeleteResponse
     {
-        $data = $this->delete();
+        $this->delete();
 
-        return new DeleteResponse($data);
+        return new DeleteResponse();
     }
 
     /**
