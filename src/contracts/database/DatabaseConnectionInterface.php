@@ -35,4 +35,10 @@ interface DatabaseConnectionInterface
     public function exec(string $query, array $bindings = []): int;
 
     public function orWhere(array $conditions): self;
+
+    public function beginTransaction(): self;
+
+    public function commit(): void;
+
+    public function rollback(): void;
 }
