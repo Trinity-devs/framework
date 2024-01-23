@@ -9,6 +9,7 @@ abstract class AbstractFormRequest
 {
     private array $errors = [];
     private array $attributes;
+    private bool $skipOnEmptyMode = false;
 
     /**
      * @param RequestInterface $request
@@ -135,6 +136,22 @@ abstract class AbstractFormRequest
         }
 
         return array_values($this->errors)[0];
+    }
+
+    /**
+     * @return void
+     */
+    public function setSkipEmptyValues(): void
+    {
+        $this->skipOnEmptyMode = true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSkipOnEmptyMode(): bool
+    {
+        return $this->skipOnEmptyMode;
     }
 
     /**
