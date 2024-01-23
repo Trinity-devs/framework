@@ -49,7 +49,7 @@ abstract class ApiCrudController
     {
         $form = $formRequestFactory->create($this->forms[self::CREATE]);
 
-        $this->update($form);
+        $this->create($form);
 
         return new CreateResponse();
     }
