@@ -52,7 +52,7 @@ class Validator implements ValidatorInterface
     {
         $this->validateData['field'] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
         $this->validateData['rule'] = $ruleItem[1];
-        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2) : [];
+        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2)[0] : [];
     }
 
     /**

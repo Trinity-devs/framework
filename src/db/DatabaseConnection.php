@@ -390,4 +390,30 @@ class DatabaseConnection implements DatabaseConnectionInterface
     {
         $this->join[] = ['type' => $type, 'table' => $table, 'on' => $on];
     }
+
+    /**
+     * @return $this
+     */
+    public function beginTransaction(): self
+    {
+        $this->fetch('START TRANSACTION;');
+
+        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    public function commit(): void
+    {
+        $this->fetch('COMMIT;');
+    }
+
+    /**
+     * @return void
+     */
+    public function rollback(): void
+    {
+        $this->fetch('ROLLBACK;');
+    }
 }

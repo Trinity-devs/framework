@@ -3,15 +3,26 @@
 namespace trinity\validator\rules;
 
 use trinity\contracts\validator\ValidatorRuleInterface;
+use trinity\exception\baseException\ValidationError;
 
 class LengthValidatorRule implements ValidatorRuleInterface
 {
-    public function validateRule(string $field, array $params, Validator $validator): void
+    /**
+     * @param array $settings
+     */
+    public function __construct(private array $settings = [])
     {
-        $value = $validator->getDataValue($field);
+    }
 
-        if (strlen($value) < $params[0] || strlen($value) > $params[1]) {
-            $validator->addError($field, 'Число символов должно быть в диапазоне от ' . $params[0] . ' до ' . $params[1]);
+    /**
+     * @param mixed $value
+     * @return void
+     * @throws ValidationError
+     */
+    public function validateRule(mixed $value): void
+    {
+        if (strlen($value) < $this->settings['min'] || strlen($value) > $this->settings['max']) {
+            throw new ValidationError('Значение должно быть в диапазоне от ' . $this->settings['min'] . ' до ' . $this->settings['max'] . ' символов');
         }
     }
 }
