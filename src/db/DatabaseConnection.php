@@ -14,7 +14,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
     private array $bindings = [];
     private array $values = [];
     private array $join = [];
-    private array $additionalOption = [];
 
     /**
      * @param array $pdoConfiguration
@@ -302,7 +301,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
             $column = key($inputArray);
             $whereClause = "$column=:$column";
         }
-
         if ($count > 1) {
             $preparedConditions = [];
             foreach ($inputArray as $column => $value) {
@@ -338,7 +336,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
         $query = $this->prepareQuery();
 
         $result = $this->fetch($query);
-
         if (empty($result) === true) {
             return '';
         }

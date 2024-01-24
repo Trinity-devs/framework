@@ -13,7 +13,8 @@ use trinity\{api\responses\HtmlResponse,
     exception\baseException\LogicException,
     exception\baseException\UnknownMethodException,
     exception\baseException\ValidationError,
-    exception\httpException\HttpException};
+    exception\httpException\HttpException
+};
 
 class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
@@ -34,7 +35,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function __construct(
         private readonly ViewRendererInterface $view,
-        bool                                   $debug,
+        bool $debug,
     ) {
         $this->debug = $debug;
 
@@ -320,7 +321,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @return string
      * @throws Throwable
      */
-    private function renderCallStackItem(string|null $file, int|null $line, string|null $class, string|null $method, array $args, int $index): string {
+    private function renderCallStackItem(
+        string|null $file,
+        int|null $line,
+        string|null $class,
+        string|null $method,
+        array $args,
+        int $index
+    ): string {
         if ($file === null || $line === null) {
             return '';
         }
@@ -366,12 +374,17 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         $classNameParts = explode('\\', get_class($exception));
         $errorName = end($classNameParts);
+        $fileNameParts = explode(DIRECTORY_SEPARATOR, $exception->getFile());
+        $fileName = end($fileNameParts);
 
         if ($this->debug === true) {
             return [
-                'error' => $exception->getFile() . ' on line ' . $exception->getLine(),
+                'error' => [
+                    'file' => $fileName,
+                    'line' => $exception->getLine(),
+                    'function' => $exception->getTrace()[0]['function'] ?? 'unknown'
+                ],
                 'cause' => $exception->getMessage(),
-                'trace' => $exception->getTrace(),
                 'type' => $errorName,
                 'data' => [],
             ];
