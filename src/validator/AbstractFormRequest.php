@@ -19,12 +19,7 @@ abstract class AbstractFormRequest
         protected DatabaseConnectionInterface $connection,
     )
     {
-        $this->attributes = array_merge(
-            [
-                $this->request->post(),
-                $this->request->get()
-            ]
-        );
+        $this->attributes = $this->request->post();
     }
 
     /**
