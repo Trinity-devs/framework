@@ -5,6 +5,12 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.4.1](https://github.com/Trinity-devs/framework/releases/tag/0.4.1) ] - 24.01.2024
+
+- Изменено
+  - Добавлены доп поля в ответе json от ErrorHandler
+  - Изменены методы для работы с БД
+
 ## [ [0.4.0](https://github.com/Trinity-devs/framework/releases/tag/0.4.0) ] - 29.12.2023
 
 - Реализовано

@@ -369,7 +369,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
         if ($this->debug === true) {
             return [
+                'error' => $exception->getFile() . ' on line ' . $exception->getLine(),
                 'cause' => $exception->getMessage(),
+                'trace' => $exception->getTrace(),
                 'type' => $errorName,
                 'data' => [],
             ];
