@@ -43,7 +43,7 @@ abstract class AbstractFormRequest
      * @param $attributes
      * @return void
      */
-    private function setAttributeRecursive($field, $newValue, &$attributes = null)
+    private function setAttributeRecursive($field, $newValue, &$attributes = null): void
     {
         foreach ($attributes as $key => &$value) {
             if ($key === $field) {
