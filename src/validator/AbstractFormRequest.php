@@ -20,12 +20,7 @@ abstract class AbstractFormRequest
         protected DatabaseConnectionInterface $connection,
     )
     {
-        $this->attributes = array_merge(
-            [
-                $this->request->post(),
-                $this->request->get()
-            ]
-        );
+        $this->attributes = $this->request->post();
     }
 
     /**
@@ -44,7 +39,7 @@ abstract class AbstractFormRequest
      * @param $attributes
      * @return void
      */
-    private function setAttributeRecursive($field, $newValue, &$attributes = null)
+    private function setAttributeRecursive($field, $newValue, &$attributes = null): void
     {
         foreach ($attributes as $key => &$value) {
             if ($key === $field) {

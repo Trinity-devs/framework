@@ -6,6 +6,7 @@ use trinity\{api\responses\CreateResponse,
     api\responses\DeleteResponse,
     api\responses\JsonResponse,
     api\responses\UpdateResponse,
+    contracts\http\RequestInterface,
     contracts\validator\FormRequestFactoryInterface,
     exception\httpException\NotFoundHttpException,
     validator\AbstractFormRequest};
@@ -15,6 +16,15 @@ abstract class ApiCrudController
     const CREATE = 'create';
     const UPDATE = 'update';
     const PATCH = 'patch';
+
+    /**
+     * @param RequestInterface $request
+     */
+    public function __construct(
+        private RequestInterface $request,
+    )
+    {
+    }
 
     protected array $forms = [];
 
@@ -35,7 +45,7 @@ abstract class ApiCrudController
      */
     public function actionListItem(): JsonResponse
     {
-        $data = $this->listItem();
+        $data = $this->listItem($this->request->get('id'));
 
         return new JsonResponse($data);
     }
@@ -63,7 +73,7 @@ abstract class ApiCrudController
     {
         $form = $formRequestFactory->create($this->forms[self::UPDATE]);
 
-        $this->update($form);
+        $this->update($this->request->get('id'), $form);
 
         return new UpdateResponse();
     }
@@ -88,7 +98,7 @@ abstract class ApiCrudController
      */
     public function actionDelete(): DeleteResponse
     {
-        $this->delete();
+        $this->delete($this->request->get('id'));
 
         return new DeleteResponse();
     }
@@ -103,10 +113,11 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @return array
      * @throws NotFoundHttpException
      */
-    protected function listItem(): array
+    protected function listItem(int|string $id): array
     {
         throw new NotFoundHttpException('Not found');
     }
@@ -122,11 +133,12 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function update(AbstractFormRequest $form): void
+    protected function update(int|string $id, AbstractFormRequest $form): void
     {
         throw new NotFoundHttpException('Not found');
     }
@@ -142,10 +154,11 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function delete(): void
+    protected function delete(int|string $id): void
     {
         throw new NotFoundHttpException('Not found');
     }
