@@ -30,6 +30,8 @@ interface DatabaseConnectionInterface
 
     public function insert(string $tableName, array $values, string $condition = null, array $bindings = []): int;
 
+    function batchInsert(string $tableName, array $values, array $bindings = []): int;
+
     public function execute(string $query, array $bindings = []): false|array;
 
     public function exec(string $query, array $bindings = []): int;
