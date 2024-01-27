@@ -10,10 +10,12 @@ abstract class AbstractFormRequest
     private array $errors = [];
     private array $attributes;
     private bool $skipOnEmptyMode = false;
+    protected string|null $attributesLabel = null;
 
     /**
      * @param RequestInterface $request
      * @param DatabaseConnectionInterface $connection
+     * @throws ValidationError
      */
     public function __construct(
         protected readonly RequestInterface   $request,
@@ -26,6 +28,10 @@ abstract class AbstractFormRequest
                 $this->request->get()
             ]
         );
+
+        if (empty($this->attributesLabel) === false) {
+            $this->attributes = $this->getAttribute($this->attributesLabel);
+        }
     }
 
     /**
