@@ -15,13 +15,13 @@ abstract class AbstractFormRequest
     /**
      * @param RequestInterface $request
      * @param DatabaseConnectionInterface $connection
-     * @throws ValidationError
      */
     public function __construct(
-        protected readonly RequestInterface   $request,
+        protected RequestInterface            $request,
         protected DatabaseConnectionInterface $connection,
     )
     {
+        //TODO: удалить гет и проверить чтобы не отъебнуло
         $this->attributes = array_merge(
             [
                 $this->request->post(),
@@ -76,17 +76,10 @@ abstract class AbstractFormRequest
     /**
      * @param string $field
      * @return mixed
-     * @throws ValidationError
      */
     public function getAttribute(string $field): mixed
     {
-        $result = $this->getAttributeRecursive($this->attributes, $field);
-
-        if ($result === null) {
-            throw new ValidationError('Поле ' . $field . ' не ожидается');
-        }
-
-        return $result;
+        return $this->getAttributeRecursive($this->attributes, $field);
     }
 
     /**
@@ -129,7 +122,7 @@ abstract class AbstractFormRequest
      */
     public function hasAttribute(string $field): bool
     {
-        return array_key_exists($field, $this->attributes);
+        return array_key_exists($field, $this->getAttributes());
     }
 
     /**
