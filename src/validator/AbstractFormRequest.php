@@ -11,6 +11,7 @@ abstract class AbstractFormRequest
     private array $attributes;
     private bool $skipOnEmptyMode = false;
     protected string|null $attributesLabel = null;
+    protected bool $validateGetParams = false;
 
     /**
      * @param RequestInterface $request
@@ -21,16 +22,14 @@ abstract class AbstractFormRequest
         protected DatabaseConnectionInterface $connection,
     )
     {
-        //TODO: удалить гет и проверить чтобы не отъебнуло
-        $this->attributes = array_merge(
-            [
-                $this->request->post(),
-                $this->request->get()
-            ]
-        );
+        $this->attributes = $this->request->post();
 
         if (empty($this->attributesLabel) === false) {
-            $this->attributes = $this->getAttribute($this->attributesLabel);
+            $this->putAttributesInLabel();
+        }
+
+        if ($this->validateGetParams === true) {
+            $this->attributes = array_merge($this->attributes, $this->request->get());
         }
     }
 
@@ -151,6 +150,14 @@ abstract class AbstractFormRequest
     public function getSkipOnEmptyMode(): bool
     {
         return $this->skipOnEmptyMode;
+    }
+
+    /**
+     * @return void
+     */
+    private function putAttributesInLabel(): void
+    {
+        $this->attributes = $this->getAttribute($this->attributesLabel);
     }
 
     /**
