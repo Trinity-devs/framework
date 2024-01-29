@@ -9,22 +9,28 @@ abstract class AbstractFormRequest
 {
     private array $errors = [];
     private array $attributes;
+    private bool $skipOnEmptyMode = false;
+    protected string|null $attributesLabel = null;
+    protected bool $validateGetParams = false;
 
     /**
      * @param RequestInterface $request
      * @param DatabaseConnectionInterface $connection
      */
     public function __construct(
-        protected readonly RequestInterface   $request,
+        protected RequestInterface            $request,
         protected DatabaseConnectionInterface $connection,
     )
     {
-        $this->attributes = array_merge(
-            [
-                $this->request->post(),
-                $this->request->get()
-            ]
-        );
+        $this->attributes = $this->request->post();
+
+        if (empty($this->attributesLabel) === false) {
+            $this->putAttributesInLabel();
+        }
+
+        if ($this->validateGetParams === true) {
+            $this->attributes = array_merge($this->attributes, $this->request->get());
+        }
     }
 
     /**
@@ -43,7 +49,7 @@ abstract class AbstractFormRequest
      * @param $attributes
      * @return void
      */
-    private function setAttributeRecursive($field, $newValue, &$attributes = null)
+    private function setAttributeRecursive($field, $newValue, &$attributes = null): void
     {
         foreach ($attributes as $key => &$value) {
             if ($key === $field) {
@@ -69,17 +75,10 @@ abstract class AbstractFormRequest
     /**
      * @param string $field
      * @return mixed
-     * @throws ValidationError
      */
     public function getAttribute(string $field): mixed
     {
-        $result = $this->getAttributeRecursive($this->attributes, $field);
-
-        if ($result === null) {
-            throw new ValidationError('Поле ' . $field . ' не ожидается');
-        }
-
-        return $result;
+        return $this->getAttributeRecursive($this->attributes, $field);
     }
 
     /**
@@ -122,7 +121,7 @@ abstract class AbstractFormRequest
      */
     public function hasAttribute(string $field): bool
     {
-        return array_key_exists($field, $this->attributes);
+        return array_key_exists($field, $this->getAttributes());
     }
 
     /**
@@ -135,6 +134,36 @@ abstract class AbstractFormRequest
         }
 
         return array_values($this->errors)[0];
+    }
+
+    /**
+     * @return void
+     */
+    public function setSkipEmptyValues(): void
+    {
+        $this->skipOnEmptyMode = true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSkipOnEmptyMode(): bool
+    {
+        return $this->skipOnEmptyMode;
+    }
+
+    /**
+     * @return void
+     */
+    private function putAttributesInLabel(): void
+    {
+        if ($this->getAttribute($this->attributesLabel) === null) {
+            $this->attributes = [];
+
+            return;
+        }
+        
+        $this->attributes = $this->getAttribute($this->attributesLabel);
     }
 
     /**
