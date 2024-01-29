@@ -30,6 +30,17 @@ class Validator implements ValidatorInterface
                     }
 
                     $value = $form->getAttribute($field);
+
+                    if ($form->hasAttribute($field) === false && $this->validateData['rule'] === 'required') {
+                        $form->addError($field, 'Поле не ожидается либо не настроена метка формы');
+
+                        continue;
+                    }
+
+                    if ($value === null) {
+                        continue;
+                    }
+
                     $this->validateField(
                         $this->validateData['rule'],
                         $value,
@@ -52,7 +63,7 @@ class Validator implements ValidatorInterface
     {
         $this->validateData['field'] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
         $this->validateData['rule'] = $ruleItem[1];
-        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2) : [];
+        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2)[0] : [];
     }
 
     /**

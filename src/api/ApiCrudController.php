@@ -6,6 +6,8 @@ use trinity\{api\responses\CreateResponse,
     api\responses\DeleteResponse,
     api\responses\JsonResponse,
     api\responses\UpdateResponse,
+    contracts\database\DatabaseConnectionInterface,
+    contracts\http\RequestInterface,
     contracts\validator\FormRequestFactoryInterface,
     exception\httpException\NotFoundHttpException,
     validator\AbstractFormRequest};
@@ -15,6 +17,15 @@ abstract class ApiCrudController
     const CREATE = 'create';
     const UPDATE = 'update';
     const PATCH = 'patch';
+
+    /**
+     * @param RequestInterface $request
+     */
+    public function __construct(
+        private RequestInterface $request,
+    )
+    {
+    }
 
     protected array $forms = [];
 
@@ -35,7 +46,7 @@ abstract class ApiCrudController
      */
     public function actionListItem(): JsonResponse
     {
-        $data = $this->listItem();
+        $data = $this->listItem($this->request->get('id'));
 
         return new JsonResponse($data);
     }
@@ -43,40 +54,43 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return CreateResponse
+     * @throws NotFoundHttpException
      */
     public function actionCreate(FormRequestFactoryInterface $formRequestFactory): CreateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::CREATE]);
 
-        $data = call_user_func_array([$this, self::CREATE], [$form]);
+        $this->create($form);
 
-        return new CreateResponse($data);
+        return new CreateResponse();
     }
 
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws NotFoundHttpException
      */
     public function actionUpdate(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::UPDATE]);
 
-        $data = call_user_func_array([$this, self::UPDATE], [$form]);
+        $this->update($this->request->get('id'), $form);
 
-        return new UpdateResponse($data);
+        return new UpdateResponse();
     }
 
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws NotFoundHttpException
      */
     public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::PATCH]);
 
-        $data = call_user_func_array([$this, self::PATCH], [$form]);
+        $this->patch($form);
 
-        return new UpdateResponse($data);
+        return new UpdateResponse();
     }
 
     /**
@@ -85,9 +99,9 @@ abstract class ApiCrudController
      */
     public function actionDelete(): DeleteResponse
     {
-        $data = $this->delete();
+        $this->delete($this->request->get('id'));
 
-        return new DeleteResponse($data);
+        return new DeleteResponse();
     }
 
     /**
@@ -100,10 +114,11 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @return array
      * @throws NotFoundHttpException
      */
-    protected function listItem(): array
+    protected function listItem(int|string $id): array
     {
         throw new NotFoundHttpException('Not found');
     }
@@ -119,11 +134,12 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function update(AbstractFormRequest $form): void
+    protected function update(int|string $id, AbstractFormRequest $form): void
     {
         throw new NotFoundHttpException('Not found');
     }
@@ -139,10 +155,11 @@ abstract class ApiCrudController
     }
 
     /**
+     * @param int|string $id
      * @return void
      * @throws NotFoundHttpException
      */
-    protected function delete(): void
+    protected function delete(int|string $id): void
     {
         throw new NotFoundHttpException('Not found');
     }

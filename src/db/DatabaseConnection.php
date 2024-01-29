@@ -60,7 +60,7 @@ class DatabaseConnection implements DatabaseConnectionInterface
     {
         $whereClause = $this->prepareBindings($conditions);
 
-        $this->where = "$whereClause";
+        $this->where = $whereClause;
 
         return $this;
     }
@@ -78,7 +78,7 @@ class DatabaseConnection implements DatabaseConnectionInterface
         }
 
         if ($this->where === '') {
-            $this->where = "$whereClause";
+            $this->where = $whereClause;
         }
 
         return $this;
@@ -178,6 +178,32 @@ class DatabaseConnection implements DatabaseConnectionInterface
         return $statement->rowCount();
     }
 
+    public function batchInsert(string $tableName, array $values, array $bindings = []): int
+    {
+        $this->table = $tableName;
+        $this->values = $values;
+        $this->where = $this->prepareBindings($bindings);
+
+        $setValues = [];
+        $columnImplode = [];
+
+        foreach ($values as $column => $value) {
+            $columnImplode[] = $column;
+            $setValues[] = ":$column";
+        }
+
+        $columns = implode(", ", $columnImplode);
+        $placeholders = implode(", ", $setValues);
+
+        $query = "INSERT INTO $this->table ($columns) VALUES ($placeholders)";
+
+        if ($this->where !== '') {
+            $query .= " WHERE $this->where";
+        }
+
+        return $this->fetchCount($query);
+    }
+
     /**
      * @param string $tableName
      * @param array $values
@@ -261,22 +287,23 @@ class DatabaseConnection implements DatabaseConnectionInterface
     }
 
     /**
-     * @param array $conditions
+     * @param array $inputArray
      * @return string
      */
-    private function prepareBindings(array $conditions = []): string
+    private function prepareBindings(array $inputArray = []): string
     {
-        $this->bindings = $conditions;
+        $this->bindings = $inputArray;
 
         $whereClause = '';
-        if (count($conditions) === 1) {
-            $column = key($conditions);
+        $count = count($inputArray);
+
+        if ($count === 1) {
+            $column = key($inputArray);
             $whereClause = "$column=:$column";
         }
-
-        if (count($conditions) > 1) {
+        if ($count > 1) {
             $preparedConditions = [];
-            foreach ($conditions as $column => $value) {
+            foreach ($inputArray as $column => $value) {
                 $preparedConditions[] = "$column=:$column";
             }
 
@@ -287,6 +314,8 @@ class DatabaseConnection implements DatabaseConnectionInterface
     }
 
     /**
+     * Возвращает $statement->rowCount()
+     *
      * @param string $query
      * @return int
      */
@@ -307,11 +336,13 @@ class DatabaseConnection implements DatabaseConnectionInterface
         $query = $this->prepareQuery();
 
         $result = $this->fetch($query);
+        if (empty($result) === true) {
+            return '';
+        }
 
-        $resultShift = array_shift($result);
-
-        return array_shift($resultShift);
+        return reset($result[0]);
     }
+
 
     /**
      * @param string $table
@@ -358,5 +389,31 @@ class DatabaseConnection implements DatabaseConnectionInterface
     private function resultJoin(string $type, string $table, array|string $on = ''): void
     {
         $this->join[] = ['type' => $type, 'table' => $table, 'on' => $on];
+    }
+
+    /**
+     * @return $this
+     */
+    public function beginTransaction(): self
+    {
+        $this->fetch('START TRANSACTION;');
+
+        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    public function commit(): void
+    {
+        $this->fetch('COMMIT;');
+    }
+
+    /**
+     * @return void
+     */
+    public function rollback(): void
+    {
+        $this->fetch('ROLLBACK;');
     }
 }
