@@ -157,6 +157,12 @@ abstract class AbstractFormRequest
      */
     private function putAttributesInLabel(): void
     {
+        if ($this->getAttribute($this->attributesLabel) === null) {
+            $this->attributes = [];
+
+            return;
+        }
+        
         $this->attributes = $this->getAttribute($this->attributesLabel);
     }
 
