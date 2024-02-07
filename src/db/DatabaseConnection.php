@@ -42,8 +42,6 @@ class DatabaseConnection implements DatabaseConnectionInterface
      */
     public function execute(string $query, array $bindings = []): false|array
     {
-        dd($query);
-        
         $statement = $this->pdo->prepare($query);
         $statement->execute($bindings);
 
