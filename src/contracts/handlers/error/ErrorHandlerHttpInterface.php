@@ -6,23 +6,23 @@ use Throwable;
 
 interface ErrorHandlerHttpInterface
 {
-    function register(): void;
+    public function register(): void;
 
-    function handleError(int $code, string $message, string $file, int $line): bool;
+    public function handleError(int $code, string $message, string $file, int $line): bool;
 
-    function handleException(Throwable $exception): mixed;
+    public function handleException(Throwable $exception): mixed;
 
-    function handleFatalError(): void;
+    public function handleFatalError(): void;
 
-    function getExceptionName(Throwable $exception): string|null;
+    public function getExceptionName(Throwable $exception): string|null;
 
-    function htmlEncode(string $text): string;
+    public function htmlEncode(string $text): string;
 
-    function renderCallStack(Throwable $exception): string;
+    public function renderCallStack(Throwable $exception): string;
 
-    function isCoreFile(string $file): bool;
+    public function isCoreFile(string $file): bool;
 
-    function setTypeResponse(string $typeResponse): void;
+    public function setTypeResponse(string $typeResponse): void;
 
     public function getStatusCode(Throwable $exception): int;
 }
