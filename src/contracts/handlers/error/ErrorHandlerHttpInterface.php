@@ -22,7 +22,5 @@ interface ErrorHandlerHttpInterface
 
     public function isCoreFile(string $file): bool;
 
-    public function setTypeResponse(string $typeResponse): void;
-
     public function getStatusCode(Throwable $exception): int;
 }

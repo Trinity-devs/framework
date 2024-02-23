@@ -36,14 +36,10 @@ class HttpKernel implements HttpKernelInterface
     public function handle(): ResponseInterface
     {
         try {
-
             $output = $this->router->dispatch();
 
             return $this->normalizeResponse($output);
-
         } catch (Throwable $e) {
-            $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
-
             return $this->normalizeResponse($this->errorHandler->handleException($e), $this->errorHandler->getStatusCode($e));
         }
     }

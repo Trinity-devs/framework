@@ -2,8 +2,8 @@
 
 namespace trinity\validator;
 
+use Throwable;
 use trinity\contracts\validator\ValidatorInterface;
-use trinity\exception\baseException\ValidationError;
 
 class Validator implements ValidatorInterface
 {
@@ -47,7 +47,7 @@ class Validator implements ValidatorInterface
                         $this->validateData['settings']
                     );
 
-                } catch (ValidationError $e) {
+                } catch (Throwable $e) {
 
                     $form->addError($field, $e->getMessage());
                 }

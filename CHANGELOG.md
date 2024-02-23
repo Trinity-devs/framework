@@ -5,6 +5,10 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+- Реализовано:
+  - Реализованы классы для работы с кэшем для редиса по PSR-6 Cache...Interface
+  - Добавлена зависимость psr/cache в composer.json
+
 ## [ [0.5.1](https://github.com/Trinity-devs/framework/releases/tag/0.5.1) ] - 21.02.2024
 
 - Исправлено:

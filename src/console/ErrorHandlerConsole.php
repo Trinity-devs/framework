@@ -152,7 +152,7 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
             $this->renderException($exception);
 
             exit(1);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->handleFallbackExceptionMessage($e, $exception);
         }
 

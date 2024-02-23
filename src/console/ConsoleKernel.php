@@ -12,8 +12,8 @@ use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
     contracts\events\EventDispatcherInterface,
     eventDispatcher\Event,
     eventDispatcher\Message,
-    exception\baseException\Exception,
     exception\consoleException\UnknownCommandException};
+use Throwable;
 
 class ConsoleKernel implements ConsoleKernelInterface
 {
@@ -131,10 +131,9 @@ class ConsoleKernel implements ConsoleKernelInterface
             $this->container->build($commandClassName)->execute();
             $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_DONE, new Message(''));
 
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
 
             $this->errorHandler->handleException($exception);
-
         }
 
         return 0;
