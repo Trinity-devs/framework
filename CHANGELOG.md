@@ -5,6 +5,11 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.6.0](https://github.com/Trinity-devs/framework/releases/tag/0.6.0) ] - 23.02.2024
+
+- Реализовано
+  - Добавлена автоматическая валидация форм в CRUD контроллерах
+
 ## [ [0.5.0](https://github.com/Trinity-devs/framework/releases/tag/0.5.0) ] - 25.01.2024
 
 - Реализовано

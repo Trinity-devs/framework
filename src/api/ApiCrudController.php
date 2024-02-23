@@ -9,6 +9,8 @@ use trinity\{api\responses\CreateResponse,
     contracts\database\DatabaseConnectionInterface,
     contracts\http\RequestInterface,
     contracts\validator\FormRequestFactoryInterface,
+    contracts\validator\ValidatorInterface,
+    exception\httpException\BadRequestHttpException,
     exception\httpException\NotFoundHttpException,
     validator\AbstractFormRequest};
 
@@ -23,6 +25,7 @@ abstract class ApiCrudController
      */
     public function __construct(
         private RequestInterface $request,
+        private ValidatorInterface $validator,
     )
     {
     }
@@ -54,11 +57,18 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return CreateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionCreate(FormRequestFactoryInterface $formRequestFactory): CreateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::CREATE]);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->create($form);
 
@@ -68,11 +78,18 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionUpdate(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::UPDATE]);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->update($this->request->get('id'), $form);
 
@@ -82,11 +99,18 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::PATCH]);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->patch($form);
 
