@@ -270,22 +270,26 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function dataJsonException(Throwable $exception): array
     {
-        $traceItem = $exception->getTrace()[0] ?? null;
+        try {
+            $traceItem = $exception->getTrace()[0] ?? null;
 
-        $shortName = 'UnknownClass';
+            $shortName = 'UnknownClass';
 
-        if ($traceItem && isset($traceItem['class'])) {
-            $reflection = new ReflectionClass($traceItem['class']);
-            $shortName = str_replace('\\', '/', $reflection->getName());
-        }
+            if ($traceItem && isset($traceItem['class'])) {
+                $reflection = new ReflectionClass($traceItem['class']);
+                $shortName = str_replace('\\', '/', $reflection->getName());
+            }
 
-        $functionName = $traceItem['function'] ?? 'unknownFunction';
-        $lineNumber = $exception->getLine();
+            $functionName = $traceItem['function'] ?? 'unknownFunction';
+            $lineNumber = $exception->getLine();
 
-        $firstError = $exception->getTrace()[0]['args'][0];
+            $firstError = null;
+            if (isset($exception->getTrace()[0]['args'][0]) === true) {
+                $firstError = $exception->getTrace()[0]['args'][0];
+            }
 
-        if ($this->debug === true) {
-            return [
+            if ($this->debug === true) {
+                return [
                 'error' => [
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
@@ -319,13 +323,16 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     return $traceItem;
                 }, $exception->getTrace()),
             ];
-        }
+            }
 
-        return [
+            return [
             'cause' => $exception->getMessage(),
             'type' => $this->getShortNameException($exception),
             'data' => [],
         ];
+        } catch (Throwable $e) {
+          throw $e;
+        }
     }
 
     /**
@@ -338,7 +345,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             return $exception->getStatusCode();
         }
 
-        return $exception->getCode() ?? 500;
+        return $exception->getCode() !== 0 ? $exception->getCode() : 500;
     }
 
     /**

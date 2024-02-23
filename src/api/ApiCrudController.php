@@ -134,8 +134,6 @@ abstract class ApiCrudController
      */
     protected function create(AbstractFormRequest $form): void
     {
-        dd($form);
-
         $this->validator->validate($form);
 
         if (empty($form->getErrors()) === false) {
