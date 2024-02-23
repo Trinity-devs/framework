@@ -289,9 +289,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 'error' => [
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
-                    'attributes' => $firstError !== null && is_string(
-                        $firstError
-                    ) === false ? $firstError->getAttributes() : [],
+                    'attributes' => $firstError !== null && is_string($firstError) === false && is_array($firstError) === false ? $firstError->getAttributes() : [],
                 ],
                 'cause' => $exception->getMessage(),
                 'type' => $this->getShortNameException($exception),

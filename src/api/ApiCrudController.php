@@ -8,6 +8,8 @@ use trinity\{api\responses\CreateResponse,
     api\responses\UpdateResponse,
     contracts\http\RequestInterface,
     contracts\validator\FormRequestFactoryInterface,
+    contracts\validator\ValidatorInterface,
+    exception\httpException\BadRequestHttpException,
     exception\httpException\NotFoundHttpException,
     validator\AbstractFormRequest};
 
@@ -19,9 +21,11 @@ abstract class ApiCrudController
 
     /**
      * @param RequestInterface $request
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         private RequestInterface $request,
+        private ValidatorInterface $validator,
     )
     {
     }
@@ -126,9 +130,18 @@ abstract class ApiCrudController
      * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
+     * @throws BadRequestHttpException
      */
     protected function create(AbstractFormRequest $form): void
     {
+        dd($form);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
+
         throw new NotFoundHttpException('Not found');
     }
 
@@ -137,9 +150,16 @@ abstract class ApiCrudController
      * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
+     * @throws BadRequestHttpException
      */
     protected function update(int|string $id, AbstractFormRequest $form): void
     {
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
+
         throw new NotFoundHttpException('Not found');
     }
 
@@ -147,9 +167,16 @@ abstract class ApiCrudController
      * @param AbstractFormRequest $form
      * @return void
      * @throws NotFoundHttpException
+     * @throws BadRequestHttpException
      */
     protected function patch(AbstractFormRequest $form): void
     {
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
+
         throw new NotFoundHttpException('Not found');
     }
 
