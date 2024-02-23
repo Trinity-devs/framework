@@ -2,17 +2,11 @@
 
 namespace trinity\api;
 
-use trinity\{api\responses\CreateResponse,
-    api\responses\DeleteResponse,
-    api\responses\JsonResponse,
-    api\responses\UpdateResponse,
-    contracts\database\DatabaseConnectionInterface,
-    contracts\http\RequestInterface,
-    contracts\validator\FormRequestFactoryInterface,
-    contracts\validator\ValidatorInterface,
-    exception\httpException\BadRequestHttpException,
-    exception\httpException\NotFoundHttpException,
-    validator\AbstractFormRequest};
+use trinity\api\responses\{CreateResponse, DeleteResponse, JsonResponse, UpdateResponse};
+use trinity\contracts\http\RequestInterface;
+use trinity\contracts\validator\{FormRequestFactoryInterface, ValidatorInterface};
+use trinity\exception\httpException\{BadRequestHttpException, NotFoundHttpException};
+use trinity\validator\AbstractFormRequest;
 
 abstract class ApiCrudController
 {
@@ -20,8 +14,13 @@ abstract class ApiCrudController
     const UPDATE = 'update';
     const PATCH = 'patch';
 
+    protected array $forms = [];
+
+    protected bool $skipOnEmpty = false;
+
     /**
      * @param RequestInterface $request
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         private RequestInterface $request,
@@ -29,8 +28,6 @@ abstract class ApiCrudController
     )
     {
     }
-
-    protected array $forms = [];
 
     /**
      * @return JsonResponse
@@ -105,6 +102,10 @@ abstract class ApiCrudController
     public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::PATCH]);
+
+        if ($this->skipOnEmpty === true) {
+            $form->setSkipEmptyValues();
+        }
 
         $this->validator->validate($form);
 

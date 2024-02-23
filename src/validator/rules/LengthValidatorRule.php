@@ -21,7 +21,7 @@ class LengthValidatorRule implements ValidatorRuleInterface
      */
     public function validateRule(mixed $value): void
     {
-        if (strlen($value) < $this->settings['min'] || strlen($value) > $this->settings['max']) {
+        if (iconv_strlen($value) < $this->settings['min'] || iconv_strlen($value) > $this->settings['max']) {
             throw new ValidationError('Значение должно быть в диапазоне от ' . $this->settings['min'] . ' до ' . $this->settings['max'] . ' символов');
         }
     }
