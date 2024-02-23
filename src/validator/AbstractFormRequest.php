@@ -2,8 +2,8 @@
 
 namespace trinity\validator;
 
-use trinity\contracts\{database\DatabaseConnectionInterface, http\RequestInterface};
-use trinity\exception\baseException\ValidationError;
+use trinity\contracts\database\DatabaseConnectionInterface;
+use trinity\contracts\http\RequestInterface;
 
 abstract class AbstractFormRequest
 {
