@@ -3,7 +3,7 @@
 namespace trinity\exception\httpException;
 
 use trinity\exception\baseException\Exception;
-use trinity\Response;
+use trinity\http\Response;
 use Throwable;
 
 class HttpException extends Exception
