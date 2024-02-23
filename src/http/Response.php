@@ -180,48 +180,8 @@ class Response implements ResponseInterface
         return $new;
     }
 
-
     public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
-    }
-
-    private function setStatusCode(int $value, string|null $text = null): Response
-    {
-        $this->statusCode = $value;
-
-        if ($this->getIsInvalid()) {
-            throw new InvalidArgumentException("Код состояния HTTP недействителен: $value");
-        }
-
-        if ($text === null) {
-            $this->reasonPhrase = static::$httpStatuses[$this->statusCode] ?? '';
-        }
-
-        if ($text !== null) {
-            $this->reasonPhrase = $text;
-        }
-
-        return $this;
-    }
-
-    public function getIsInvalid(): bool
-    {
-        return $this->getStatusCode() < 100 || $this->getStatusCode() >= 600;
-    }
-
-    public function setStatusCodeByException(Throwable $e): Response
-    {
-        $new = clone $this;
-
-        if ($e instanceof HttpException) {
-            $new->setStatusCode($e->statusCode);
-
-            return $new;
-        }
-
-        $new->setStatusCode(500);
-
-        return $new;
     }
 }

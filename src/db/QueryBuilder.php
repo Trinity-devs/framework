@@ -2,8 +2,10 @@
 
 namespace trinity\db;
 
+use Throwable;
 use trinity\contracts\database\DatabaseConnectionInterface;
 use trinity\contracts\database\QueryBuilderInterface;
+use trinity\exception\databaseException\PDOException;
 
 class QueryBuilder implements QueryBuilderInterface
 {
@@ -16,8 +18,7 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function __construct(
         private readonly DatabaseConnectionInterface $connection
-    )
-    {
+    ) {
     }
 
     /**
@@ -104,9 +105,13 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function one(): array
     {
-        $query = $this->prepareQuery();
+        try {
+            $query = $this->prepareQuery();
 
-        $result = $this->fetch($query);
+            $result = $this->fetch($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
 
         if ($result !== []) {
             return array_shift($result);
@@ -120,9 +125,13 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function all(): array
     {
-        $query = $this->prepareQuery();
+        try {
+            $query = $this->prepareQuery();
 
-        return $this->fetch($query);
+            return $this->fetch($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -132,7 +141,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function exec(string $query, array $bindings = []): int
     {
-        return $this->connection->exec($query, $bindings);
+        try {
+            return $this->connection->exec($query, $bindings);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -142,7 +155,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function execute(string $query, array $bindings = []): false|array
     {
-        return $this->connection->execute($query, $bindings);
+        try {
+            return $this->connection->execute($query, $bindings);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -154,7 +171,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function insert(string $tableName, array $values, string $condition = null, array $bindings = []): int
     {
-        return $this->connection->insert($tableName, $values, $condition, $bindings);
+        try {
+            return $this->connection->insert($tableName, $values, $condition, $bindings);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     public function batchInsert(string $tableName, array $values, array $bindings = []): int
@@ -180,7 +201,11 @@ class QueryBuilder implements QueryBuilderInterface
             $query .= " WHERE $this->where";
         }
 
-        return $this->fetchCount($query);
+        try {
+            return $this->fetchCount($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -208,7 +233,11 @@ class QueryBuilder implements QueryBuilderInterface
             $query .= " WHERE $this->where";
         }
 
-        return $this->fetchCount($query);
+        try {
+            return $this->fetchCount($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -224,7 +253,11 @@ class QueryBuilder implements QueryBuilderInterface
 
         $query = "DELETE FROM $this->table WHERE $this->where";
 
-        return $this->fetchCount($query);
+        try {
+            return $this->fetchCount($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -233,7 +266,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     private function fetch(string $query): array
     {
-        return $this->connection->fetch($query, $this->bindings);
+        try {
+            return $this->connection->fetch($query, $this->bindings);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -292,7 +329,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     private function fetchCount(string $query): int
     {
-        return $this->connection->fetchCount($query);
+        try {
+            return $this->connection->fetchCount($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     /**
@@ -300,9 +341,15 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function scalar(): mixed
     {
+        try {
+
         $query = $this->prepareQuery();
 
         $result = $this->fetch($query);
+        } catch (Throwable $e) {
+            throw new PDOException($e->getMessage());
+        }
+
         if (empty($result) === true) {
             return '';
         }

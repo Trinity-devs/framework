@@ -5,6 +5,7 @@ namespace trinity\helpers;
 use ArrayAccess;
 use Closure;
 use Exception;
+use Throwable;
 use trinity\exception\baseException\InvalidArgumentException;
 
 class ArrayHelper
@@ -48,7 +49,7 @@ class ArrayHelper
         if (is_object($array)) {
             try {
                 return $array->$key;
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 if ($array instanceof ArrayAccess) {
                     return $default;
                 }

@@ -36,14 +36,10 @@ class HttpKernel implements HttpKernelInterface
     public function handle(): ResponseInterface
     {
         try {
-
             $output = $this->router->dispatch();
 
             return $this->normalizeResponse($output);
-
         } catch (Throwable $e) {
-            $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
-
             return $this->normalizeResponse($this->errorHandler->handleException($e), $this->errorHandler->getStatusCode($e));
         }
     }
@@ -57,7 +53,7 @@ class HttpKernel implements HttpKernelInterface
     {
         $responseHandlers = match (get_class($output)) {
             JsonResponse::class => function ($output, $statusCode) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($statusCode ?? 200);
+                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($statusCode === 0 ? 200 : $statusCode);
             },
 
             HtmlResponse::class => function ($output, $statusCode) {
