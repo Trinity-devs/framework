@@ -5,7 +5,6 @@ namespace trinity\http;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionObject;
-use ReflectionProperty;
 use Throwable;
 use trinity\api\responses\{HtmlResponse, JsonResponse};
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
@@ -33,10 +32,9 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function __construct(
         private readonly ViewRendererInterface $view,
-        private readonly bool                  $debug,
+        private readonly bool $debug,
         private readonly string $contentType
-    )
-    {
+    ) {
         ini_set('display_errors', $this->debug ? '1' : '0');
     }
 
@@ -106,7 +104,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function handleFatalError(): void
     {
         $error = error_get_last();
-        if ($error && ErrorException::isFatalError($error)) {
+        if ($error !== null && ErrorException::isFatalError($error) === true) {
             $exception = new ErrorException(
                 $error['message'],
                 $error['type'],
@@ -222,11 +220,11 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function renderCallStackItem(
         string|null $file,
-        int|null    $line,
+        int|null $line,
         string|null $class,
         string|null $method,
-        array       $args,
-        int         $index
+        array $args,
+        int $index
     ): string {
         if ($file === null || $line === null) {
             return '';
@@ -278,25 +276,46 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
         if ($traceItem && isset($traceItem['class'])) {
             $reflection = new ReflectionClass($traceItem['class']);
-            $shortName = $reflection->getShortName();
+            $shortName = str_replace('\\', '/', $reflection->getName());
         }
 
         $functionName = $traceItem['function'] ?? 'unknownFunction';
         $lineNumber = $exception->getLine();
 
-        $errorString = "$shortName::$functionName on $lineNumber";
-
         $firstError = $exception->getTrace()[0]['args'][0];
 
         if ($this->debug === true) {
             return [
-                'error' => $errorString,
+                'error' => [
+                    'class' => $shortName . ':' . $lineNumber,
+                    'function' => $functionName,
+                    'attributes' => $firstError !== null && is_string(
+                        $firstError
+                    ) === false ? $firstError->getAttributes() : [],
+                ],
                 'cause' => $exception->getMessage(),
                 'type' => $this->getShortNameException($exception),
                 'data' => [],
                 'trace' => array_map(function ($traceItem) {
-                    if (isset($traceItem['args'])) {
+                    if (isset($traceItem['file']) === true) {
+                        $file = str_replace("/var/www/html/", "", $traceItem['file']);
+                        $traceItem['file'] = str_replace('.php', '', $file) . ':' . $traceItem['line'];
+                    }
+
+                    if (isset($traceItem['line']) === true) {
+                        unset($traceItem['line']);
+                    }
+
+                    if (isset($traceItem['args']) === true) {
                         $traceItem['args'] = $this->serializeTraceArgs($traceItem['args']);
+                    }
+
+                    if (isset($traceItem['class']) === true) {
+                        $traceItem['class'] = str_replace('\\', '/', $traceItem['class']);
+                    }
+
+                    if (isset($traceItem['type']) === true) {
+                        unset($traceItem['type']);
                     }
 
                     return $traceItem;
@@ -317,7 +336,11 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getStatusCode(Throwable $exception): int
     {
-        return $exception->getCode() ? $exception->getCode() : 500;
+        if ($exception instanceof HttpException) {
+            return $exception->getStatusCode();
+        }
+
+        return $exception->getCode() ?? 500;
     }
 
     /**
@@ -349,12 +372,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         return array_map(function ($arg) {
             if (is_object($arg)) {
-                $properties = (new ReflectionObject($arg))->getProperties(ReflectionProperty::IS_PUBLIC);
+                $reflection = new ReflectionObject($arg);
+                $properties = $reflection->getProperties();
                 $propsArray = [];
                 foreach ($properties as $property) {
                     $propsArray[$property->getName()] = $this->serializeValue($property->getValue($arg));
                 }
-                return ['type' => get_class($arg), 'properties' => $propsArray];
+
+                return ['type' => str_replace('\\', '/', get_class($arg)), 'properties' => $propsArray];
             }
 
             if (is_array($arg)) {
@@ -362,14 +387,13 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             }
 
             return ['type' => gettype($arg), 'value' => $arg];
-
         }, $args);
     }
 
     private function serializeValue(mixed $value): string
     {
         if (is_object($value)) {
-            return 'Object of class ' . get_class($value);
+            return str_replace('\\', '/', get_class($value));
         }
 
         if (is_array($value)) {
@@ -377,7 +401,5 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         }
 
         return $value;
-
     }
-
 }
