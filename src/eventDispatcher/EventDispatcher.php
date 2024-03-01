@@ -2,9 +2,9 @@
 
 namespace trinity\eventDispatcher;
 
-use trinity\{contracts\events\EventDispatcherInterface,
-    contracts\events\ObserverInterface,
-    exception\baseException\LogicException};
+
+use trinity\contracts\events\{EventDispatcherInterface, MessageInterface, ObserverInterface};
+use trinity\exception\baseException\LogicException;
 use UnitEnum;
 
 class EventDispatcher implements EventDispatcherInterface
@@ -59,7 +59,7 @@ class EventDispatcher implements EventDispatcherInterface
      * @param UnitEnum $event Событие, которое будет запущено
      * @param Message $message Сообщение, передаваемое наблюдателю
      */
-    public function trigger(UnitEnum $event, Message $message): void
+    public function trigger(UnitEnum $event, MessageInterface $message): void
     {
         if (isset($this->eventObservers[$event->value]) === false) {
             return;
