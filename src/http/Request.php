@@ -6,6 +6,7 @@ use trinity\contracts\http\RequestInterface;
 use trinity\contracts\http\StreamInterface;
 use trinity\contracts\http\UriInterface;
 use trinity\exception\{baseException\Exception, httpException\NotFoundHttpException};
+use trinity\helpers\ArrayHelper;
 
 class Request implements RequestInterface
 {
@@ -22,13 +23,15 @@ class Request implements RequestInterface
     private array $input;
     private array $requestParams = [];
     private object|array $identity = [];
+    private array $cookie;
 
     /**
      * @param array $server
      * @param array $get
      * @param array $post
+     * @param array $cookie
      */
-    public function __construct(array $server, array $get, array $post)
+    public function __construct(array $server, array $get, array $post, array $cookie)
     {
         $this->protocolVersion = $server['SERVER_PROTOCOL'];
         $this->method = $server['REQUEST_METHOD'];
@@ -36,6 +39,7 @@ class Request implements RequestInterface
         $this->contentType = $server['CONTENT_TYPE'];
         $this->input = $post;
         $this->headers = getallheaders();
+        $this->cookie = $cookie;
     }
 
     /**
@@ -304,8 +308,21 @@ class Request implements RequestInterface
     /**
      * @return object|array
      */
-    public function identity(): object|array
+    public function getIdentity(): object|array
     {
         return $this->identity;
+    }
+
+    /**
+     * @return int|null
+     * @throws \Exception
+     */
+    public function getUserId(): null|int
+    {
+        if (ArrayHelper::keyExists('userId', $this->cookie)) {
+            return ArrayHelper::getValue($this->cookie, 'userId');
+        }
+
+        return null;
     }
 }
