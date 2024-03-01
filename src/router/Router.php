@@ -135,12 +135,4 @@ final class Router implements RouterInterface
     {
         $this->processMiddleware($routesCollection->getGlobalMiddlewares());
     }
-
-    /**
-     * @return string
-     */
-    public function getTypeResponse(): string
-    {
-        return $this->findMatchedRoutes()->getTypeResponse();
-    }
 }
