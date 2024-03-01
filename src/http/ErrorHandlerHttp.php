@@ -143,9 +143,10 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function renderException(Throwable $exception): object
     {
-        return $this->contentType === self::CONTENT_TYPE_JSON
-            ? new JsonResponse($this->dataJsonException($exception))
-            : new HtmlResponse($this->renderHtmlException($exception));
+        return match ($this->contentType) {
+            self::CONTENT_TYPE_JSON => new JsonResponse($this->dataJsonException($exception)),
+            default => new HtmlResponse($this->renderHtmlException($exception))
+        };
     }
 
     /**

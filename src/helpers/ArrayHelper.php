@@ -4,14 +4,13 @@ namespace trinity\helpers;
 
 use ArrayAccess;
 use Closure;
-use Exception;
 use Throwable;
 use trinity\exception\baseException\InvalidArgumentException;
 
 class ArrayHelper
 {
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public static function getValue(array|object $array, array|object|string $key, mixed $default = null): mixed
     {
@@ -62,7 +61,7 @@ class ArrayHelper
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public static function map(
         array $array,
