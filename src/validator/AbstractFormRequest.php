@@ -15,11 +15,11 @@ abstract class AbstractFormRequest
 
     /**
      * @param RequestInterface $request
-     * @param DatabaseConnectionInterface $connection
+     * @param DatabaseConnectionInterface $db
      */
     public function __construct(
         protected RequestInterface            $request,
-        protected DatabaseConnectionInterface $connection,
+        protected DatabaseConnectionInterface $db,
     )
     {
         $this->attributes = $this->request->post();

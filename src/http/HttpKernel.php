@@ -3,16 +3,20 @@
 namespace trinity\http;
 
 use Throwable;
-use trinity\api\{responses\AuthResponse,
-    responses\CreateResponse,
-    responses\DeleteResponse,
-    responses\HtmlResponse,
-    responses\JsonResponse,
-    responses\UpdateResponse};
-use trinity\contracts\{handlers\error\ErrorHandlerHttpInterface,
+use trinity\api\responses\ {
+    AuthResponse,
+    CreateResponse,
+    DeleteResponse,
+    HtmlResponse,
+    JsonResponse,
+    UpdateResponse
+};
+use trinity\contracts\ {
+    handlers\error\ErrorHandlerHttpInterface,
     http\HttpKernelInterface,
     http\ResponseInterface,
-    router\RouterInterface};
+    router\RouterInterface
+};
 
 class HttpKernel implements HttpKernelInterface
 {
@@ -25,8 +29,7 @@ class HttpKernel implements HttpKernelInterface
         private RouterInterface $router,
         private ErrorHandlerHttpInterface $errorHandler,
         private ResponseInterface $response,
-    )
-    {
+    ) {
         $this->errorHandler->register();
     }
 

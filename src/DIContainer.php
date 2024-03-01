@@ -144,7 +144,7 @@ class DIContainer implements ContainerInterface
 
         $reflectionClass = new ReflectionClass($className);
 
-        if ($reflectionClass->isInstantiable() === false || $reflectionClass->isCloneable() === false){
+        if ($reflectionClass->isInstantiable() === false || $reflectionClass->isCloneable() === false) {
             throw new ReflectionException('Экземпляр класса ' . $className . ' не может быть создан');
         }
 

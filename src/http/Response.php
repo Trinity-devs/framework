@@ -2,10 +2,7 @@
 
 namespace trinity\http;
 
-use trinity\{contracts\http\ResponseInterface,
-    exception\baseException\InvalidArgumentException,
-    exception\httpException\HttpException};
-use Throwable;
+use trinity\contracts\http\ResponseInterface;
 
 class Response implements ResponseInterface
 {
@@ -94,7 +91,7 @@ class Response implements ResponseInterface
 
         echo $this->getBody();
     }
-    
+
     public function getStatusCode(): string
     {
         return $this->statusCode;
@@ -134,8 +131,7 @@ class Response implements ResponseInterface
     }
 
     public function hasHeader($name): bool
-    {
-    }
+    {}
 
     public function withProtocolVersion($version): static
     {
@@ -154,12 +150,10 @@ class Response implements ResponseInterface
     }
 
     public function withAddedHeader($name, $value): static
-    {
-    }
+    {}
 
     public function withoutHeader($name): static
-    {
-    }
+    {}
 
 
     public function withBody(mixed $body): static

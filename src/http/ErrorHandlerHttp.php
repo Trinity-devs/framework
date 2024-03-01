@@ -6,10 +6,17 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionObject;
 use Throwable;
-use trinity\api\responses\{HtmlResponse, JsonResponse};
+use trinity\api\responses\ {
+    HtmlResponse,
+    JsonResponse
+};
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
-use trinity\exception\baseException\{ErrorException, LogicException, UnknownMethodException};
+use trinity\exception\baseException\ {
+    ErrorException,
+    LogicException,
+    UnknownMethodException
+};
 use trinity\exception\databaseException\PDOException;
 use trinity\exception\httpException\HttpException;
 
@@ -23,12 +30,12 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public string $traceLine = '{html}';
 
     /**
-     * @param ViewRendererInterface $view
+     * @param ViewRendererInterface $viewRenderer
      * @param bool $debug
      * @param string $contentType
      */
     public function __construct(
-        private readonly ViewRendererInterface $view,
+        private readonly ViewRendererInterface $viewRenderer,
         private readonly bool $debug,
         private readonly string $contentType
     ) {
@@ -102,7 +109,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             return;
         }
 
-        if ($error !== null && ErrorException::isFatalError($error) === true) {
+        if (ErrorException::isFatalError($error) === true) {
             $exception = new ErrorException(
                 $error['message'],
                 $error['type'],
@@ -151,7 +158,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         $params['handler'] = $this;
 
-        return $this->view->render($file, $params);
+        return $this->viewRenderer->render($file, $params);
     }
 
     /**
@@ -290,7 +297,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
                     'attributes' => method_exists($firstError, 'getAttributes') === true
-                            ? $firstError->getAttributes() : [],
+                        ? $firstError->getAttributes() : [],
                 ],
                 'cause' => $exception->getMessage(),
                 'type' => $this->getShortNameException($exception),
@@ -318,7 +325,8 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     }
 
                     return $traceItem;
-                }, $exception->getTrace()),
+                },
+                    $exception->getTrace()),
             ];
         }
 
@@ -378,15 +386,19 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     $propsArray[$property->getName()] = $this->serializeValue($property->getValue($arg));
                 }
 
-                return ['type' => str_replace('\\', '/', get_class($arg)), 'properties' => $propsArray];
+                return ['type' => str_replace('\\', '/', get_class($arg)),
+                    'properties' => $propsArray];
             }
 
             if (is_array($arg === true)) {
-                return ['type' => 'array', 'value' => $this->serializeTraceArgs($arg)];
+                return ['type' => 'array',
+                    'value' => $this->serializeTraceArgs($arg)];
             }
 
-            return ['type' => gettype($arg), 'value' => $arg];
-        }, $args);
+            return ['type' => gettype($arg),
+                'value' => $arg];
+        },
+            $args);
     }
 
     private function serializeValue(mixed $value): string
