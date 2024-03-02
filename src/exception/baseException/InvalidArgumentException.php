@@ -2,9 +2,7 @@
 
 namespace trinity\exception\baseException;
 
-use BadMethodCallException;
-
-class InvalidArgumentException extends BadMethodCallException
+class InvalidArgumentException extends Exception
 {
     /**
      * @return string

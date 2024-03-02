@@ -2,7 +2,7 @@
 
 namespace trinity\exception\baseException;
 
-class ValidationError extends \Exception
+class ValidationError extends Exception
 {
 
     /**

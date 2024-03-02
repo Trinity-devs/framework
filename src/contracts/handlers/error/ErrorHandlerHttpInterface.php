@@ -3,6 +3,7 @@
 namespace trinity\contracts\handlers\error;
 
 use Throwable;
+use trinity\contracts\http\ResponseInterface;
 
 interface ErrorHandlerHttpInterface
 {
@@ -10,7 +11,7 @@ interface ErrorHandlerHttpInterface
 
     public function handleError(int $code, string $message, string $file, int $line): bool;
 
-    public function handleException(Throwable $exception): mixed;
+    public function handleException(Throwable $exception): void;
 
     public function handleFatalError(): void;
 

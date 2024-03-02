@@ -3,6 +3,7 @@
 namespace trinity;
 
 use trinity\contracts\container\ContainerInterface;
+use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\exception\baseException\LogicException;
 use ReflectionClass;
 use ReflectionException;
@@ -16,10 +17,12 @@ class DIContainer implements ContainerInterface
 
     /**
      * @param array $config
+     * @throws ReflectionException
      */
     private function __construct(array $config)
     {
         $this->dependentsList = $config;
+        $this->singleton(ErrorHandlerHttpInterface::class)->register();
     }
 
     /**

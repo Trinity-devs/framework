@@ -8,19 +8,10 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionObject;
 use Throwable;
-use trinity\api\responses\ {
-    HtmlResponse,
-    JsonResponse
-};
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
-use trinity\exception\baseException\ {
-    ErrorException,
-    LogicException,
-    UnknownMethodException
-};
+use trinity\exception\baseException\{ErrorException, Exception};
 use trinity\exception\databaseException\PDOException;
-use trinity\exception\httpException\HttpException;
 
 final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
@@ -65,11 +56,14 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @param int $line
      * @return bool
      * @throws ErrorException
+     * @throws Throwable
      */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() !== 0 && $code) {
-            throw new ErrorException($message, $code, $code, $file, $line);
+           $exception = new ErrorException($message, $code);
+
+           $this->renderException($exception);
         }
 
         return false;
@@ -77,16 +71,14 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return object
      * @throws Throwable
      */
-    public function handleException(Throwable $exception): object
+    public function handleException(Throwable $exception): void
     {
         $this->unregister();
-
         $this->clearOutput();
 
-        return $this->renderException($exception);
+        $this->renderException($exception);
     }
 
     /**
@@ -116,8 +108,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 $error['message'],
                 $error['type'],
                 $error['type'],
-                $error['file'],
-                $error['line']
             );
 
             $this->clearOutput();
@@ -140,15 +130,22 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return object
      * @throws Throwable
      */
-    private function renderException(Throwable $exception): object
+    private function renderException(Throwable $exception): void
     {
-        return match ($this->contentType) {
-            self::CONTENT_TYPE_JSON => new JsonResponse($this->dataJsonException($exception)),
-            default => new HtmlResponse($this->renderHtmlException($exception))
+        $response = new Response();
+        $response = match ($this->contentType) {
+            self::CONTENT_TYPE_JSON => $response->withBody(
+               $this->dataJsonException($exception)
+            )->withHeader('Content-Type', 'application/json'),
+            default => $response->withBody($this->renderHtmlException($exception))->withHeader(
+                'Content-Type',
+                'text/html'
+            )
         };
+
+        $response->withStatus($this->getStatusCode($exception), $this->getExceptionName($exception))->send();
     }
 
     /**
@@ -170,11 +167,13 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getExceptionName(Throwable $exception): string
     {
-        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException || $exception instanceof PDOException) {
+        if ($exception instanceof Exception || $exception instanceof PDOException) {
             return $exception->getName();
         }
 
-        return $this->getShortNameException($exception);
+        $classNameParts = explode('\\', get_class($exception));
+
+        return end($classNameParts);
     }
 
     /**
@@ -271,11 +270,11 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return array
+     * @return string
      * @throws ReflectionException
      * @throws Throwable
      */
-    private function dataJsonException(Throwable $exception): array
+    private function dataJsonException(Throwable $exception): string
     {
         $traceItem = $exception->getTrace()[0] ?? null;
 
@@ -289,22 +288,21 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         $functionName = $traceItem['function'] ?? 'unknownFunction';
         $lineNumber = $exception->getLine();
 
-        $firstError = null;
-        if (isset($exception->getTrace()[0]['args'][0]) === true) {
-            $firstError = $exception->getTrace()[0]['args'][0];
-        }
+        $body = [
+            'cause' => $exception->getMessage(),
+            'type' => $this->getExceptionName($exception),
+            'data' => []
+        ];
 
         if ($this->debug === true) {
-            return [
+           $body = [
                 'error' => [
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
-                    'attributes' => class_exists($firstError) === true
-                    && method_exists($firstError, 'getAttributes') === true
-                        ? $firstError->getAttributes() : [],
+                    'file' => $exception->getFile()
                 ],
-                'cause' => $exception->getMessage(),
-                'type' => $this->getShortNameException($exception),
+                'cause' => str_replace('\\', '/', $exception->getMessage()),
+                'type' => $this->getExceptionName($exception),
                 'data' => [],
                 'trace' => array_map(function ($traceItem) {
                     if (isset($traceItem['file']) === true) {
@@ -334,11 +332,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             ];
         }
 
-        return [
-            'cause' => $exception->getMessage(),
-            'type' => $this->getShortNameException($exception),
-            'data' => []
-        ];
+        return json_encode($body);
     }
 
     /**
@@ -348,17 +342,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function getStatusCode(Throwable $exception): int
     {
         return $exception->getCode() !== 0 ? $exception->getCode() : 500;
-    }
-
-    /**
-     * @param Throwable $exception
-     * @return string
-     */
-    private function getShortNameException(Throwable $exception): string
-    {
-        $classNameParts = explode('\\', get_class($exception));
-
-        return end($classNameParts);
     }
 
     /**
@@ -386,22 +369,28 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     $propsArray[$property->getName()] = $this->serializeValue($property->getValue($arg));
                 }
 
-                return ['type' => str_replace('\\', '/', get_class($arg)),
-                    'properties' => $propsArray];
+                return [
+                    'type' => str_replace('\\', '/', get_class($arg)),
+                    'properties' => $propsArray
+                ];
             }
 
             if (is_array($arg === true)) {
-                return ['type' => 'array',
-                    'value' => $this->serializeTraceArgs($arg)];
+                return [
+                    'type' => 'array',
+                    'value' => $this->serializeTraceArgs($arg)
+                ];
             }
 
-            return ['type' => gettype($arg),
-                'value' => $arg];
+            return [
+                'type' => gettype($arg),
+                'value' => $arg
+            ];
         },
             $args);
     }
 
-    private function serializeValue(mixed $value): string
+    private function serializeValue(mixed $value): string|bool
     {
         if (is_object($value) === true) {
             return str_replace('\\', '/', get_class($value));

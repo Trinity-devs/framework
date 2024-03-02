@@ -2,7 +2,7 @@
 
 namespace trinity\exception\baseException;
 
-class UnknownMethodException extends \BadMethodCallException
+class UnknownMethodException extends Exception
 {
     /**
      * @return string

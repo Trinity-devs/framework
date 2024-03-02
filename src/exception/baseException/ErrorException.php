@@ -2,7 +2,7 @@
 
 namespace trinity\exception\baseException;
 
-class ErrorException extends \ErrorException
+class ErrorException extends Exception
 {
     const E_HHVM_FATAL_ERROR = 16777217;
 
