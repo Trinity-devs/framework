@@ -1,30 +1,30 @@
 {
-    "name": "trinity-devs/framework",
-    "version": "0.6.0",
-    "authors": [
-        {
-            "name": "Roman Alborov",
-            "email": "lamole4@gmail.com"
-        },
-        {
-            "name": "Artur Ushakov",
-            "email": "ush.as@yandex.ru"
-        },
-        {
-            "name": "Danil Babykin",
-            "email": "l.yophen.l@gmail.com"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "trinity\\": "src"
-        }
+  "name": "trinity-devs/framework",
+  "version": "0.6.0",
+  "authors": [
+    {
+      "name": "Roman Alborov",
+      "email": "lamole4@gmail.com"
     },
-    "minimum-stability": "stable",
-    "require": {
-        "php": "^8.2",
-        "ext-pdo": "*",
-        "psr/cache": "^3.0",
-      "ext-redis": "*"
+    {
+      "name": "Artur Ushakov",
+      "email": "ush.as@yandex.ru"
+    },
+    {
+      "name": "Danil Babykin",
+      "email": "l.yophen.l@gmail.com"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "trinity\\": "src"
+    }
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "php": "^8.2",
+    "ext-pdo": "*",
+    "psr/cache": "^3.0",
+    "ext-redis": "*"
+  }
 }
