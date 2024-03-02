@@ -111,6 +111,4 @@ interface RequestInterface extends MessageInterface
     public function post(string $name = null): array|string|null;
 
     public function get(string $name = null): array|string|null;
-
-
 }
