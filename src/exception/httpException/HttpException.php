@@ -6,19 +6,18 @@ use trinity\exception\baseException\Exception;
 use trinity\http\Response;
 use Throwable;
 
-class HttpException extends Exception
+abstract class HttpException extends Exception
 {
-    public int $statusCode;
+    private int $statusCode;
 
     /**
-     * @param int $status
      * @param string|null $message
      * @param int $code
      * @param Throwable|null $previous
      */
-    public function __construct(int $status, string|null $message = null, int $code = 0, Throwable $previous = null)
+    public function __construct(string|null $message = null, int $code = 0, Throwable $previous = null)
     {
-        $this->statusCode = $status;
+        $this->statusCode = $code;
         parent::__construct((string)$message, $code, $previous);
     }
 

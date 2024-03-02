@@ -6,7 +6,7 @@ class PDOException extends \PDOException
 {
     public function __construct($message, $errorInfo = [], $code = 500, $previous = null)
     {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, $code, $previous);
         $this->errorInfo = $errorInfo;
         $this->code = $code;
     }

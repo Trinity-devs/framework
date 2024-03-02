@@ -9,8 +9,8 @@ class NotAcceptableHttpException extends HttpException
      * @param $code
      * @param $previous
      */
-    public function __construct($message = null, $code = 0, $previous = null)
+    public function __construct($message = null, $code = 406, $previous = null)
     {
-        parent::__construct(406, $message, $code, $previous);
+        parent::__construct($message, $code, $previous);
     }
 }

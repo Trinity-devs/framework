@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
 use ReflectionClass;
@@ -20,7 +22,7 @@ use trinity\exception\baseException\ {
 use trinity\exception\databaseException\PDOException;
 use trinity\exception\httpException\HttpException;
 
-class ErrorHandlerHttp implements ErrorHandlerHttpInterface
+final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
     private const CONTENT_TYPE_JSON = 'application/json';
     private bool $isRegistered = false;
@@ -297,7 +299,8 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 'error' => [
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
-                    'attributes' => class_exists($firstError) === true && method_exists($firstError, 'getAttributes') === true
+                    'attributes' => class_exists($firstError) === true
+                    && method_exists($firstError, 'getAttributes') === true
                         ? $firstError->getAttributes() : [],
                 ],
                 'cause' => $exception->getMessage(),
@@ -344,10 +347,6 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getStatusCode(Throwable $exception): int
     {
-        if ($exception instanceof HttpException) {
-            return $exception->getStatusCode();
-        }
-
         return $exception->getCode() !== 0 ? $exception->getCode() : 500;
     }
 
