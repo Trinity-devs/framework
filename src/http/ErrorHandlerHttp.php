@@ -16,6 +16,7 @@ use trinity\exception\databaseException\PDOException;
 final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
     private const CONTENT_TYPE_JSON = 'application/json';
+    private const CONTENT_TYPE_HTML = 'text/html';
     private bool $isRegistered = false;
     private int $maxSourceLines = 19;
     private int $maxTraceSourceLines = 13;
@@ -61,9 +62,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() !== 0 && $code) {
-           $exception = new ErrorException($message, $code);
+            $exception = new ErrorException($message, $code);
 
-           $this->renderException($exception);
+            $this->renderException($exception);
         }
 
         return false;
@@ -137,12 +138,11 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         $response = new Response();
         $response = match ($this->contentType) {
             self::CONTENT_TYPE_JSON => $response->withBody(
-               $this->dataJsonException($exception)
-            )->withHeader('Content-Type', 'application/json'),
-            default => $response->withBody($this->renderHtmlException($exception))->withHeader(
-                'Content-Type',
-                'text/html'
-            )
+                $this->dataJsonException($exception)
+            )->withHeader('Content-Type', self::CONTENT_TYPE_JSON),
+            self::CONTENT_TYPE_HTML => $response->withBody($this->renderHtmlException($exception)
+            )->withHeader('Content-Type',self::CONTENT_TYPE_HTML),
+            default => var_dump($exception)
         };
 
         $response->withStatus($this->getStatusCode($exception), $this->getExceptionName($exception))->send();
@@ -295,7 +295,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         ];
 
         if ($this->debug === true) {
-           $body = [
+            $body = [
                 'error' => [
                     'class' => $shortName . ':' . $lineNumber,
                     'function' => $functionName,
