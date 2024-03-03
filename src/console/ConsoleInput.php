@@ -5,7 +5,8 @@ namespace trinity\console;
 use RuntimeException;
 use trinity\contracts\console\ConsoleCommandInterface;
 use trinity\contracts\console\ConsoleInputInterface;
-use InvalidArgumentException;
+use trinity\exception\baseException\InvalidArgumentException;
+use trinity\helpers\ArrayHelper;
 use UnexpectedValueException;
 
 class ConsoleInput implements ConsoleInputInterface
@@ -119,7 +120,7 @@ class ConsoleInput implements ConsoleInputInterface
      */
     public function getArgument(string $name): int|string
     {
-        if (array_key_exists($name, $this->arguments) === false) {
+        if (ArrayHelper::keyExists($name, $this->arguments) === false) {
             throw new InvalidArgumentException(sprintf('Аргумент "%s" не существует', $name));
         }
 
