@@ -12,6 +12,7 @@ use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
 use trinity\exception\baseException\{ErrorException, Exception};
 use trinity\exception\databaseException\PDOException;
+use trinity\helpers\ArrayHelper;
 
 final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
@@ -276,13 +277,13 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function dataJsonException(Throwable $exception): string
     {
-        $traceItem = $exception->getTrace()[0] ?? null;
+        $traceItem = ArrayHelper::getValue($exception->getTrace(), '0');
 
         $shortName = 'UnknownClass';
 
         if ($traceItem !== null && isset($traceItem['class'])) {
             $reflection = new ReflectionClass($traceItem['class']);
-            $shortName = str_replace('\\', '/', $reflection->getName());
+            $shortName = $this->replaceDoubleSlash($reflection->getName());
         }
 
         $functionName = $traceItem['function'] ?? 'unknownFunction';
@@ -301,30 +302,25 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                     'function' => $functionName,
                     'file' => $exception->getFile()
                 ],
-                'cause' => str_replace('\\', '/', $exception->getMessage()),
+                'cause' => $this->replaceDoubleSlash($exception->getMessage()),
                 'type' => $this->getExceptionName($exception),
                 'data' => [],
                 'trace' => array_map(function ($traceItem) {
                     if (isset($traceItem['file']) === true) {
-                        $file = str_replace("/var/www/html/", "", $traceItem['file']);
-                        $traceItem['file'] = str_replace('.php', '', $file) . ':' . $traceItem['line'];
+                        $file = $this->replaceWithEmpty("/var/www/html/", $traceItem['file']);
+                        $traceItem['file'] = $this->replaceWithEmpty('.php', $file) . ':' . $traceItem['line'];
                     }
 
-                    if (isset($traceItem['line']) === true) {
-                        unset($traceItem['line']);
-                    }
+                    unset($traceItem['line'], $traceItem['type']);
 
                     if (isset($traceItem['args']) === true) {
                         $traceItem['args'] = $this->serializeTraceArgs($traceItem['args']);
                     }
 
                     if (isset($traceItem['class']) === true) {
-                        $traceItem['class'] = str_replace('\\', '/', $traceItem['class']);
+                        $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
                     }
 
-                    if (isset($traceItem['type']) === true) {
-                        unset($traceItem['type']);
-                    }
 
                     return $traceItem;
                 },
@@ -370,7 +366,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 }
 
                 return [
-                    'type' => str_replace('\\', '/', get_class($arg)),
+                    'type' => $this->serializeValue($arg),
                     'properties' => $propsArray
                 ];
             }
@@ -392,14 +388,44 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     private function serializeValue(mixed $value): string|bool
     {
-        if (is_object($value) === true) {
-            return str_replace('\\', '/', get_class($value));
-        }
+        return match (true) {
+            is_object($value) => $this->replaceDoubleSlash(get_class($value)),
+            is_array($value) => 'Array[' . count($value) . ']',
+            default => $value,
+        };
+    }
 
-        if (is_array($value) === true) {
-            return 'Array[' . count($value) . ']';
-        }
+    /**
+     * @param string $search Строка поиска
+     * @param string $replace Строка замены
+     * @param string $subject Строка, в которой производится поиск и замена
+     * @return string Возвращает строку с заменёнными значениями
+     */
+    private function replace(string $search, string $replace, string $subject): string
+    {
+        return str_replace($search, $replace, $subject);
+    }
 
-        return $value;
+    /**
+     *  Заменяет все вхождения строки поиска на пустую строку
+     *
+     * @param string $search
+     * @param string $subject
+     * @return string
+     */
+    private function replaceWithEmpty(string $search, string $subject): string
+    {
+        return $this->replace($search, '', $subject);
+    }
+
+    /**
+     *  Заменяет \\\\ на /
+     *
+     * @param string $subject
+     * @return string
+     */
+    private function replaceDoubleSlash(string $subject): string
+    {
+        return self::replace('\\', '/', $subject);
     }
 }

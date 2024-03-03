@@ -3,6 +3,8 @@
 namespace trinity;
 
 use trinity\contracts\handlers\file\FileHandlerInterface;
+use trinity\exception\baseException\InvalidArgumentException;
+use trinity\helpers\ArrayHelper;
 
 class FileHandler implements FileHandlerInterface
 {
@@ -28,10 +30,11 @@ class FileHandler implements FileHandlerInterface
     /**
      * @param string $link
      * @return bool
+     * @throws InvalidArgumentException
      */
     public function aliasExists(string $link): bool
     {
-        return array_key_exists($link, $this->aliases);
+        return ArrayHelper::keyExists($link, $this->aliases);
     }
 
     /**

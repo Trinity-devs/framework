@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\helpers;
 
 use ArrayAccess;
@@ -7,9 +9,16 @@ use Closure;
 use Throwable;
 use trinity\exception\baseException\InvalidArgumentException;
 
-class ArrayHelper
+final class ArrayHelper
 {
     /**
+     * Получить ключ из массива
+     *
+     * @param array|object $array
+     * @param array|object|string $key
+     * @param mixed|null $default
+     * @return mixed
+     * @throws InvalidArgumentException
      * @throws Throwable
      */
     public static function getValue(array|object $array, array|object|string $key, mixed $default = null): mixed
@@ -61,6 +70,10 @@ class ArrayHelper
     }
 
     /**
+     * @param array $array
+     * @param Closure|string $from
+     * @param Closure|string $to
+     * @return array
      * @throws Throwable
      */
     public static function map(
@@ -79,6 +92,15 @@ class ArrayHelper
         return $result;
     }
 
+    /**
+     * Проверяет есть ли указанный ключ в массиве
+     *
+     * @param int|string $key
+     * @param array|ArrayAccess $array
+     * @param bool $caseSensitive
+     * @return bool
+     * @throws InvalidArgumentException
+     */
     public static function keyExists(int|string $key, array|ArrayAccess $array, bool $caseSensitive = true): bool
     {
         if ($caseSensitive === true) {
@@ -90,7 +112,7 @@ class ArrayHelper
         }
 
         if ($array instanceof ArrayAccess) {
-            throw new InvalidArgumentException('Второй параметр ($array) не может быть ArrayAccess в режиме без учета регистра.');
+            throw new InvalidArgumentException('Второй параметр не может быть типа ArrayAccess, когда caseSensitive false');
         }
 
         foreach (array_keys($array) as $k) {

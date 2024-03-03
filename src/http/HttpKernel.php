@@ -40,13 +40,13 @@ class HttpKernel implements HttpKernelInterface
                 return $this->response = $this->response->withBody(json_encode($output))->withHeader(
                     'Content-Type',
                     'application/json'
-                )->withStatus(200);
+                );
             },
 
             HtmlResponse::class => function ($output) {
                 return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody(
                     $output
-                )->withStatus(200);
+                );
             },
 
             AuthResponse::class => function ($output) {
