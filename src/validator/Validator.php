@@ -4,14 +4,17 @@ namespace trinity\validator;
 
 use Throwable;
 use trinity\contracts\validator\ValidatorInterface;
+use trinity\exception\baseException\InvalidArgumentException;
 
 class Validator implements ValidatorInterface
 {
     private array $validateData = [];
+    private array $ruleFields = [];
 
     /**
      * @param AbstractFormRequest $form
      * @return void
+     * @throws InvalidArgumentException
      */
     public function validate(AbstractFormRequest $form): void
     {
@@ -19,7 +22,8 @@ class Validator implements ValidatorInterface
 
             $this->prepareValidatableRules($ruleItem);
 
-            foreach ($this->validateData['field'] as $field) {
+            foreach ($this->validateData['field'] as $ruleField) {
+                $this->ruleFields[] = $ruleField;
 
                 try {
 
@@ -29,10 +33,10 @@ class Validator implements ValidatorInterface
                         continue;
                     }
 
-                    $value = $form->getAttribute($field);
+                    $value = $form->getAttribute($ruleField);
 
-                    if ($form->hasAttribute($field) === false && $this->validateData['rule'] === 'required') {
-                        $form->addError($field, 'Поле не ожидается либо не настроена метка формы');
+                    if ($form->hasAttribute($ruleField) === false && $this->validateData['rule'] === 'required') {
+                        $form->addError($ruleField, 'Поля ' . $ruleField . ' нет в передаваемой форме, либо не настроена метка формы');
 
                         continue;
                     }
@@ -49,9 +53,13 @@ class Validator implements ValidatorInterface
 
                 } catch (Throwable $e) {
 
-                    $form->addError($field, $e->getMessage());
+                    $form->addError($ruleField, $e->getMessage());
                 }
             }
+        }
+
+        if ($form->getErrors() === null) {
+            $form->deleteAttributes($this->searchBadAttributes($form->getAttributes()));
         }
     }
 
@@ -83,5 +91,12 @@ class Validator implements ValidatorInterface
         $customRule = new $customClassRule($settings);
 
         $customRule->validateRule($value);
+    }
+
+    private function searchBadAttributes(array $attributes): array
+    {
+        $uniqueRuleFields = array_unique($this->ruleFields);
+
+        return array_diff_key($attributes, array_flip($uniqueRuleFields));
     }
 }

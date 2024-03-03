@@ -4,6 +4,8 @@ namespace trinity\validator;
 
 use trinity\contracts\database\DatabaseConnectionInterface;
 use trinity\contracts\http\RequestInterface;
+use trinity\exception\baseException\InvalidArgumentException;
+use trinity\helpers\ArrayHelper;
 
 abstract class AbstractFormRequest
 {
@@ -118,10 +120,11 @@ abstract class AbstractFormRequest
     /**
      * @param string $field
      * @return bool
+     * @throws InvalidArgumentException
      */
     public function hasAttribute(string $field): bool
     {
-        return array_key_exists($field, $this->getAttributes());
+        return ArrayHelper::keyExists($field, $this->getAttributes());
     }
 
     /**
@@ -164,6 +167,18 @@ abstract class AbstractFormRequest
         }
         
         $this->attributes = $this->getAttribute($this->attributesLabel);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function deleteAttributes(array $fields): void
+    {
+        foreach ($fields as $key => $value) {
+            if (ArrayHelper::keyExists($key, $this->attributes) === true) {
+                unset($this->attributes[$key]);
+            }
+        }
     }
 
     /**
