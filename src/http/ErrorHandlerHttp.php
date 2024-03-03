@@ -6,7 +6,6 @@ namespace trinity\http;
 
 use ReflectionClass;
 use ReflectionException;
-use ReflectionObject;
 use Throwable;
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
@@ -141,8 +140,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             self::CONTENT_TYPE_JSON => $response->withBody(
                 $this->dataJsonException($exception)
             )->withHeader('Content-Type', self::CONTENT_TYPE_JSON),
-            self::CONTENT_TYPE_HTML => $response->withBody($this->renderHtmlException($exception)
-            )->withHeader('Content-Type',self::CONTENT_TYPE_HTML),
+            self::CONTENT_TYPE_HTML => $response->withBody(
+                $this->renderHtmlException($exception)
+            )->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
             default => var_dump($exception)
         };
 
@@ -279,14 +279,18 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         $traceItem = ArrayHelper::getValue($exception->getTrace(), '0');
 
-        $shortName = 'UnknownClass';
+        $className = 'UnknownClass';
+        $functionName = 'unknownFunction';
 
         if ($traceItem !== null && isset($traceItem['class'])) {
             $reflection = new ReflectionClass($traceItem['class']);
-            $shortName = $this->replaceDoubleSlash($reflection->getName());
+            $className = $this->replaceDoubleSlash($reflection->getName());
         }
 
-        $functionName = $traceItem['function'] ?? 'unknownFunction';
+        if ($traceItem !== null && isset($traceItem['function'])) {
+            $functionName = $traceItem['function'];
+        }
+
         $lineNumber = $exception->getLine();
 
         $body = [
@@ -298,29 +302,24 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         if ($this->debug === true) {
             $body = [
                 'error' => [
-                    'class' => $shortName . ':' . $lineNumber,
+                    'file' => $exception->getFile(),
                     'function' => $functionName,
-                    'file' => $exception->getFile()
+                    'class' => $className . ':' . $lineNumber,
                 ],
                 'cause' => $this->replaceDoubleSlash($exception->getMessage()),
                 'type' => $this->getExceptionName($exception),
                 'data' => [],
                 'trace' => array_map(function ($traceItem) {
+                    if (isset($traceItem['class']) === true) {
+                        $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
+                    }
+
                     if (isset($traceItem['file']) === true) {
                         $file = $this->replaceWithEmpty("/var/www/html/", $traceItem['file']);
                         $traceItem['file'] = $this->replaceWithEmpty('.php', $file) . ':' . $traceItem['line'];
                     }
 
-                    unset($traceItem['line'], $traceItem['type']);
-
-                    if (isset($traceItem['args']) === true) {
-                        $traceItem['args'] = $this->serializeTraceArgs($traceItem['args']);
-                    }
-
-                    if (isset($traceItem['class']) === true) {
-                        $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
-                    }
-
+                    unset($traceItem['line'], $traceItem['type'], $traceItem['args']);
 
                     return $traceItem;
                 },
@@ -354,47 +353,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         return $this->renderFile('errorHandler/error', ['exception' => $exception]);
     }
 
-    private function serializeTraceArgs(array $args): array
-    {
-        return array_map(function ($arg) {
-            if (is_object($arg) === true) {
-                $reflection = new ReflectionObject($arg);
-                $properties = $reflection->getProperties();
-                $propsArray = [];
-                foreach ($properties as $property) {
-                    $propsArray[$property->getName()] = $this->serializeValue($property->getValue($arg));
-                }
-
-                return [
-                    'type' => $this->serializeValue($arg),
-                    'properties' => $propsArray
-                ];
-            }
-
-            if (is_array($arg === true)) {
-                return [
-                    'type' => 'array',
-                    'value' => $this->serializeTraceArgs($arg)
-                ];
-            }
-
-            return [
-                'type' => gettype($arg),
-                'value' => $arg
-            ];
-        },
-            $args);
-    }
-
-    private function serializeValue(mixed $value): string|bool
-    {
-        return match (true) {
-            is_object($value) => $this->replaceDoubleSlash(get_class($value)),
-            is_array($value) => 'Array[' . count($value) . ']',
-            default => $value,
-        };
-    }
-
     /**
      * @param string $search Строка поиска
      * @param string $replace Строка замены
@@ -426,6 +384,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function replaceDoubleSlash(string $subject): string
     {
-        return self::replace('\\', '/', $subject);
+        return $this->replace('\\', '/', $subject);
     }
 }
