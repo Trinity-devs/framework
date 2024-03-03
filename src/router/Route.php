@@ -11,12 +11,11 @@ class Route
      * @param array $middlewares
      */
     public function __construct(
-        private array  $url,
+        private array $url,
         private string $method,
-        private mixed  $controllerAction,
-        private array  $middlewares,
-    )
-    {
+        private mixed $controllerAction,
+        private array $middlewares,
+    ) {
     }
 
     /**

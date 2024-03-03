@@ -9,7 +9,8 @@ use ReflectionException;
 use Throwable;
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
-use trinity\exception\baseException\{ErrorException, Exception};
+use trinity\exception\baseException\ErrorException;
+use trinity\exception\baseException\Exception;
 use trinity\exception\databaseException\PDOException;
 use trinity\helpers\ArrayHelper;
 

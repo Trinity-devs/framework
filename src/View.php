@@ -2,7 +2,8 @@
 
 namespace trinity;
 
-use trinity\contracts\{handlers\file\FileHandlerInterface, view\ViewRendererInterface};
+use trinity\contracts\handlers\file\FileHandlerInterface;
+use trinity\contracts\{view\ViewRendererInterface};
 use Throwable;
 use trinity\exception\baseException\LogicException;
 

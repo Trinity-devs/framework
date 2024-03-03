@@ -19,12 +19,11 @@ final class Router implements RouterInterface
      * @param DIContainer $container
      */
     public function __construct(
-        private RequestInterface          $request,
-        private UriInterface              $uri,
+        private RequestInterface $request,
+        private UriInterface $uri,
         private RoutesCollectionInterface $routesCollection,
-        private DIContainer               $container,
-    )
-    {
+        private DIContainer $container,
+    ) {
     }
 
     /**

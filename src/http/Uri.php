@@ -2,7 +2,6 @@
 
 namespace trinity\http;
 
-
 use trinity\contracts\http\UriInterface;
 
 class Uri implements UriInterface

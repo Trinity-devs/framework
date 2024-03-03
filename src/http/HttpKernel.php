@@ -4,7 +4,8 @@ namespace trinity\http;
 
 use Throwable;
 use trinity\api\responses\{AuthResponse, CreateResponse, DeleteResponse, HtmlResponse, JsonResponse, UpdateResponse};
-use trinity\contracts\{http\HttpKernelInterface, http\ResponseInterface, router\RouterInterface};
+use trinity\contracts\http\{HttpKernelInterface, ResponseInterface};
+use trinity\contracts\router\RouterInterface;
 
 class HttpKernel implements HttpKernelInterface
 {
