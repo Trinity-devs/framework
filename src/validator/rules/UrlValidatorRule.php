@@ -6,7 +6,6 @@ use trinity\contracts\validator\ValidatorRuleInterface;
 
 class UrlValidatorRule implements ValidatorRuleInterface
 {
-
     public function validateRule(string $field, array $params, Validator $validator): void
     {
         $value = $validator->getDataValue($field);

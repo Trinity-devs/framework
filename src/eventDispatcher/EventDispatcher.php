@@ -2,7 +2,6 @@
 
 namespace trinity\eventDispatcher;
 
-
 use trinity\contracts\events\{EventDispatcherInterface, MessageInterface, ObserverInterface};
 use trinity\exception\baseException\LogicException;
 use UnitEnum;

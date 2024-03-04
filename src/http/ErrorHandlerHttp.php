@@ -310,21 +310,23 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
                 'cause' => $this->replaceDoubleSlash($exception->getMessage()),
                 'type' => $this->getExceptionName($exception),
                 'data' => [],
-                'trace' => array_map(function ($traceItem) {
-                    if (isset($traceItem['class']) === true) {
-                        $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
-                    }
+                'trace' => array_map(
+                    function ($traceItem) {
+                        if (isset($traceItem['class']) === true) {
+                            $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
+                        }
 
-                    if (isset($traceItem['file']) === true) {
-                        $file = $this->replaceWithEmpty("/var/www/html/", $traceItem['file']);
-                        $traceItem['file'] = $this->replaceWithEmpty('.php', $file) . ':' . $traceItem['line'];
-                    }
+                        if (isset($traceItem['file']) === true) {
+                            $file = $this->replaceWithEmpty("/var/www/html/", $traceItem['file']);
+                            $traceItem['file'] = $this->replaceWithEmpty('.php', $file) . ':' . $traceItem['line'];
+                        }
 
-                    unset($traceItem['line'], $traceItem['type'], $traceItem['args']);
+                        unset($traceItem['line'], $traceItem['type'], $traceItem['args']);
 
-                    return $traceItem;
-                },
-                    $exception->getTrace()),
+                        return $traceItem;
+                    },
+                    $exception->getTrace()
+                ),
             ];
         }
 

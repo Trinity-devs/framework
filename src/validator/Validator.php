@@ -19,14 +19,12 @@ class Validator implements ValidatorInterface
     public function validate(AbstractFormRequest $form): void
     {
         foreach ($form->rules() as $ruleItem) {
-
             $this->prepareValidatableRules($ruleItem);
 
             foreach ($this->validateData['field'] as $ruleField) {
                 $this->ruleFields[] = $ruleField;
 
                 try {
-
                     if (is_callable($this->validateData['rule']) === true) {
                         $this->validateData['rule']();
 
@@ -50,9 +48,7 @@ class Validator implements ValidatorInterface
                         $value,
                         $this->validateData['settings']
                     );
-
                 } catch (Throwable $e) {
-
                     $form->addError($ruleField, $e->getMessage());
                 }
             }

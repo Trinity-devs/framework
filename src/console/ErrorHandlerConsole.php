@@ -53,10 +53,12 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
                 $this->formatMessage("$errorName: ") . $exception->getMessage();
             }
 
-            $message .= $this->formatMessage(PHP_EOL . "Class: " . get_class($exception),[ConsoleColors::BOLD, ConsoleColors::BLUE])
+            $message .= $this->formatMessage(PHP_EOL . "Class: " . get_class($exception), [ConsoleColors::BOLD, ConsoleColors::BLUE])
                 . PHP_EOL . 'With message ' . $this->formatMessage("'{$exception->getMessage()}'", [ConsoleColors::BOLD])
-                . PHP_EOL . PHP_EOL . 'in ' . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(basename($exception->getFile()),[ConsoleColors::BOLD])
-                . ':' . $this->formatMessage($exception->getLine(), [ConsoleColors::BOLD, ConsoleColors::YELLOW]
+                . PHP_EOL . PHP_EOL . 'in ' . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(basename($exception->getFile()), [ConsoleColors::BOLD])
+                . ':' . $this->formatMessage(
+                    $exception->getLine(),
+                    [ConsoleColors::BOLD, ConsoleColors::YELLOW]
                 ) . PHP_EOL;
 
             if ($previous === null) {
@@ -64,9 +66,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
             }
 
             $message .= PHP_EOL . PHP_EOL . $this->formatMessage(
-                    '------------------------------------------------------------>>',
-                    [ConsoleColors::RED]
-                );
+                '------------------------------------------------------------>>',
+                [ConsoleColors::RED]
+            );
         }
 
         echo fwrite(STDERR, $message . PHP_EOL);

@@ -131,7 +131,8 @@ class Response implements ResponseInterface
     }
 
     public function hasHeader($name): bool
-    {}
+    {
+    }
 
     public function withProtocolVersion($version): static
     {
@@ -150,10 +151,12 @@ class Response implements ResponseInterface
     }
 
     public function withAddedHeader($name, $value): static
-    {}
+    {
+    }
 
     public function withoutHeader($name): static
-    {}
+    {
+    }
 
 
     public function withBody(mixed $body): static

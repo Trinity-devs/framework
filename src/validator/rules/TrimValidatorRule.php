@@ -11,7 +11,7 @@ class TrimValidatorRule implements ValidatorRuleInterface
         $value = trim($validator->getDataValue($field));
 
         $validator->setDataValue($field, $value);
-        
+
         if (is_string($value) === false) {
             $validator->addError($field, 'Значение должно быть строкой');
         }

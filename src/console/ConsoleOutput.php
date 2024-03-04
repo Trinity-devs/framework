@@ -22,7 +22,7 @@ class ConsoleOutput implements ConsoleOutputInterface
      */
     public function ansiFormat(string $message, ConsoleColors $color): void
     {
-       echo "\033[{$color->value}m{$message}\033[0m";
+        echo "\033[{$color->value}m{$message}\033[0m";
     }
 
     /**

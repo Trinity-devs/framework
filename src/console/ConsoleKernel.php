@@ -33,8 +33,7 @@ class ConsoleKernel implements ConsoleKernelInterface
         private EventDispatcherInterface $eventDispatcher,
         private ErrorHandlerConsoleInterface $errorHandler,
         private DIContainer $container,
-    )
-    {
+    ) {
         $this->errorHandler->register();
         $this->initializeDefaultCommands();
     }
@@ -120,7 +119,6 @@ class ConsoleKernel implements ConsoleKernelInterface
     public function handle(): int
     {
         try {
-
             $this->eventDispatcher->trigger(Event::CONSOLE_INPUT_READY, new Message($this->input));
 
             $commandName = $this->input->getNameCommand() ?? $this->defaultCommandName;
@@ -130,9 +128,7 @@ class ConsoleKernel implements ConsoleKernelInterface
             $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_STARTED, new Message(''));
             $this->container->build($commandClassName)->execute();
             $this->eventDispatcher->trigger(Event::CONSOLE_COMMAND_DONE, new Message(''));
-
         } catch (Throwable $exception) {
-
             $this->errorHandler->handleException($exception);
         }
 

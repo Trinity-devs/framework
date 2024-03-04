@@ -58,7 +58,7 @@ class Descriptor
         }
         if (str_contains($argument, ':') === true) {
             [, $description] = explode(':', $argument, 2);
-            $this->arguments[$key]= $description;
+            $this->arguments[$key] = $description;
         }
     }
 

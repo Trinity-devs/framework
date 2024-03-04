@@ -199,7 +199,8 @@ class RoutesCollection implements RoutesCollectionInterface
         }
 
         $this->globalMiddlewares = array_merge(
-            ($this->globalMiddlewares ?? []), $middleware
+            ($this->globalMiddlewares ?? []),
+            $middleware
         );
 
         return $this;

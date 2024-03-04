@@ -4,7 +4,6 @@ namespace trinity\exception\baseException;
 
 class ValidationError extends Exception
 {
-
     /**
      * @return string
      */

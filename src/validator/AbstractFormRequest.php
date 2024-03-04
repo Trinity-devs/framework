@@ -20,10 +20,9 @@ abstract class AbstractFormRequest
      * @param DatabaseConnectionInterface $db
      */
     public function __construct(
-        protected RequestInterface            $request,
+        protected RequestInterface $request,
         protected DatabaseConnectionInterface $db,
-    )
-    {
+    ) {
         $this->attributes = $this->request->post();
 
         if (empty($this->attributesLabel) === false) {
@@ -165,7 +164,7 @@ abstract class AbstractFormRequest
 
             return;
         }
-        
+
         $this->attributes = $this->getAttribute($this->attributesLabel);
     }
 
