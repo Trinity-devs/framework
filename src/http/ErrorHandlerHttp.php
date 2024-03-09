@@ -77,7 +77,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function handleException(Throwable $exception): void
     {
-        dd($exception);
         $this->unregister();
         $this->clearOutput();
 
