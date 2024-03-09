@@ -18,6 +18,7 @@ abstract class AbstractFormRequest
     /**
      * @param RequestInterface $request
      * @param DatabaseConnectionInterface $db
+     * @throws InvalidArgumentException
      */
     public function __construct(
         protected RequestInterface $request,
@@ -32,6 +33,8 @@ abstract class AbstractFormRequest
         if ($this->validateGetParams === true) {
             $this->attributes = array_merge($this->attributes, $this->request->get());
         }
+
+        $this->removingUnexpectedFields();
     }
 
     /**
@@ -95,11 +98,7 @@ abstract class AbstractFormRequest
             }
 
             if (is_array($value) === true) {
-                $result = $this->getAttributeRecursive($value, $field);
-
-                if ($result !== null) {
-                    return $result;
-                }
+                return $this->getAttributeRecursive($value, $field);
             }
         }
 
@@ -169,11 +168,24 @@ abstract class AbstractFormRequest
     }
 
     /**
+     * @return void
      * @throws InvalidArgumentException
      */
-    public function deleteAttributes(array $fields): void
+    private function removingUnexpectedFields(): void
     {
-        foreach ($fields as $key => $value) {
+        $ruleFields = [];
+
+        foreach ($this->rules() as $ruleItem) {
+            $ruleFields[] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
+        }
+
+        $ruleFields = array_merge(...$ruleFields);
+
+        $uniqueRuleFields = array_unique($ruleFields);
+
+        $unexpectedFields = array_diff_key($this->attributes, array_flip($uniqueRuleFields));
+
+        foreach ($unexpectedFields as $key => $value) {
             if (ArrayHelper::keyExists($key, $this->attributes) === true) {
                 unset($this->attributes[$key]);
             }
