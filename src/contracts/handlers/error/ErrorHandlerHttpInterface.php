@@ -3,7 +3,6 @@
 namespace trinity\contracts\handlers\error;
 
 use Throwable;
-use trinity\contracts\http\ResponseInterface;
 
 interface ErrorHandlerHttpInterface
 {
