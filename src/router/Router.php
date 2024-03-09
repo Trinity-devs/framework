@@ -36,7 +36,6 @@ final class Router implements RouterInterface
         $this->runGlobalMiddlewareAction($this->routesCollection);
 
         $matchedRoute = $this->findMatchedRoutes();
-
         $this->runMiddlewareAction($matchedRoute);
 
         $controllersAction = $this->verificationAction($matchedRoute->getControllerAction());

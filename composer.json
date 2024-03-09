@@ -23,8 +23,7 @@
   "minimum-stability": "stable",
   "require": {
     "php": "^8.2",
-    "ext-pdo": "*",
     "psr/cache": "^3.0",
-    "ext-redis": "*"
+    "guzzlehttp/psr7": "^2.6"
   }
 }
