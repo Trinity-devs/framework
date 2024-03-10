@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
-use trinity\{contracts\http\ResponseInterface,
-    exception\baseException\InvalidArgumentException,
-    exception\httpException\HttpException};
-use Throwable;
+use GuzzleHttp\Psr7\Response as BaseResponse;
+use trinity\contracts\http\ResponseInterface;
 
-class Response implements ResponseInterface
+class Response extends BaseResponse implements ResponseInterface
 {
     public static array $httpStatuses = [
         100 => 'Continue',
@@ -79,149 +79,17 @@ class Response implements ResponseInterface
         511 => 'Network Authentication Required',
     ];
 
-    private mixed $body = '';
-    private string $statusCode = '200';
-    private string $reasonPhrase = 'OK';
-    private string $protocolVersion = 'HTTP/1.1';
-    private array $headers = [];
-
     public function send(): void
     {
-        header("{$this->protocolVersion} {$this->statusCode} {$this->reasonPhrase}\r\n");
-        foreach ($this->getHeaders() as $name => $value) {
-            header($this->getHeaderLine($name));
+        header("HTTP/{$this->getProtocolVersion()} {$this->getStatusCode()} {$this->getReasonPhrase()}", false);
+
+        foreach ($this->getHeaders() as $name => $values) {
+            foreach ($values as $value) {
+
+                header($name . ': ' . $value, false);
+            }
         }
 
-        echo $this->getBody();
-    }
-    
-    public function getStatusCode(): string
-    {
-        return $this->statusCode;
-    }
-
-    public function getHeaderLine($name): string
-    {
-        if (isset($this->headers[$name])) {
-            return "{$name}: {$this->headers[$name]}\r\n";
-        }
-
-        return '';
-    }
-
-    public function getBody(): mixed
-    {
-        return $this->body;
-    }
-
-    public function getProtocolVersion(): string
-    {
-        if (isset($this->protocolVersion) === true) {
-            return $this->protocolVersion;
-        }
-
-        return '';
-    }
-
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
-
-    public function getHeader($name): array
-    {
-        return $this->headers[$name];
-    }
-
-    public function hasHeader($name): bool
-    {
-    }
-
-    public function withProtocolVersion($version): static
-    {
-        $new = clone $this;
-        $new->protocolVersion = $version;
-
-        return $new;
-    }
-
-    public function withHeader($name, $value): static
-    {
-        $new = clone $this;
-        $new->headers[$name] = $value;
-
-        return $new;
-    }
-
-    public function withAddedHeader($name, $value): static
-    {
-    }
-
-    public function withoutHeader($name): static
-    {
-    }
-
-
-    public function withBody(mixed $body): static
-    {
-        $new = clone $this;
-        $new->body = $body;
-
-        return $new;
-    }
-
-
-    public function withStatus($code, $reasonPhrase = ''): static
-    {
-        $new = clone $this;
-        $new->statusCode = $code;
-        $new->reasonPhrase = $reasonPhrase;
-
-        return $new;
-    }
-
-
-    public function getReasonPhrase(): string
-    {
-        return $this->reasonPhrase;
-    }
-
-    private function setStatusCode(int $value, string|null $text = null): Response
-    {
-        $this->statusCode = $value;
-
-        if ($this->getIsInvalid()) {
-            throw new InvalidArgumentException("Код состояния HTTP недействителен: $value");
-        }
-
-        if ($text === null) {
-            $this->reasonPhrase = static::$httpStatuses[$this->statusCode] ?? '';
-        }
-
-        if ($text !== null) {
-            $this->reasonPhrase = $text;
-        }
-
-        return $this;
-    }
-
-    public function getIsInvalid(): bool
-    {
-        return $this->getStatusCode() < 100 || $this->getStatusCode() >= 600;
-    }
-
-    public function setStatusCodeByException(Throwable $e): Response
-    {
-        $new = clone $this;
-
-        if ($e instanceof HttpException) {
-            $new->setStatusCode($e->statusCode);
-
-            return $new;
-        }
-
-        $new->setStatusCode(500);
-
-        return $new;
+        echo $this->getBody()->getContents();
     }
 }

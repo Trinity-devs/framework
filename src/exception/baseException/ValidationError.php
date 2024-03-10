@@ -1,23 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-class ValidationError extends \Exception
+final class ValidationError extends Exception
 {
-
     /**
      * @return string
      */
     public function getName(): string
     {
         return 'ValidationError';
-    }
-
-    /**
-     * @param $message
-     */
-    public function __construct($message = null)
-    {
-        parent::__construct($message);
     }
 }

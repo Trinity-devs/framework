@@ -340,13 +340,13 @@ body.mousedown pre {
            </div>
             <h1><?php
                     $name = $handler->getExceptionName($exception);
-                if (empty($name) === false) {
-                        echo '<span>' . $handler->htmlEncode($name) . '</span>';
-                    }
+            if (empty($name) === false) {
+                echo '<span>' . $handler->htmlEncode($name) . '</span>';
+            }
 
-                if (empty($name) === true) {
-                        echo '<span>' . $handler->htmlEncode(get_class($exception)) . '</span>';
-                    }
+            if (empty($name) === true) {
+                echo '<span>' . $handler->htmlEncode(get_class($exception)) . '</span>';
+            }
             ?></h1>
         <h2><?= nl2br($handler->htmlEncode($exception->getMessage())) ?></h2>
 

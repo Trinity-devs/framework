@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity;
 
-use trinity\contracts\{handlers\file\FileHandlerInterface, view\ViewRendererInterface};
+use trinity\contracts\handlers\file\FileHandlerInterface;
+use trinity\contracts\{view\ViewRendererInterface};
+use Throwable;
 use trinity\exception\baseException\LogicException;
 
-class View implements ViewRendererInterface
+final class View implements ViewRendererInterface
 {
     public string $title;
 
@@ -46,7 +50,7 @@ class View implements ViewRendererInterface
      * @param string $view
      * @param array $params
      * @return string
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function render(string $view, array $params = []): string
     {
@@ -73,6 +77,7 @@ class View implements ViewRendererInterface
     private function getViewFile(string $view, string $controller = ''): ?string
     {
         $viewParts = explode('/', $view);
+
         if ($viewParts[0] === "errorHandler") {
             return $this->fileHandler->getAlias('@viewsTrinity') . "$view" . '.php';
         }
@@ -88,18 +93,22 @@ class View implements ViewRendererInterface
     public function renderPhpFile(string $_file, array $_params = []): string
     {
         $obInitialLevel = ob_get_level();
+
         ob_start();
         ob_implicit_flush(false);
         extract($_params);
+
         try {
             require $_file;
+
             return ob_get_clean();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             while (ob_get_level() > $obInitialLevel) {
                 if (ob_end_clean() === false) {
                     ob_clean();
                 }
             }
+
             throw $e;
         }
     }

@@ -2,32 +2,31 @@
 
 namespace trinity\api;
 
-use trinity\{api\responses\CreateResponse,
-    api\responses\DeleteResponse,
-    api\responses\JsonResponse,
-    api\responses\UpdateResponse,
-    contracts\database\DatabaseConnectionInterface,
-    contracts\http\RequestInterface,
-    contracts\validator\FormRequestFactoryInterface,
-    exception\httpException\NotFoundHttpException,
-    validator\AbstractFormRequest};
+use trinity\api\responses\{CreateResponse, DeleteResponse, JsonResponse, UpdateResponse};
+use trinity\contracts\http\RequestInterface;
+use trinity\contracts\validator\{FormRequestFactoryInterface, ValidatorInterface};
+use trinity\exception\httpException\{BadRequestHttpException, NotFoundHttpException};
+use trinity\validator\AbstractFormRequest;
 
 abstract class ApiCrudController
 {
-    const CREATE = 'create';
-    const UPDATE = 'update';
-    const PATCH = 'patch';
+    public const CREATE = 'create';
+    public const UPDATE = 'update';
+    public const PATCH = 'patch';
+
+    protected array $forms = [];
+
+    protected bool $skipOnEmpty = false;
 
     /**
      * @param RequestInterface $request
+     * @param ValidatorInterface $validator
      */
     public function __construct(
         private RequestInterface $request,
-    )
-    {
+        private ValidatorInterface $validator,
+    ) {
     }
-
-    protected array $forms = [];
 
     /**
      * @return JsonResponse
@@ -54,11 +53,18 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return CreateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionCreate(FormRequestFactoryInterface $formRequestFactory): CreateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::CREATE]);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->create($form);
 
@@ -68,11 +74,18 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionUpdate(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::UPDATE]);
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->update($this->request->get('id'), $form);
 
@@ -82,11 +95,22 @@ abstract class ApiCrudController
     /**
      * @param FormRequestFactoryInterface $formRequestFactory
      * @return UpdateResponse
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionPatch(FormRequestFactoryInterface $formRequestFactory): UpdateResponse
     {
         $form = $formRequestFactory->create($this->forms[self::PATCH]);
+
+        if ($this->skipOnEmpty === true) {
+            $form->setSkipEmptyValues();
+        }
+
+        $this->validator->validate($form);
+
+        if (empty($form->getErrors()) === false) {
+            throw new BadRequestHttpException($form->getErrors());
+        }
 
         $this->patch($form);
 

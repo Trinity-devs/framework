@@ -4,16 +4,18 @@ namespace trinity\validator\rules;
 
 use trinity\contracts\validator\ValidatorRuleInterface;
 
+/**
+ * @deprecated
+ */
 class DefaultValueValidatorRule implements ValidatorRuleInterface
 {
-
     public function validateRule(string $field, array $params, Validator $validator): void
     {
         $value = $validator->getDataValue($field) ?? $params[0];
 
         if (is_callable($value) === true) {
             $validator->setDataValue($field, $value());
-            
+
             return;
         }
 

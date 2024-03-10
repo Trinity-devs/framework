@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\eventDispatcher;
 
 use trinity\contracts\events\MessageInterface;
 
-class Message implements MessageInterface
+final class Message implements MessageInterface
 {
     public string $eventName;
 

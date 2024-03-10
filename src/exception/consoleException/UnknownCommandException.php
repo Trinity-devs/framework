@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\consoleException;
 
 use trinity\exception\baseException\Exception;
 
-class UnknownCommandException extends Exception
+final class UnknownCommandException extends Exception
 {
     /**
      * @param $message

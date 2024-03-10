@@ -2,15 +2,15 @@
 
 namespace trinity\contracts\events;
 
-use UnitEnum;
+use BackedEnum;
 
 interface EventDispatcherInterface
 {
-    public function attach(UnitEnum $event, ObserverInterface $observer): void;
+    public function attach(BackedEnum $event, ObserverInterface $observer): void;
 
-    public function detach(UnitEnum $event): void;
+    public function detach(BackedEnum $event): void;
 
-    public function trigger(UnitEnum $event, MessageInterface $message): void;
+    public function trigger(BackedEnum $event, MessageInterface $message): void;
 
     public function configure(array $config): void;
 }

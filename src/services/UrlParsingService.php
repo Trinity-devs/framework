@@ -12,7 +12,7 @@ class UrlParsingService
      */
     public static function parseQuery(string $url): array
     {
-        preg_match_all("/\{([^{}]+)\}/", $url, $matches);
+        preg_match_all("/\{([^{}]+)}/", $url, $matches);
 
         return $matches;
     }

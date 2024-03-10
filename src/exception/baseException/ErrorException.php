@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-class ErrorException extends \ErrorException
+final class ErrorException extends Exception
 {
-    const E_HHVM_FATAL_ERROR = 16777217;
+    public const E_HHVM_FATAL_ERROR = 16777217;
 
     /**
      * @return string

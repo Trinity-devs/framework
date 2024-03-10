@@ -2,12 +2,13 @@
 
 namespace trinity\validator;
 
+use Throwable;
 use trinity\contracts\validator\ValidatorInterface;
-use trinity\exception\baseException\ValidationError;
+use trinity\exception\baseException\InvalidArgumentException;
 
 class Validator implements ValidatorInterface
 {
-    private array $validateData = [];
+    private array $validatableRuleData = [];
 
     /**
      * @param AbstractFormRequest $form
@@ -19,39 +20,50 @@ class Validator implements ValidatorInterface
 
             $this->prepareValidatableRules($ruleItem);
 
-            foreach ($this->validateData['field'] as $field) {
+            try {
 
-                try {
+                $this->search($form);
 
-                    if (is_callable($this->validateData['rule']) === true) {
-                        $this->validateData['rule']();
+            } catch (Throwable $e) {
 
-                        continue;
-                    }
+                $form->addError('Произошла непредвиденная ошибка при выполнении валидации формы', $e->getMessage());
 
-                    $value = $form->getAttribute($field);
-
-                    if ($form->hasAttribute($field) === false && $this->validateData['rule'] === 'required') {
-                        $form->addError($field, 'Поле не ожидается либо не настроена метка формы');
-
-                        continue;
-                    }
-
-                    if ($value === null) {
-                        continue;
-                    }
-
-                    $this->validateField(
-                        $this->validateData['rule'],
-                        $value,
-                        $this->validateData['settings']
-                    );
-
-                } catch (ValidationError $e) {
-
-                    $form->addError($field, $e->getMessage());
-                }
             }
+        }
+    }
+
+    /**
+     * @param AbstractFormRequest $form
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    private function search(AbstractFormRequest $form): void
+    {
+        foreach ($this->validatableRuleData['field'] as $ruleField) {
+
+            if (is_callable($this->validatableRuleData['rule']) === true) {
+                $this->validatableRuleData['rule']();
+
+                continue;
+            }
+
+            $formAttribute = $form->getAttribute($ruleField);
+
+            if ($form->hasAttribute($ruleField) === false && $this->validatableRuleData['rule'] === 'required') {
+                $form->addError($ruleField, 'Поля ' . $ruleField . ' нет в передаваемой форме, либо не настроена метка формы');
+
+                continue;
+            }
+
+            if ($formAttribute === null) {
+                continue;
+            }
+
+            $this->validateField(
+                rule: $this->validatableRuleData['rule'],
+                value: $formAttribute,
+                settings: $this->validatableRuleData['settings']
+            );
         }
     }
 
@@ -61,9 +73,9 @@ class Validator implements ValidatorInterface
      */
     private function prepareValidatableRules(array $ruleItem): void
     {
-        $this->validateData['field'] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
-        $this->validateData['rule'] = $ruleItem[1];
-        $this->validateData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2)[0] : [];
+        $this->validatableRuleData['field'] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
+        $this->validatableRuleData['rule'] = $ruleItem[1];
+        $this->validatableRuleData['settings'] = isset($ruleItem[2]) ? array_slice($ruleItem, 2)[0] : [];
     }
 
     /**

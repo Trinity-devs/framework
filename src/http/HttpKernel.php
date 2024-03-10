@@ -1,86 +1,86 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
+use GuzzleHttp\Psr7\Utils;
 use Throwable;
-use trinity\api\{responses\AuthResponse,
-    responses\CreateResponse,
-    responses\DeleteResponse,
-    responses\HtmlResponse,
-    responses\JsonResponse,
-    responses\UpdateResponse};
-use trinity\contracts\{handlers\error\ErrorHandlerHttpInterface,
-    http\HttpKernelInterface,
-    http\ResponseInterface,
-    router\RouterInterface};
+use trinity\api\responses\{AuthResponse, CreateResponse, DeleteResponse, HtmlResponse, JsonResponse, UpdateResponse};
+use trinity\contracts\http\{HttpKernelInterface, ResponseInterface};
+use trinity\contracts\router\RouterInterface;
 
-class HttpKernel implements HttpKernelInterface
+final class HttpKernel implements HttpKernelInterface
 {
     /**
      * @param RouterInterface $router
-     * @param ErrorHandlerHttpInterface $errorHandler
      * @param ResponseInterface $response
      */
     public function __construct(
         private RouterInterface $router,
-        private ErrorHandlerHttpInterface $errorHandler,
         private ResponseInterface $response,
-    )
-    {
-        $this->errorHandler->register();
+    ) {
     }
 
     /**
      * @return ResponseInterface
+     * @throws Throwable
      */
     public function handle(): ResponseInterface
     {
-        try {
+        $output = $this->router->dispatch();
 
-            $output = $this->router->dispatch();
-
-            return $this->normalizeResponse($output);
-
-        } catch (Throwable $e) {
-            $this->errorHandler->setTypeResponse($this->router->getTypeResponse());
-
-            return $this->normalizeResponse($this->errorHandler->handleException($e), $this->errorHandler->getStatusCode($e));
-        }
+        return $this->normalizeResponse($output);
     }
 
     /**
      * @param object $output
-     * @param int $statusCode
      * @return ResponseInterface
      */
-    private function normalizeResponse(object $output, int $statusCode = 200): ResponseInterface
+    private function normalizeResponse(object $output): ResponseInterface
     {
         $responseHandlers = match (get_class($output)) {
-            JsonResponse::class => function ($output, $statusCode) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader('Content-Type', 'application/json')->withStatus($statusCode ?? 200);
+            JsonResponse::class => function ($output) {
+                return $this->response = $this->response
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)))
+                    ->withHeader('Content-Type','application/json');
             },
 
-            HtmlResponse::class => function ($output, $statusCode) {
-                return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody($output)->withStatus($statusCode ?? 200);
+            HtmlResponse::class => function ($output) {
+                return $this->response = $this->response
+                    ->withHeader('Content-Type', 'text/html')
+                    ->withBody(Utils::streamFor($output));
             },
 
             AuthResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(201, 'Successful entry')->withBody(json_encode($output));
+                return $this->response = $this->response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(201,'Successful entry')
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
             },
 
             CreateResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(201, 'Created')->withBody($output);
+                return $this->response = $this->response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(201,'Created')
+                    ->withBody(Utils::streamFor($output));
             },
 
             DeleteResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(204, 'Successfully deleted')->withBody($output);
+                return $this->response = $this->response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(204,'Successfully deleted')
+                    ->withBody(Utils::streamFor($output));
             },
 
             UpdateResponse::class => function ($output) {
-                return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(200, 'Successfully updated')->withBody($output);
+                return $this->response = $this->response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(200,'Successfully updated')
+                    ->withBody(Utils::streamFor($output));
             }
         };
 
-        return $responseHandlers($output->data, $statusCode);
+        return $responseHandlers($output->data);
     }
 }
