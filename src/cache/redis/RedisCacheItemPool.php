@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\cache\redis;
 
 use Psr\Cache\CacheItemPoolInterface;
@@ -7,7 +9,7 @@ use Psr\Cache\CacheItemInterface;
 use Redis;
 use RedisException;
 
-class RedisCacheItemPool implements CacheItemPoolInterface
+final class RedisCacheItemPool implements CacheItemPoolInterface
 {
     private array $deferred = [];
 

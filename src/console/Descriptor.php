@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use InvalidArgumentException;
 
-class Descriptor
+final class Descriptor
 {
     private array $arguments = [];
 
@@ -58,7 +60,7 @@ class Descriptor
         }
         if (str_contains($argument, ':') === true) {
             [, $description] = explode(':', $argument, 2);
-            $this->arguments[$key]= $description;
+            $this->arguments[$key] = $description;
         }
     }
 

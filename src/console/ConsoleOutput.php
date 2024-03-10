@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use trinity\contracts\console\ConsoleOutputInterface;
 
-class ConsoleOutput implements ConsoleOutputInterface
+final class ConsoleOutput implements ConsoleOutputInterface
 {
     /**
      * @param int $carriagesLength
@@ -22,7 +24,7 @@ class ConsoleOutput implements ConsoleOutputInterface
      */
     public function ansiFormat(string $message, ConsoleColors $color): void
     {
-       echo "\033[{$color->value}m{$message}\033[0m";
+        echo "\033[{$color->value}m{$message}\033[0m";
     }
 
     /**

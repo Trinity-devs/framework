@@ -10,9 +10,9 @@ use trinity\validator\AbstractFormRequest;
 
 abstract class ApiCrudController
 {
-    const CREATE = 'create';
-    const UPDATE = 'update';
-    const PATCH = 'patch';
+    public const CREATE = 'create';
+    public const UPDATE = 'update';
+    public const PATCH = 'patch';
 
     protected array $forms = [];
 
@@ -25,8 +25,7 @@ abstract class ApiCrudController
     public function __construct(
         private RequestInterface $request,
         private ValidatorInterface $validator,
-    )
-    {
+    ) {
     }
 
     /**

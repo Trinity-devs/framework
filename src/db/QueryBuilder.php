@@ -342,10 +342,9 @@ class QueryBuilder implements QueryBuilderInterface
     public function scalar(): mixed
     {
         try {
+            $query = $this->prepareQuery();
 
-        $query = $this->prepareQuery();
-
-        $result = $this->fetch($query);
+            $result = $this->fetch($query);
         } catch (Throwable $e) {
             throw new PDOException($e->getMessage());
         }

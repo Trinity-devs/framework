@@ -1,4 +1,5 @@
 <?php
+
 /* @var $exception \Throwable */
 /* @var $handler trinity\http\ErrorHandlerhttp */
 

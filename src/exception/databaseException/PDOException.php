@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\databaseException;
 
-class PDOException extends \PDOException
+use PDOException as BasePDOException;
+
+final class PDOException extends BasePDOException
 {
     public function __construct($message, $errorInfo = [], $code = 500, $previous = null)
     {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, $code, $previous);
         $this->errorInfo = $errorInfo;
         $this->code = $code;
     }

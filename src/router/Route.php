@@ -8,17 +8,14 @@ class Route
      * @param array $url
      * @param string $method
      * @param mixed $controllerAction
-     * @param string $typeResponse
      * @param array $middlewares
      */
     public function __construct(
-        private array  $url,
+        private array $url,
         private string $method,
-        private mixed  $controllerAction,
-        private string $typeResponse,
-        private array  $middlewares,
-    )
-    {
+        private mixed $controllerAction,
+        private array $middlewares,
+    ) {
     }
 
     /**
@@ -51,13 +48,5 @@ class Route
     public function getMiddleware(): array
     {
         return $this->middlewares;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTypeResponse(): string
-    {
-        return $this->typeResponse;
     }
 }

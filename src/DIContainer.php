@@ -3,6 +3,7 @@
 namespace trinity;
 
 use trinity\contracts\container\ContainerInterface;
+use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\exception\baseException\LogicException;
 use ReflectionClass;
 use ReflectionException;
@@ -16,10 +17,12 @@ class DIContainer implements ContainerInterface
 
     /**
      * @param array $config
+     * @throws ReflectionException
      */
     private function __construct(array $config)
     {
         $this->dependentsList = $config;
+        $this->singleton(ErrorHandlerHttpInterface::class)->register();
     }
 
     /**
@@ -144,7 +147,7 @@ class DIContainer implements ContainerInterface
 
         $reflectionClass = new ReflectionClass($className);
 
-        if ($reflectionClass->isInstantiable() === false || $reflectionClass->isCloneable() === false){
+        if ($reflectionClass->isInstantiable() === false || $reflectionClass->isCloneable() === false) {
             throw new ReflectionException('Экземпляр класса ' . $className . ' не может быть создан');
         }
 
@@ -161,11 +164,13 @@ class DIContainer implements ContainerInterface
         $dependencies = [];
 
         foreach ($constructor->getParameters() as $parameter) {
-            if (interface_exists($parameter->getType()->getName()) === false && class_exists($parameter->getType()->getName()) === false) {
+            $name = $parameter->getType()?->getName() ?? '';
+
+            if (interface_exists($name) === false && class_exists($name) === false) {
                 continue;
             }
 
-            $dependencyInterface = $parameter->getType()->getName();
+            $dependencyInterface = $parameter->getType()?->getName();
             $dependencies[] = $this->singleton($dependencyInterface);
         }
 

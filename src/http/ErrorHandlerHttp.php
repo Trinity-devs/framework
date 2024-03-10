@@ -1,41 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
+use GuzzleHttp\Psr7\HttpFactory;
+use GuzzleHttp\Psr7\Utils;
+use Psr\Http\Message\StreamInterface;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionObject;
 use Throwable;
-use trinity\api\responses\{HtmlResponse, JsonResponse};
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
-use trinity\exception\baseException\{ErrorException, LogicException, UnknownMethodException};
+use trinity\exception\baseException\{ErrorException, Exception};
 use trinity\exception\databaseException\PDOException;
-use trinity\exception\httpException\HttpException;
+use trinity\helpers\ArrayHelper;
 
-class ErrorHandlerHttp implements ErrorHandlerHttpInterface
+final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 {
-    const CONTENT_TYPE_JSON = 'application/json';
-    private Throwable|null $exception = null;
-    private bool $discardExistingOutput = true;
+    private const CONTENT_TYPE_JSON = 'application/json';
+    private const CONTENT_TYPE_HTML = 'text/html';
     private bool $isRegistered = false;
-    private string|null $directory = null;
-
-    public string $traceLine = '{html}';
     private int $maxSourceLines = 19;
     private int $maxTraceSourceLines = 13;
+    private ?Throwable $exception = null;
+
+    public string $traceLine = '{html}';
 
     /**
-     * @param ViewRendererInterface $view
+     * @param ViewRendererInterface $viewRenderer
      * @param bool $debug
      * @param string $contentType
      */
     public function __construct(
-        private readonly ViewRendererInterface $view,
+        private readonly ViewRendererInterface $viewRenderer,
         private readonly bool $debug,
-        private readonly string $contentType
+        private string $contentType
     ) {
+        $this->contentType = explode(',', $contentType)[0];
         ini_set('display_errors', $this->debug ? '1' : '0');
+        ini_set('error_reporting', $this->debug ? E_ALL : E_ERROR | E_WARNING | E_PARSE);
     }
 
     /**
@@ -48,7 +52,6 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             set_error_handler([$this, 'handleError']);
             register_shutdown_function([$this, 'handleFatalError']);
 
-            $this->directory = getcwd();
             $this->isRegistered = true;
         }
     }
@@ -60,11 +63,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      * @param int $line
      * @return bool
      * @throws ErrorException
+     * @throws Throwable
      */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
         if (error_reporting() !== 0 && $code) {
-            throw new ErrorException($message, $code, $code, $file, $line);
+            $this->exception = new ErrorException($message, $code);
+
+            $this->renderException();
         }
 
         return false;
@@ -72,19 +78,15 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return object
      * @throws Throwable
      */
-    public function handleException(Throwable $exception): object
+    public function handleException(Throwable $exception): void
     {
-        $this->exception = $exception;
         $this->unregister();
+        $this->clearOutput();
+        $this->exception = $exception;
 
-        if ($this->discardExistingOutput) {
-            $this->clearOutput();
-        }
-
-        return $this->renderException($exception);
+        $this->renderException();
     }
 
     /**
@@ -104,20 +106,21 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function handleFatalError(): void
     {
         $error = error_get_last();
-        if ($error !== null && ErrorException::isFatalError($error) === true) {
-            $exception = new ErrorException(
+
+        if ($error === null) {
+            return;
+        }
+
+        if (ErrorException::isFatalError($error) === true) {
+            $this->exception = new ErrorException(
                 $error['message'],
                 $error['type'],
                 $error['type'],
-                $error['file'],
-                $error['line']
             );
 
-            if ($this->discardExistingOutput) {
-                $this->clearOutput();
-            }
+            $this->clearOutput();
 
-            $this->renderException($exception);
+            $this->renderException();
         }
     }
 
@@ -126,7 +129,7 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function unregister(): void
     {
-        if ($this->isRegistered) {
+        if ($this->isRegistered === true) {
             restore_error_handler();
             restore_exception_handler();
             $this->isRegistered = false;
@@ -134,15 +137,22 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param Throwable $exception
-     * @return object
      * @throws Throwable
      */
-    private function renderException(Throwable $exception): object
+    private function renderException(): void
     {
-        return $this->contentType === self::CONTENT_TYPE_JSON
-            ? new JsonResponse($this->dataJsonException($exception))
-            : new HtmlResponse($this->renderHtmlException($exception));
+        $response = new Response(status: $this->getStatusCode(), reason: $this->getExceptionName());
+        $response = match ($this->contentType) {
+            self::CONTENT_TYPE_JSON => $response
+                ->withBody($this->dataJsonException())
+                ->withAddedHeader('Content-Type', self::CONTENT_TYPE_JSON),
+            self::CONTENT_TYPE_HTML => $response
+                ->withBody($this->renderHtmlException())
+                ->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
+            default => var_dump($this->exception)
+        };
+
+        $response->send();
     }
 
     /**
@@ -155,20 +165,21 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     {
         $params['handler'] = $this;
 
-        return $this->view->render($file, $params);
+        return $this->viewRenderer->render($file, $params);
     }
 
     /**
-     * @param Throwable $exception
      * @return string
      */
-    public function getExceptionName(Throwable $exception): string
+    public function getExceptionName(): string
     {
-        if ($exception instanceof HttpException || $exception instanceof UnknownMethodException || $exception instanceof LogicException || $exception instanceof ErrorException || $exception instanceof PDOException) {
-            return $exception->getName();
+        if ($this->exception instanceof Exception || $this->exception instanceof PDOException) {
+            return $this->exception->getName();
         }
 
-        return $this->getShortNameException($exception);
+        $classNameParts = explode('\\', get_class($this->exception));
+
+        return end($classNameParts);
     }
 
     /**
@@ -181,15 +192,14 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param Throwable $exception
      * @return string
      * @throws Throwable
      */
-    public function renderCallStack(Throwable $exception): string
+    public function renderCallStack(): string
     {
         $out = '<ul>';
-        $out .= $this->renderCallStackItem($exception->getFile(), $exception->getLine(), null, null, [], 1);
-        for ($i = 0, $trace = $exception->getTrace(), $length = count($trace); $i < $length; ++$i) {
+        $out .= $this->renderCallStackItem($this->exception->getFile(), $this->exception->getLine(), null, null, [], 1);
+        for ($i = 0, $trace = $this->exception->getTrace(), $length = count($trace); $i < $length; ++$i) {
             $file = empty($trace[$i]['file']) === false ? $trace[$i]['file'] : null;
             $line = empty($trace[$i]['line']) === false ? $trace[$i]['line'] : null;
             $class = empty($trace[$i]['class']) === false ? $trace[$i]['class'] : null;
@@ -264,147 +274,125 @@ class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param Throwable $exception
-     * @return array
+     * @return StreamInterface
      * @throws ReflectionException
-     */
-    private function dataJsonException(Throwable $exception): array
-    {
-        try {
-            $traceItem = $exception->getTrace()[0] ?? null;
-
-            $shortName = 'UnknownClass';
-
-            if ($traceItem && isset($traceItem['class'])) {
-                $reflection = new ReflectionClass($traceItem['class']);
-                $shortName = str_replace('\\', '/', $reflection->getName());
-            }
-
-            $functionName = $traceItem['function'] ?? 'unknownFunction';
-            $lineNumber = $exception->getLine();
-
-            $firstError = null;
-            if (isset($exception->getTrace()[0]['args'][0]) === true) {
-                $firstError = $exception->getTrace()[0]['args'][0];
-            }
-
-            if ($this->debug === true) {
-                return [
-                'error' => [
-                    'class' => $shortName . ':' . $lineNumber,
-                    'function' => $functionName,
-                    'attributes' => $firstError !== null && is_string($firstError) === false && is_array($firstError) === false ? $firstError->getAttributes() : [],
-                ],
-                'cause' => $exception->getMessage(),
-                'type' => $this->getShortNameException($exception),
-                'data' => [],
-                'trace' => array_map(function ($traceItem) {
-                    if (isset($traceItem['file']) === true) {
-                        $file = str_replace("/var/www/html/", "", $traceItem['file']);
-                        $traceItem['file'] = str_replace('.php', '', $file) . ':' . $traceItem['line'];
-                    }
-
-                    if (isset($traceItem['line']) === true) {
-                        unset($traceItem['line']);
-                    }
-
-                    if (isset($traceItem['args']) === true) {
-                        $traceItem['args'] = $this->serializeTraceArgs($traceItem['args']);
-                    }
-
-                    if (isset($traceItem['class']) === true) {
-                        $traceItem['class'] = str_replace('\\', '/', $traceItem['class']);
-                    }
-
-                    if (isset($traceItem['type']) === true) {
-                        unset($traceItem['type']);
-                    }
-
-                    return $traceItem;
-                }, $exception->getTrace()),
-            ];
-            }
-
-            return [
-            'cause' => $exception->getMessage(),
-            'type' => $this->getShortNameException($exception),
-            'data' => [],
-        ];
-        } catch (Throwable $e) {
-          throw $e;
-        }
-    }
-
-    /**
-     * @param Throwable $exception
-     * @return int
-     */
-    public function getStatusCode(Throwable $exception): int
-    {
-        if ($exception instanceof HttpException) {
-            return $exception->getStatusCode();
-        }
-
-        return $exception->getCode() !== 0 ? $exception->getCode() : 500;
-    }
-
-    /**
-     * @param Throwable $exception
-     * @return string
-     */
-    private function getShortNameException(Throwable $exception): string
-    {
-        $classNameParts = explode('\\', get_class($exception));
-
-        return end($classNameParts);
-    }
-
-    /**
-     * @param Throwable $exception
-     * @return string
      * @throws Throwable
      */
-    private function renderHtmlException(Throwable $exception): string
+    private function dataJsonException(): StreamInterface
     {
-        if ($this->debug) {
-            return $this->renderFile('errorHandler/exception', ['exception' => $exception]);
+        $traceItem = ArrayHelper::getValue($this->exception->getTrace(), '0');
+
+        $className = 'UnknownClass';
+        $functionName = 'unknownFunction';
+
+        if ($traceItem !== null && isset($traceItem['class'])) {
+            $reflection = new ReflectionClass($traceItem['class']);
+            $className = $this->replaceDoubleSlash($reflection->getName());
         }
 
-        return $this->renderFile('errorHandler/error', ['exception' => $exception]);
+        if ($traceItem !== null && isset($traceItem['function'])) {
+            $functionName = $traceItem['function'];
+        }
+
+        $lineNumber = $this->exception->getLine();
+
+        $body = [
+            'cause' => $this->exception->getMessage(),
+            'type' => $this->getExceptionName(),
+            'data' => []
+        ];
+
+        if ($this->debug === true) {
+            $body = [
+                'error' => [
+                    'file' => $this->exception->getFile(),
+                    'function' => $functionName,
+                    'class' => $className . ':' . $lineNumber,
+                ],
+                'cause' => $this->replaceDoubleSlash($this->exception->getMessage()),
+                'type' => $this->getExceptionName(),
+                'data' => [],
+                'trace' => array_map(
+                    function ($traceItem) {
+                        if (isset($traceItem['class']) === true) {
+                            $traceItem['class'] = $this->replaceDoubleSlash($traceItem['class']);
+                        }
+
+                        if (isset($traceItem['file']) === true) {
+                            $file = $this->replaceWithEmpty("/var/www/html/", $traceItem['file']);
+                            $traceItem['file'] = $this->replaceWithEmpty('.php', $file) . ':' . $traceItem['line'];
+                        }
+
+                        unset($traceItem['line'], $traceItem['type'], $traceItem['args']);
+
+                        return $traceItem;
+                    },
+                    $this->exception->getTrace()
+                ),
+            ];
+        }
+
+        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+
+        return Utils::streamFor($json);
     }
 
-    private function serializeTraceArgs(array $args): array
+    /**
+     * @return int
+     */
+    public function getStatusCode(): int
     {
-        return array_map(function ($arg) {
-            if (is_object($arg)) {
-                $reflection = new ReflectionObject($arg);
-                $properties = $reflection->getProperties();
-                $propsArray = [];
-                foreach ($properties as $property) {
-                    $propsArray[$property->getName()] = $this->serializeValue($property->getValue($arg));
-                }
-
-                return ['type' => str_replace('\\', '/', get_class($arg)), 'properties' => $propsArray];
-            }
-
-            if (is_array($arg)) {
-                return ['type' => 'array', 'value' => $this->serializeTraceArgs($arg)];
-            }
-
-            return ['type' => gettype($arg), 'value' => $arg];
-        }, $args);
+        return $this->exception->getCode() !== 0 ? $this->exception->getCode() : 500;
     }
 
-    private function serializeValue(mixed $value): string
+    /**
+     * @return StreamInterface
+     * @throws Throwable
+     */
+    private function renderHtmlException(): StreamInterface
     {
-        if (is_object($value)) {
-            return str_replace('\\', '/', get_class($value));
+        if ($this->debug === true) {
+            $html = $this->renderFile('errorHandler/exception', ['exception' => $this->exception]);
+
+            return Utils::streamFor($html);
         }
 
-        if (is_array($value)) {
-            return 'Array[' . count($value) . ']';
-        }
+        $html = $this->renderFile('errorHandler/error', ['exception' => $this->exception]);
 
-        return $value;
+        return Utils::streamFor($html);
+    }
+
+    /**
+     * @param string $search Строка поиска
+     * @param string $replace Строка замены
+     * @param string $subject Строка, в которой производится поиск и замена
+     * @return string Возвращает строку с заменёнными значениями
+     */
+    private function replace(string $search, string $replace, string $subject): string
+    {
+        return str_replace($search, $replace, $subject);
+    }
+
+    /**
+     *  Заменяет все вхождения строки поиска на пустую строку
+     *
+     * @param string $search
+     * @param string $subject
+     * @return string
+     */
+    private function replaceWithEmpty(string $search, string $subject): string
+    {
+        return $this->replace($search, '', $subject);
+    }
+
+    /**
+     *  Заменяет \\\\ на /
+     *
+     * @param string $subject
+     * @return string
+     */
+    private function replaceDoubleSlash(string $subject): string
+    {
+        return $this->replace('\\', '/', $subject);
     }
 }

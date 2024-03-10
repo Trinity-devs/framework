@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-use BadMethodCallException;
-
-class InvalidArgumentException extends BadMethodCallException
+final class InvalidArgumentException extends Exception
 {
     /**
      * @return string

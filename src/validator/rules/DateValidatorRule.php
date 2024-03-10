@@ -4,9 +4,11 @@ namespace trinity\validator\rules;
 
 use trinity\contracts\validator\ValidatorRuleInterface;
 
+/**
+ * @deprecated
+ */
 class DateValidatorRule implements ValidatorRuleInterface
 {
-
     public function validateRule(string $field, array $params, Validator $validator): void
     {
         $value = $validator->getDataValue($field);

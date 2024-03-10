@@ -4,6 +4,8 @@ namespace trinity\validator;
 
 use trinity\contracts\database\DatabaseConnectionInterface;
 use trinity\contracts\http\RequestInterface;
+use trinity\exception\baseException\InvalidArgumentException;
+use trinity\helpers\ArrayHelper;
 
 abstract class AbstractFormRequest
 {
@@ -15,13 +17,13 @@ abstract class AbstractFormRequest
 
     /**
      * @param RequestInterface $request
-     * @param DatabaseConnectionInterface $connection
+     * @param DatabaseConnectionInterface $db
+     * @throws InvalidArgumentException
      */
     public function __construct(
-        protected RequestInterface            $request,
-        protected DatabaseConnectionInterface $connection,
-    )
-    {
+        protected RequestInterface $request,
+        protected DatabaseConnectionInterface $db,
+    ) {
         $this->attributes = $this->request->post();
 
         if (empty($this->attributesLabel) === false) {
@@ -31,6 +33,8 @@ abstract class AbstractFormRequest
         if ($this->validateGetParams === true) {
             $this->attributes = array_merge($this->attributes, $this->request->get());
         }
+
+        $this->removingUnexpectedFields();
     }
 
     /**
@@ -94,11 +98,7 @@ abstract class AbstractFormRequest
             }
 
             if (is_array($value) === true) {
-                $result = $this->getAttributeRecursive($value, $field);
-
-                if ($result !== null) {
-                    return $result;
-                }
+                return $this->getAttributeRecursive($value, $field);
             }
         }
 
@@ -118,10 +118,11 @@ abstract class AbstractFormRequest
     /**
      * @param string $field
      * @return bool
+     * @throws InvalidArgumentException
      */
     public function hasAttribute(string $field): bool
     {
-        return array_key_exists($field, $this->getAttributes());
+        return ArrayHelper::keyExists($field, $this->getAttributes());
     }
 
     /**
@@ -162,8 +163,33 @@ abstract class AbstractFormRequest
 
             return;
         }
-        
+
         $this->attributes = $this->getAttribute($this->attributesLabel);
+    }
+
+    /**
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    private function removingUnexpectedFields(): void
+    {
+        $ruleFields = [];
+
+        foreach ($this->rules() as $ruleItem) {
+            $ruleFields[] = is_array($ruleItem[0]) ? $ruleItem[0] : [$ruleItem[0]];
+        }
+
+        $ruleFields = array_merge(...$ruleFields);
+
+        $uniqueRuleFields = array_unique($ruleFields);
+
+        $unexpectedFields = array_diff_key($this->attributes, array_flip($uniqueRuleFields));
+
+        foreach ($unexpectedFields as $key => $value) {
+            if (ArrayHelper::keyExists($key, $this->attributes) === true) {
+                unset($this->attributes[$key]);
+            }
+        }
     }
 
     /**

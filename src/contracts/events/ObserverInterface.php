@@ -9,5 +9,5 @@ interface ObserverInterface
      *
      * @param MessageInterface $message Сообщение, содержащее информацию о событии.
      */
-    function observe(MessageInterface $message): void;
+    public function observe(MessageInterface $message): void;
 }
