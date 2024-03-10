@@ -38,6 +38,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     ) {
         $this->contentType = explode(',', $contentType)[0];
         ini_set('display_errors', $this->debug ? '1' : '0');
+        ini_set('error_reporting', $this->debug ? E_ALL : E_ERROR | E_WARNING | E_PARSE);
     }
 
     /**
