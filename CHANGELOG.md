@@ -5,11 +5,20 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.7.0](https://github.com/Trinity-devs/framework/releases/tag/0.7.0) ] - 10.03.2024
+
 - Реализовано:
     - Добавлена возможность отправки полей в форме, которые не используются в логике программы
+    - Переписан фреймворк на работу с GuzzleHttp/PSR7
 
 - Изменено:
     - Изменено название $connection на $db
+    - Разделение логики методов валидации, упразднение вложенностей
+    - Изменена регистрация errorHandler, перенесено в DIContainer
+    - Полностью TypeReponse в роутах
+    - Изменен ответ ErrorHandler для application/json
+    - Изменена логика формирования типа ответа для ErrorHandler
+    - Изменена работа с identity
 
 ## [ [0.6.0](https://github.com/Trinity-devs/framework/releases/tag/0.6.0) ] - 23.02.2024
 
