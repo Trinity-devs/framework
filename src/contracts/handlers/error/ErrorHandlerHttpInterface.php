@@ -14,13 +14,13 @@ interface ErrorHandlerHttpInterface
 
     public function handleFatalError(): void;
 
-    public function getExceptionName(Throwable $exception): string|null;
+    public function getExceptionName(): string|null;
 
     public function htmlEncode(string $text): string;
 
-    public function renderCallStack(Throwable $exception): string;
+    public function renderCallStack(): string;
 
     public function isCoreFile(string $file): bool;
 
-    public function getStatusCode(Throwable $exception): int;
+    public function getStatusCode(): int;
 }

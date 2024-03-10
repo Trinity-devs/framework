@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
-class UnauthorizedHttpException extends HttpException
+final class UnauthorizedHttpException extends HttpException
 {
     /**
      * @param $message

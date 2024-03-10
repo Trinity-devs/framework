@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use RuntimeException;
@@ -9,7 +11,7 @@ use trinity\exception\baseException\InvalidArgumentException;
 use trinity\helpers\ArrayHelper;
 use UnexpectedValueException;
 
-class ConsoleInput implements ConsoleInputInterface
+final class ConsoleInput implements ConsoleInputInterface
 {
     private array $params;
     private array $arguments = [];

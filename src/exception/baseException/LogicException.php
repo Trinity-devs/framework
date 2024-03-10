@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-class LogicException extends Exception
+final class LogicException extends Exception
 {
     /**
      * @return string

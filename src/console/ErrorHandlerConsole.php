@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use Throwable;
 use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
     exception\baseException\ErrorException,
-    exception\baseException\Exception};
+    exception\baseException\Exception
+};
 
-class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
+final class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
 {
     private Throwable|null $exception;
     private bool $discardExistingOutput = true;
@@ -66,9 +69,9 @@ class ErrorHandlerConsole implements ErrorHandlerConsoleInterface
             }
 
             $message .= PHP_EOL . PHP_EOL . $this->formatMessage(
-                '------------------------------------------------------------>>',
-                [ConsoleColors::RED]
-            );
+                    '------------------------------------------------------------>>',
+                    [ConsoleColors::RED]
+                );
         }
 
         echo fwrite(STDERR, $message . PHP_EOL);

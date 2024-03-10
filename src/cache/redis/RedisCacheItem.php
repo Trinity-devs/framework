@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\cache\redis;
 
 use DateInterval;
@@ -7,7 +9,7 @@ use DateTime;
 use DateTimeInterface;
 use Psr\Cache\CacheItemInterface;
 
-class RedisCacheItem implements CacheItemInterface
+final class RedisCacheItem implements CacheItemInterface
 {
     private mixed $value;
     public int|null $ttl = null;

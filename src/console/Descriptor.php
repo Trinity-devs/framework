@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use InvalidArgumentException;
 
-class Descriptor
+final class Descriptor
 {
     private array $arguments = [];
 

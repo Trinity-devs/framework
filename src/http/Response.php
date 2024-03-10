@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
 use GuzzleHttp\Psr7\Response as BaseResponse;

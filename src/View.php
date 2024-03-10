@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity;
 
 use trinity\contracts\handlers\file\FileHandlerInterface;
@@ -7,7 +9,7 @@ use trinity\contracts\{view\ViewRendererInterface};
 use Throwable;
 use trinity\exception\baseException\LogicException;
 
-class View implements ViewRendererInterface
+final class View implements ViewRendererInterface
 {
     public string $title;
 

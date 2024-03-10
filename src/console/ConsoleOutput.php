@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use trinity\contracts\console\ConsoleOutputInterface;
 
-class ConsoleOutput implements ConsoleOutputInterface
+final class ConsoleOutput implements ConsoleOutputInterface
 {
     /**
      * @param int $carriagesLength

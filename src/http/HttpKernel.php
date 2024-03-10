@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\http;
 
 use GuzzleHttp\Psr7\Utils;
@@ -8,7 +10,7 @@ use trinity\api\responses\{AuthResponse, CreateResponse, DeleteResponse, HtmlRes
 use trinity\contracts\http\{HttpKernelInterface, ResponseInterface};
 use trinity\contracts\router\RouterInterface;
 
-class HttpKernel implements HttpKernelInterface
+final class HttpKernel implements HttpKernelInterface
 {
     /**
      * @param RouterInterface $router

@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
+use Throwable;
+use trinity\contracts\exception\ExceptionInterface;
 use trinity\exception\baseException\Exception;
 use trinity\http\Response;
-use Throwable;
 
-abstract class HttpException extends Exception
+abstract class HttpException extends Exception implements ExceptionInterface
 {
     private int $statusCode;
 
@@ -15,7 +18,7 @@ abstract class HttpException extends Exception
      * @param int $code
      * @param Throwable|null $previous
      */
-    public function __construct(string|null $message = null, int $code = 0, Throwable $previous = null)
+    public function __construct(string|null $message = null, int $code = 500, Throwable $previous = null)
     {
         $this->statusCode = $code;
         parent::__construct((string)$message, $code, $previous);
@@ -26,15 +29,6 @@ abstract class HttpException extends Exception
      */
     public function getName(): string
     {
-        if (isset(Response::$httpStatuses[$this->statusCode])) {
-            return Response::$httpStatuses[$this->statusCode];
-        }
-
-        return 'Error';
-    }
-
-    public function getStatusCode(): int
-    {
-        return $this->statusCode;
+        return Response::$httpStatuses[$this->statusCode];
     }
 }

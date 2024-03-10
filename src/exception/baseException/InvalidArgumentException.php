@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-class InvalidArgumentException extends Exception
+final class InvalidArgumentException extends Exception
 {
     /**
      * @return string

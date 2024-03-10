@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
-class NotAcceptableHttpException extends HttpException
+final class NotAcceptableHttpException extends HttpException
 {
     /**
      * @param $message

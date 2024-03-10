@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
-class BadRequestHttpException extends HttpException
+final class BadRequestHttpException extends HttpException
 {
     /**
      * @param $message

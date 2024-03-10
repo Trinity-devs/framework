@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\eventDispatcher;
 
+use BackedEnum;
 use trinity\contracts\events\{EventDispatcherInterface, MessageInterface, ObserverInterface};
 use trinity\exception\baseException\LogicException;
-use UnitEnum;
 
-class EventDispatcher implements EventDispatcherInterface
+final class EventDispatcher implements EventDispatcherInterface
 {
     private array $eventObservers = [];
 
@@ -30,10 +32,10 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Подписывает наблюдателя к определенному событию
      *
-     * @param UnitEnum $event Событие, к которому присоединяется наблюдатель
+     * @param BackedEnum $event Событие, к которому присоединяется наблюдатель
      * @param ObserverInterface $observer Наблюдатель, который будет присоединен
      */
-    public function attach(UnitEnum $event, ObserverInterface $observer): void
+    public function attach(BackedEnum $event, ObserverInterface $observer): void
     {
         $this->eventObservers[$event->value] = $observer;
     }
@@ -41,9 +43,9 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Отписывает наблюдателя от определенного события
      *
-     * @param UnitEnum $event Событие, от которого отсоединяется наблюдатель
+     * @param BackedEnum $event Событие, от которого отсоединяется наблюдатель
      */
-    public function detach(UnitEnum $event): void
+    public function detach(BackedEnum $event): void
     {
         if (isset($this->eventObservers[$event->value]) === false) {
             return;
@@ -55,10 +57,10 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * Запускает событие и уведомляет соответствующего наблюдателя с переданным сообщением
      *
-     * @param UnitEnum $event Событие, которое будет запущено
+     * @param BackedEnum $event Событие, которое будет запущено
      * @param Message $message Сообщение, передаваемое наблюдателю
      */
-    public function trigger(UnitEnum $event, MessageInterface $message): void
+    public function trigger(BackedEnum $event, MessageInterface $message): void
     {
         if (isset($this->eventObservers[$event->value]) === false) {
             return;

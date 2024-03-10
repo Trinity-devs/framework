@@ -4,6 +4,9 @@ namespace trinity\validator\rules;
 
 use trinity\contracts\validator\ValidatorRuleInterface;
 
+/**
+ * @deprecated
+ */
 class UrlValidatorRule implements ValidatorRuleInterface
 {
     public function validateRule(string $field, array $params, Validator $validator): void

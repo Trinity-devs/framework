@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use InvalidArgumentException;
@@ -12,10 +14,11 @@ use trinity\{contracts\container\ContainerInterface,
     contracts\events\EventDispatcherInterface,
     eventDispatcher\Event,
     eventDispatcher\Message,
-    exception\consoleException\UnknownCommandException};
+    exception\consoleException\UnknownCommandException
+};
 use Throwable;
 
-class ConsoleKernel implements ConsoleKernelInterface
+final class ConsoleKernel implements ConsoleKernelInterface
 {
     private string $defaultCommandName = 'list';
     private array $commandMap = [];
@@ -28,11 +31,11 @@ class ConsoleKernel implements ConsoleKernelInterface
      * @param ContainerInterface $container
      */
     public function __construct(
-        private ConsoleInputInterface $input,
-        private ConsoleOutputInterface $output,
-        private EventDispatcherInterface $eventDispatcher,
+        private ConsoleInputInterface        $input,
+        private ConsoleOutputInterface       $output,
+        private EventDispatcherInterface     $eventDispatcher,
         private ErrorHandlerConsoleInterface $errorHandler,
-        private ContainerInterface $container,
+        private ContainerInterface           $container,
     ) {
         $this->errorHandler->register();
         $this->initializeDefaultCommands();

@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\console;
 
 use trinity\{contracts\console\ConsoleCommandInterface,
     contracts\console\ConsoleKernelInterface,
-    contracts\console\ConsoleOutputInterface};
+    contracts\console\ConsoleOutputInterface
+};
 
-class ListCommand implements ConsoleCommandInterface
+final class ListCommand implements ConsoleCommandInterface
 {
     private static string $signature = 'list';
     private static string $description = 'Вывод информации о доступных командах';

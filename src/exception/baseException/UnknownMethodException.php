@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\baseException;
 
-class UnknownMethodException extends Exception
+final class UnknownMethodException extends Exception
 {
     /**
      * @return string

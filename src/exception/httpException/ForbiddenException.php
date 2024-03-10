@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
-class ForbiddenException extends HttpException
+final class ForbiddenException extends HttpException
 {
     /**
      * @param $message

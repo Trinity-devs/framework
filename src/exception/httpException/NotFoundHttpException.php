@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\exception\httpException;
 
-class NotFoundHttpException extends HttpException
+final class NotFoundHttpException extends HttpException
 {
     /**
      * @param $message
