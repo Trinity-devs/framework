@@ -79,6 +79,15 @@ class Response extends BaseResponse implements ResponseInterface
 
     public function send(): void
     {
+        header("HTTP/{$this->getProtocolVersion()} {$this->getStatusCode()} {$this->getReasonPhrase()}", false);
+
+        foreach ($this->getHeaders() as $name => $values) {
+            foreach ($values as $value) {
+
+                header($name . ': ' . $value, false);
+            }
+        }
+
         echo $this->getBody()->getContents();
     }
 }
