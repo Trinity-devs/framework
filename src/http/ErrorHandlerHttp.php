@@ -139,17 +139,18 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     private function renderException(Throwable $exception): void
     {
-        $response = new Response();
+        $response = new Response(status: $this->getStatusCode($exception), reason: $this->getExceptionName($exception));
         $response = match ($this->contentType) {
-            self::CONTENT_TYPE_JSON => $response->withBody(
-                $this->dataJsonException($exception)
-            )->withHeader('content-Type', self::CONTENT_TYPE_JSON),
-            self::CONTENT_TYPE_HTML => $response->withBody(
-                $this->renderHtmlException($exception)
-            )->withHeader('content-Type', self::CONTENT_TYPE_HTML),
+            self::CONTENT_TYPE_JSON => $response
+                ->withBody($this->dataJsonException($exception))
+                ->withAddedHeader('Content-Type', self::CONTENT_TYPE_JSON),
+            self::CONTENT_TYPE_HTML => $response
+                ->withBody($this->renderHtmlException($exception))
+                ->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
             default => var_dump($exception)
         };
-        $response->withStatus($this->getStatusCode($exception), $this->getExceptionName($exception))->send();
+
+        $response->send();
     }
 
     /**

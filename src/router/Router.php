@@ -3,11 +3,11 @@
 namespace trinity\router;
 
 use ReflectionException;
-use trinity\contracts\{http\RequestInterface,
+use trinity\contracts\{container\ContainerInterface,
+    http\RequestInterface,
     http\UriInterface,
     router\RouterInterface,
     router\RoutesCollectionInterface};
-use trinity\DIContainer;
 use trinity\exception\baseException\LogicException;
 
 final class Router implements RouterInterface
@@ -16,13 +16,13 @@ final class Router implements RouterInterface
      * @param RequestInterface $request
      * @param UriInterface $uri
      * @param RoutesCollectionInterface $routesCollection
-     * @param DIContainer $container
+     * @param ContainerInterface $container
      */
     public function __construct(
         private RequestInterface $request,
         private UriInterface $uri,
         private RoutesCollectionInterface $routesCollection,
-        private DIContainer $container,
+        private ContainerInterface $container,
     ) {
     }
 

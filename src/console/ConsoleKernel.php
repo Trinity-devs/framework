@@ -4,8 +4,8 @@ namespace trinity\console;
 
 use InvalidArgumentException;
 use ReflectionException;
-use trinity\{contracts\handlers\error\ErrorHandlerConsoleInterface,
-    DIContainer,
+use trinity\{contracts\container\ContainerInterface,
+    contracts\handlers\error\ErrorHandlerConsoleInterface,
     contracts\console\ConsoleInputInterface,
     contracts\console\ConsoleKernelInterface,
     contracts\console\ConsoleOutputInterface,
@@ -25,14 +25,14 @@ class ConsoleKernel implements ConsoleKernelInterface
      * @param ConsoleOutputInterface $output
      * @param ErrorHandlerConsoleInterface $errorHandler
      * @param EventDispatcherInterface $eventDispatcher
-     * @param DIContainer $container
+     * @param ContainerInterface $container
      */
     public function __construct(
         private ConsoleInputInterface $input,
         private ConsoleOutputInterface $output,
         private EventDispatcherInterface $eventDispatcher,
         private ErrorHandlerConsoleInterface $errorHandler,
-        private DIContainer $container,
+        private ContainerInterface $container,
     ) {
         $this->errorHandler->register();
         $this->initializeDefaultCommands();
