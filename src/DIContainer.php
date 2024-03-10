@@ -164,11 +164,13 @@ class DIContainer implements ContainerInterface
         $dependencies = [];
 
         foreach ($constructor->getParameters() as $parameter) {
-            if (interface_exists($parameter->getType()->getName()) === false && class_exists($parameter->getType()->getName()) === false) {
+            $name = $parameter->getType()?->getName() ?? '';
+
+            if (interface_exists($name) === false && class_exists($name) === false) {
                 continue;
             }
 
-            $dependencyInterface = $parameter->getType()->getName();
+            $dependencyInterface = $parameter->getType()?->getName();
             $dependencies[] = $this->singleton($dependencyInterface);
         }
 

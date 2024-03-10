@@ -14,15 +14,7 @@ use trinity\helpers\ArrayHelper;
 
 class Request extends BaseRequest implements RequestInterface
 {
-    private array $queryArg = [];
-    private array $queryArgsName = [];
-    private string $path;
-    private string $protocolVersion;
-    private string $method;
     private string $contentType;
-    private $headers;
-    private $uri;
-    private mixed $requestTarget;
     private array $queryParams;
     private array $input;
     private array $requestParams = [];
@@ -135,7 +127,7 @@ class Request extends BaseRequest implements RequestInterface
     public function getUserId(): null|int
     {
         if (ArrayHelper::keyExists('userId', $this->cookie)) {
-            return ArrayHelper::getValue($this->cookie, 'userId');
+            return (int)ArrayHelper::getValue($this->cookie, 'userId');
         }
 
         return null;
