@@ -2,6 +2,7 @@
 
 namespace trinity\http;
 
+use GuzzleHttp\Psr7\Utils;
 use Throwable;
 use trinity\api\responses\{AuthResponse, CreateResponse, DeleteResponse, HtmlResponse, JsonResponse, UpdateResponse};
 use trinity\contracts\http\{HttpKernelInterface, ResponseInterface};
@@ -38,15 +39,14 @@ class HttpKernel implements HttpKernelInterface
     {
         $responseHandlers = match (get_class($output)) {
             JsonResponse::class => function ($output) {
-                return $this->response = $this->response->withBody(json_encode($output))->withHeader(
-                    'Content-Type',
-                    'application/json'
-                );
+                return $this->response = $this->response
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)))
+                    ->withHeader('Content-Type','application/json');
             },
 
             HtmlResponse::class => function ($output) {
                 return $this->response = $this->response->withHeader('Content-Type', 'text/html')->withBody(
-                    $output
+                    Utils::streamFor($output)
                 );
             },
 
@@ -54,28 +54,28 @@ class HttpKernel implements HttpKernelInterface
                 return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(
                     201,
                     'Successful entry'
-                )->withBody(json_encode($output));
+                )->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
             },
 
             CreateResponse::class => function ($output) {
                 return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(
                     201,
                     'Created'
-                )->withBody($output);
+                )->withBody(Utils::streamFor($output));
             },
 
             DeleteResponse::class => function ($output) {
                 return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(
                     204,
                     'Successfully deleted'
-                )->withBody($output);
+                )->withBody(Utils::streamFor($output));
             },
 
             UpdateResponse::class => function ($output) {
                 return $this->response = $this->response->withHeader('Content-Type', 'application/json')->withStatus(
                     200,
                     'Successfully updated'
-                )->withBody($output);
+                )->withBody(Utils::streamFor($output));
             }
         };
 

@@ -77,17 +77,8 @@ class Response extends BaseResponse implements ResponseInterface
         511 => 'Network Authentication Required',
     ];
 
-    private string $statusCode = '200';
-    private string $reasonPhrase = 'OK';
-    private string $protocolVersion = 'HTTP/1.1';
-
     public function send(): void
     {
-        header("{$this->protocolVersion} {$this->statusCode} {$this->reasonPhrase}\r\n");
-        foreach ($this->getHeaders() as $name => $value) {
-            header($this->getHeaderLine($name));
-        }
-
-        echo $this->getBody();
+        echo $this->getBody()->getContents();
     }
 }

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace trinity\http;
 
+use GuzzleHttp\Psr7\HttpFactory;
+use GuzzleHttp\Psr7\Utils;
+use Psr\Http\Message\StreamInterface;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
 use trinity\contracts\handlers\error\ErrorHandlerHttpInterface;
 use trinity\contracts\view\ViewRendererInterface;
-use trinity\exception\baseException\ErrorException;
-use trinity\exception\baseException\Exception;
+use trinity\exception\baseException\{ErrorException, Exception};
 use trinity\exception\databaseException\PDOException;
 use trinity\helpers\ArrayHelper;
 
@@ -32,8 +34,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     public function __construct(
         private readonly ViewRendererInterface $viewRenderer,
         private readonly bool $debug,
-        private readonly string $contentType
+        private string $contentType
     ) {
+        $this->contentType = explode(',', $contentType)[0];
         ini_set('display_errors', $this->debug ? '1' : '0');
     }
 
@@ -140,13 +143,12 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
         $response = match ($this->contentType) {
             self::CONTENT_TYPE_JSON => $response->withBody(
                 $this->dataJsonException($exception)
-            )->withHeader('Content-Type', self::CONTENT_TYPE_JSON),
+            )->withHeader('content-Type', self::CONTENT_TYPE_JSON),
             self::CONTENT_TYPE_HTML => $response->withBody(
                 $this->renderHtmlException($exception)
-            )->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
+            )->withHeader('content-Type', self::CONTENT_TYPE_HTML),
             default => var_dump($exception)
         };
-
         $response->withStatus($this->getStatusCode($exception), $this->getExceptionName($exception))->send();
     }
 
@@ -272,11 +274,11 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return string
+     * @return StreamInterface
      * @throws ReflectionException
      * @throws Throwable
      */
-    private function dataJsonException(Throwable $exception): string
+    private function dataJsonException(Throwable $exception): StreamInterface
     {
         $traceItem = ArrayHelper::getValue($exception->getTrace(), '0');
 
@@ -330,7 +332,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             ];
         }
 
-        return json_encode($body);
+        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+
+        return Utils::streamFor($json);
     }
 
     /**
@@ -344,16 +348,20 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
 
     /**
      * @param Throwable $exception
-     * @return string
+     * @return StreamInterface
      * @throws Throwable
      */
-    private function renderHtmlException(Throwable $exception): string
+    private function renderHtmlException(Throwable $exception): StreamInterface
     {
         if ($this->debug === true) {
-            return $this->renderFile('errorHandler/exception', ['exception' => $exception]);
+            $html = $this->renderFile('errorHandler/exception', ['exception' => $exception]);
+
+            return Utils::streamFor($html);
         }
 
-        return $this->renderFile('errorHandler/error', ['exception' => $exception]);
+        $html = $this->renderFile('errorHandler/error', ['exception' => $exception]);
+
+        return Utils::streamFor($html);
     }
 
     /**
