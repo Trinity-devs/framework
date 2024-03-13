@@ -17,9 +17,10 @@ final class HttpKernel implements HttpKernelInterface
      * @param ResponseInterface $response
      */
     public function __construct(
-        private RouterInterface $router,
+        private RouterInterface   $router,
         private ResponseInterface $response,
-    ) {
+    )
+    {
     }
 
     /**
@@ -43,7 +44,7 @@ final class HttpKernel implements HttpKernelInterface
             JsonResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)))
-                    ->withHeader('Content-Type','application/json');
+                    ->withHeader('Content-Type', 'application/json');
             },
 
             HtmlResponse::class => function ($output) {
@@ -55,28 +56,28 @@ final class HttpKernel implements HttpKernelInterface
             AuthResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(201,'Successful entry')
+                    ->withStatus(201, 'Successful entry')
                     ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)));
             },
 
             CreateResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(201,'Created')
+                    ->withStatus(201, 'Created')
                     ->withBody(Utils::streamFor($output));
             },
 
             DeleteResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(204,'Successfully deleted')
+                    ->withStatus(204, 'Successfully deleted')
                     ->withBody(Utils::streamFor($output));
             },
 
             UpdateResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(200,'Successfully updated')
+                    ->withStatus(200, 'Successfully updated')
                     ->withBody(Utils::streamFor($output));
             }
         };
