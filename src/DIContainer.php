@@ -22,7 +22,6 @@ class DIContainer implements ContainerInterface
     private function __construct(array $config)
     {
         $this->dependentsList = $config;
-        $this->singleton(ErrorHandlerHttpInterface::class)->register();
     }
 
     /**
