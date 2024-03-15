@@ -11,8 +11,8 @@ final class NotFoundHttpException extends HttpException
      * @param $code
      * @param $previous
      */
-    public function __construct($message = null, $code = 404, $previous = null)
+    public function __construct($message = null, $code, $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct(404, $message, $code, $previous);
     }
 }

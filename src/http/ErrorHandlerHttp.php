@@ -342,7 +342,11 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getStatusCode(): int
     {
-        return $this->exception->getCode() !== 0 ? $this->exception->getCode() : 500;
+        if (method_exists($this->exception, 'getStatusCode') === true) {
+            return $this->exception->getStatusCode();
+        }
+
+        return 500;
     }
 
     /**
