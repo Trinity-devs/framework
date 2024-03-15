@@ -31,7 +31,7 @@ class Request extends BaseRequest implements RequestInterface
     {
         parent::__construct($server['REQUEST_METHOD'], $server['REQUEST_URI'], getallheaders());
         $this->queryParams = $get;
-        $this->contentType = $_SERVER['CONTENT_TYPE'] !== '' ? $_SERVER['CONTENT_TYPE'] : $_SERVER['HTTP_ACCEPT'];
+        $this->contentType = 'application/json';
         $this->input = $post;
         $this->cookie = $cookie;
     }
