@@ -103,10 +103,10 @@ class Request extends BaseRequest implements RequestInterface
     }
 
     /**
-     * @param object $params (param DTO object)
+     * @param object|array $params (param DTO object)
      * @return void
      */
-    public function setIdentityParams(object $params): void
+    public function setIdentityParams(object|array $params): void
     {
         $this->identity = $params;
     }

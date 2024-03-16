@@ -42,7 +42,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
     public function register(): void
     {
@@ -56,13 +56,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param int $code
-     * @param string $message
-     * @param string $file
-     * @param int $line
-     * @return bool
-     * @throws ErrorException
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
@@ -76,8 +70,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param Throwable $exception
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleException(Throwable $exception): void
     {
@@ -99,8 +92,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return void
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleFatalError(): void
     {
@@ -168,7 +160,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getExceptionName(): string
     {
@@ -182,8 +174,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param string $text
-     * @return string
+     * @inheritDoc
      */
     public function htmlEncode(string $text): string
     {
@@ -191,8 +182,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return string
-     * @throws Throwable
+     * @inheritDoc
      */
     public function renderCallStack(): string
     {
@@ -264,8 +254,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param string $file
-     * @return bool
+     * @inheritDoc
      */
     public function isCoreFile(string $file): bool
     {
@@ -337,7 +326,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return int
+     * @inheritDoc
      */
     public function getStatusCode(): int
     {
