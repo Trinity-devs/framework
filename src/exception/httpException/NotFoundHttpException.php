@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace trinity\exception\httpException;
 
+use trinity\enum\ExceptionStatusCode;
+
 final class NotFoundHttpException extends HttpException
 {
-    /**
-     * @param $message
-     * @param $code
-     * @param $previous
-     */
-    public function __construct($message = null, $code, $previous = null)
+    protected function getStatusCodeEnum(): ExceptionStatusCode
     {
-        parent::__construct(404, $message, $code, $previous);
+        return ExceptionStatusCode::NotFound;
     }
 }

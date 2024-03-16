@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace trinity\http;
 
-use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 use ReflectionClass;

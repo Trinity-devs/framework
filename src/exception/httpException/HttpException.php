@@ -6,35 +6,35 @@ namespace trinity\exception\httpException;
 
 use Throwable;
 use trinity\contracts\exception\ExceptionInterface;
+use trinity\enum\ExceptionStatusCode;
 use trinity\exception\baseException\Exception;
-use trinity\http\Response;
 
 abstract class HttpException extends Exception implements ExceptionInterface
 {
     private int $statusCode;
+    private string $statusMessage;
 
-    /**
-     * @param int $status
-     * @param string|null $message
-     * @param int $code
-     * @param Throwable|null $previous
-     */
-    public function __construct(int $status = 500, string|null $message = null, int $code = 0, Throwable $previous = null)
+    public function __construct(?string $message = null, int $code = 0, Throwable $previous = null)
     {
-        $this->statusCode = $status;
-        parent::__construct((string)$message, $code, $previous);
+        $status = $this->getStatusCodeEnum();
+        $this->statusCode = $status->value;
+        $this->statusMessage = $message ?? $status->getMessage();
+
+        parent::__construct($this->statusMessage, $code, $previous);
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string
+    protected function getStatusCodeEnum(): ExceptionStatusCode
     {
-        return Response::$httpStatuses[$this->statusCode];
+        return ExceptionStatusCode::InternalServerError;
     }
 
     public function getStatusCode(): int
     {
         return $this->statusCode;
+    }
+
+    public function getName(): string
+    {
+        return $this->statusMessage;
     }
 }
