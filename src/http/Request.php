@@ -18,7 +18,7 @@ class Request extends BaseRequest implements RequestInterface
     private array $queryParams;
     private array $input;
     private array $requestParams = [];
-    private object|array $identity = [];
+    private object|null $identity = null;
     private array $cookie;
 
     /**
@@ -112,10 +112,14 @@ class Request extends BaseRequest implements RequestInterface
     }
 
     /**
-     * @return object|array
+     * @return object
      */
-    public function getIdentity(): object|array
+    public function getIdentity(): object
     {
+        if ($this->identity === null) {
+            throw new InvalidArgumentException('Identity не инициализирован');
+        }
+
         return $this->identity;
     }
 

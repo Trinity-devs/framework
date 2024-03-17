@@ -5,7 +5,10 @@
 Формат основан на [стандарте формата CHANGELOG](https://keepachangelog.com/en/1.0.0/),
 и придерживается [правил версионирования](https://semver.org/spec/v2.0.0.html).
 
+## [ [0.7.1](https://github.com/Trinity-devs/framework/releases/tag/0.7.1) ] - 17.03.2024
+
 - Исправлено:
+  - Исправлено свойство identity
   - Исправлен вызов ErrorHandler из DiContainer
 
 ## [ [0.7.0](https://github.com/Trinity-devs/framework/releases/tag/0.7.0) ] - 10.03.2024
