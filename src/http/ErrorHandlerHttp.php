@@ -164,10 +164,6 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
      */
     public function getExceptionName(): string
     {
-        if ($this->exception instanceof Exception || $this->exception instanceof PDOException) {
-            return $this->exception->getName();
-        }
-
         $classNameParts = explode('\\', get_class($this->exception));
 
         return end($classNameParts);
@@ -320,7 +316,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             ];
         }
 
-        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         return Utils::streamFor($json);
     }

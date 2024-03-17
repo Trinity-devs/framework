@@ -32,9 +32,4 @@ abstract class HttpException extends Exception implements ExceptionInterface
     {
         return $this->statusCode;
     }
-
-    public function getName(): string
-    {
-        return $this->statusMessage;
-    }
 }
