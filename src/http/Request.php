@@ -108,7 +108,13 @@ class Request extends BaseRequest implements RequestInterface
      */
     public function setIdentityParams(object|array $params): void
     {
-        $this->identity = $params;
+        if ($this->identity === null) {
+            $this->identity = $params;
+
+            return;
+        }
+
+        throw new InvalidArgumentException('Identity инициализирован другим обьектом: ' . get_class($this->identity));
     }
 
     /**
