@@ -10,6 +10,7 @@
 - Исправлено:
   - Исправлено свойство identity
   - Исправлен вызов ErrorHandler из DiContainer
+  - Исправлен работа со Stream
 
 ## [ [0.7.0](https://github.com/Trinity-devs/framework/releases/tag/0.7.0) ] - 10.03.2024
 

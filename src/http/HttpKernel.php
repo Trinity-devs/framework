@@ -81,11 +81,10 @@ final class HttpKernel implements HttpKernelInterface
                     ->withBody(Utils::streamFor($output));
             },
             Response::class => function ($output) {
-                return $this->response;
+                return $output;
             }
         };
 
-//        return $responseHandlers($output);
-        return $responseHandlers($output->data);
+        return $responseHandlers($output);
     }
 }
