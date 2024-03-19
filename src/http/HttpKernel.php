@@ -17,10 +17,9 @@ final class HttpKernel implements HttpKernelInterface
      * @param ResponseInterface $response
      */
     public function __construct(
-        private RouterInterface   $router,
+        private RouterInterface $router,
         private ResponseInterface $response,
-    )
-    {
+    ) {
     }
 
     /**
@@ -50,7 +49,7 @@ final class HttpKernel implements HttpKernelInterface
             HtmlResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'text/html')
-                    ->withBody(Utils::streamFor($output));
+                    ->withBody(Utils::streamFor($output->data));
             },
 
             AuthResponse::class => function ($output) {
