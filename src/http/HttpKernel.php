@@ -63,21 +63,21 @@ final class HttpKernel implements HttpKernelInterface
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(201, 'Created')
-                    ->withBody(Utils::streamFor($output));
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
             },
 
             DeleteResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(204, 'Successfully deleted')
-                    ->withBody(Utils::streamFor($output));
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
             },
 
             UpdateResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(200, 'Successfully updated')
-                    ->withBody(Utils::streamFor($output));
+                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
             },
             Response::class => function ($output) {
                 return $output;
