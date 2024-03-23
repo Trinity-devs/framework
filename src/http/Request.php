@@ -142,4 +142,13 @@ class Request extends BaseRequest implements RequestInterface
 
         return null;
     }
+
+    public function getAccessToken(): null|string
+    {
+        if (ArrayHelper::keyExists('access_token', $this->cookie)) {
+            return ArrayHelper::getValue($this->cookie, 'access_token');
+        }
+
+        return null;
+    }
 }
