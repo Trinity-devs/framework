@@ -42,44 +42,69 @@ final class HttpKernel implements HttpKernelInterface
         $responseHandlers = match (get_class($output)) {
             JsonResponse::class => function ($output) {
                 return $this->response = $this->response
-                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)))
+                    ->withBody(
+                        Utils::streamFor(
+                            json_encode(
+                                $output->data,
+                                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                            ))
+                    )
                     ->withHeader('Content-Type', 'application/json');
             },
-
             HtmlResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'text/html')
                     ->withBody(Utils::streamFor($output->data));
             },
-
             AuthResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(201, 'Successful entry')
-                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
+                    ->withBody(
+                        Utils::streamFor(
+                            json_encode(
+                                $output->data,
+                                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                            ))
+                    );
             },
-
             CreateResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(201, 'Created')
-                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
+                    ->withBody(
+                        Utils::streamFor(
+                            json_encode(
+                                $output->data,
+                                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                            ))
+                    );
             },
-
             DeleteResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(204, 'Successfully deleted')
-                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
+                    ->withBody(
+                        Utils::streamFor(
+                            json_encode(
+                                $output->data,
+                                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                            ))
+                    );
             },
-
             UpdateResponse::class => function ($output) {
                 return $this->response = $this->response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(200, 'Successfully updated')
-                    ->withBody(Utils::streamFor(json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)));
+                    ->withBody(
+                        Utils::streamFor(
+                            json_encode(
+                                $output->data,
+                                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                            ))
+                    );
             },
-            Response::class => function ($output) {
+            Response::class => static function ($output) {
                 return $output;
             }
         };
