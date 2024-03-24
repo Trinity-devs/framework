@@ -9,4 +9,5 @@ use Throwable;
 interface ExceptionInterface extends Throwable
 {
     public function getName(): string;
+    public function getStatusCode(): int;
 }

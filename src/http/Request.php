@@ -31,7 +31,7 @@ class Request extends BaseRequest implements RequestInterface
     {
         parent::__construct($server['REQUEST_METHOD'], $server['REQUEST_URI'], getallheaders());
         $this->queryParams = $get;
-        $this->contentType = $_SERVER['CONTENT_TYPE'] !== '' ? $_SERVER['CONTENT_TYPE'] : $_SERVER['HTTP_ACCEPT'];
+        $this->contentType = $_SERVER['CONTENT_TYPE'] ?? 'application/json';
         $this->input = $post;
         $this->cookie = $cookie;
     }
@@ -103,10 +103,10 @@ class Request extends BaseRequest implements RequestInterface
     }
 
     /**
-     * @param object $params (param DTO object)
+     * @param object|array $params (param DTO object)
      * @return void
      */
-    public function setIdentityParams(object $params): void
+    public function setIdentityParams(object|array $params): void
     {
         if ($this->identity === null) {
             $this->identity = $params;
@@ -138,6 +138,15 @@ class Request extends BaseRequest implements RequestInterface
     {
         if (ArrayHelper::keyExists('userId', $this->cookie)) {
             return (int)ArrayHelper::getValue($this->cookie, 'userId');
+        }
+
+        return null;
+    }
+
+    public function getAccessToken(): null|string
+    {
+        if (ArrayHelper::keyExists('access_token', $this->cookie)) {
+            return ArrayHelper::getValue($this->cookie, 'access_token');
         }
 
         return null;
