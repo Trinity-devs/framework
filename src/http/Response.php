@@ -90,6 +90,6 @@ class Response extends BaseResponse implements ResponseInterface
             }
         }
 
-        echo $this->getBody()->getContents();
+       echo "{$this->getBody()}";
     }
 }

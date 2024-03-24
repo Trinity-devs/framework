@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace trinity\http;
 
-use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\StreamInterface;
 use ReflectionClass;
@@ -43,7 +42,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
     public function register(): void
     {
@@ -57,13 +56,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param int $code
-     * @param string $message
-     * @param string $file
-     * @param int $line
-     * @return bool
-     * @throws ErrorException
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleError(int $code, string $message, string $file, int $line): bool
     {
@@ -77,8 +70,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param Throwable $exception
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleException(Throwable $exception): void
     {
@@ -100,8 +92,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return void
-     * @throws Throwable
+     * @inheritDoc
      */
     public function handleFatalError(): void
     {
@@ -149,7 +140,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             self::CONTENT_TYPE_HTML => $response
                 ->withBody($this->renderHtmlException())
                 ->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
-            default => var_dump($this->exception)
+            default => $response
+                ->withBody($this->dataJsonException())
+                ->withAddedHeader('Content-Type', self::CONTENT_TYPE_JSON)
         };
 
         $response->send();
@@ -169,22 +162,17 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getExceptionName(): string
     {
-        if ($this->exception instanceof Exception || $this->exception instanceof PDOException) {
-            return $this->exception->getName();
-        }
-
         $classNameParts = explode('\\', get_class($this->exception));
 
         return end($classNameParts);
     }
 
     /**
-     * @param string $text
-     * @return string
+     * @inheritDoc
      */
     public function htmlEncode(string $text): string
     {
@@ -192,8 +180,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @return string
-     * @throws Throwable
+     * @inheritDoc
      */
     public function renderCallStack(): string
     {
@@ -265,8 +252,7 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
     }
 
     /**
-     * @param string $file
-     * @return bool
+     * @inheritDoc
      */
     public function isCoreFile(string $file): bool
     {
@@ -332,17 +318,21 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             ];
         }
 
-        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        $json = json_encode($body, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         return Utils::streamFor($json);
     }
 
     /**
-     * @return int
+     * @inheritDoc
      */
     public function getStatusCode(): int
     {
-        return $this->exception->getCode() !== 0 ? $this->exception->getCode() : 500;
+        if (method_exists($this->exception, 'getStatusCode') === true) {
+            return $this->exception->getStatusCode();
+        }
+
+        return 500;
     }
 
     /**
