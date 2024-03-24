@@ -140,7 +140,9 @@ final class ErrorHandlerHttp implements ErrorHandlerHttpInterface
             self::CONTENT_TYPE_HTML => $response
                 ->withBody($this->renderHtmlException())
                 ->withHeader('Content-Type', self::CONTENT_TYPE_HTML),
-            default => var_dump($this->exception)
+            default => $response
+                ->withBody($this->dataJsonException())
+                ->withAddedHeader('Content-Type', self::CONTENT_TYPE_JSON)
         };
 
         $response->send();
