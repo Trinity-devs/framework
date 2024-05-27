@@ -7,7 +7,9 @@ namespace trinity\http;
 use GuzzleHttp\Psr7\Request as BaseRequest;
 use JsonException;
 use Throwable;
+use trinity\contracts\entity\EntityInterface;
 use trinity\contracts\http\RequestInterface;
+use trinity\exception\baseException\Exception;
 use trinity\exception\baseException\InvalidArgumentException;
 use trinity\exception\httpException\NotFoundHttpException;
 use trinity\helpers\ArrayHelper;
@@ -18,7 +20,7 @@ class Request extends BaseRequest implements RequestInterface
     private array $queryParams;
     private array $input;
     private array $requestParams = [];
-    private object|null $identity = null;
+    private EntityInterface|null $identity = null;
     private array $cookie;
 
     /**
@@ -68,12 +70,25 @@ class Request extends BaseRequest implements RequestInterface
      */
     private function getParsedBody(string|null $name = null): array|string
     {
+        if (empty($this->input) === false) {
+            if ($name === null) {
+                return $this->input;
+            }
+
+            if (array_key_exists($name, $this->input) === false) {
+                throw new NotFoundHttpException("Параметр $name не найден");
+            }
+
+            return $this->input[$name];
+        }
+
+        $post = [];
         if ($this->contentType === 'application/x-www-form-urlencoded') {
-            parse_str(file_get_contents('php://input'), $this->input);
+            parse_str(file_get_contents('php://input'), $post);
         }
 
         if ($this->contentType === 'application/json') {
-            $this->input = json_decode
+            $post = json_decode
             (
                 file_get_contents('php://input'),
                 true,
@@ -83,14 +98,14 @@ class Request extends BaseRequest implements RequestInterface
         }
 
         if ($name === null) {
-            return $this->input;
+            return $post;
         }
 
-        if (array_key_exists($name, $this->input) === false) {
+        if (array_key_exists($name, $post) === false) {
             throw new NotFoundHttpException("Параметр $name не найден");
         }
 
-        return $this->input !== [] ? $this->input[$name] : [];
+        return $post !== [] ? $post[$name] : [];
     }
 
     /**
@@ -103,11 +118,17 @@ class Request extends BaseRequest implements RequestInterface
     }
 
     /**
-     * @param object|array $params (param DTO object)
+     * @param EntityInterface|null $params (param DTO object)
      * @return void
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
-    public function setIdentityParams(object|array $params): void
+    public function setIdentityParams(EntityInterface|null $params): void
     {
+        if ($params === null) {
+            throw new Exception('Нельзя создать UserEntity с пустыми параметрами');
+        }
+
         if ($this->identity === null) {
             $this->identity = $params;
 
@@ -118,9 +139,9 @@ class Request extends BaseRequest implements RequestInterface
     }
 
     /**
-     * @return object
+     * @return EntityInterface
      */
-    public function getIdentity(): object
+    public function getIdentity(): EntityInterface
     {
         if ($this->identity === null) {
             throw new InvalidArgumentException('Identity не инициализирован');
@@ -136,17 +157,24 @@ class Request extends BaseRequest implements RequestInterface
      */
     public function getUserId(): null|int
     {
-        if (ArrayHelper::keyExists('userId', $this->cookie)) {
-            return (int)ArrayHelper::getValue($this->cookie, 'userId');
-        }
-
-        return null;
+        return $this->getCookie('userId');
     }
 
     public function getAccessToken(): null|string
     {
-        if (ArrayHelper::keyExists('access_token', $this->cookie)) {
-            return ArrayHelper::getValue($this->cookie, 'access_token');
+       return $this->getCookie('access_token');
+    }
+
+    public function getCookie(string $name): null|string|int
+    {
+        if (ArrayHelper::keyExists($name, $this->cookie)) {
+            $value = ArrayHelper::getValue($this->cookie, $name);
+
+            if (is_numeric($value)) {
+                return (int)$value;
+            }
+
+            return $value;
         }
 
         return null;

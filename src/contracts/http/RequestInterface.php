@@ -5,6 +5,8 @@ namespace trinity\contracts\http;
 use JsonException;
 use Psr\Http\Message\RequestInterface as BaseRequestInterface;
 use Throwable;
+use trinity\contracts\entity\EntityInterface;
+use trinity\exception\baseException\Exception;
 use trinity\exception\baseException\InvalidArgumentException;
 use trinity\exception\httpException\NotFoundHttpException;
 
@@ -41,17 +43,19 @@ interface RequestInterface extends BaseRequestInterface
     /**
      * Sets the identity parameters of the request.
      *
-     * @param object|array $params The identity parameters to be set.
+     * @param EntityInterface|null $params (param DTO object)
      * @return void
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
-    public function setIdentityParams(object|array $params): void;
+    public function setIdentityParams(EntityInterface|null $params): void;
 
     /**
      * Retrieves the identity parameters of the request.
      *
-     * @return object|array The identity parameters of the request.
+     * @return EntityInterface The identity parameters of the request.
      */
-    public function getIdentity(): object|array;
+    public function getIdentity(): EntityInterface;
 
     /**
      * Attempts to retrieve the user ID from the cookie data.
@@ -61,4 +65,8 @@ interface RequestInterface extends BaseRequestInterface
      * @throws Throwable If an unexpected error occurs.
      */
     public function getUserId(): null|int;
+
+    public function getCookie(string $name): null|string|int;
+
+    public function getAccessToken(): null|string;
 }
