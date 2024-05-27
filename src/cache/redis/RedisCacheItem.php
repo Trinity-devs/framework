@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace trinity\cache\redis;
 
 use DateInterval;
-use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
+use InvalidArgumentException;
 use Psr\Cache\CacheItemInterface;
 
 final class RedisCacheItem implements CacheItemInterface
 {
-    private mixed $value;
-    public int|null $ttl = null;
-    public bool $isHit;
+    private string $key;
+    private mixed $value = null;
+    private ?DateTimeInterface $expiresAt;
+    private bool $isHit;
 
-    public function __construct(private readonly string $key)
+    public function __construct(string $key)
     {
+        $this->key = $key;
         $this->isHit = false;
     }
 
@@ -38,39 +41,41 @@ final class RedisCacheItem implements CacheItemInterface
     public function set(mixed $value): static
     {
         $this->value = $value;
+
         return $this;
     }
 
-    public function expiresAt(DateTimeInterface|null $expiration): static
+    public function expiresAt(?DateTimeInterface $expiration): static
     {
-        if ($expiration instanceof DateTimeInterface) {
-            $now = new DateTime();
-            $this->ttl = $expiration->getTimestamp() - $now->getTimestamp();
-
-            return $this;
-        }
-
-        $this->ttl = null;
+        $this->expiresAt = $expiration;
 
         return $this;
     }
 
     public function expiresAfter(DateInterval|int|null $time): static
     {
+        if ($time instanceof DateInterval === false && is_int($time) === false) {
+            throw new InvalidArgumentException('Invalid time value provided.');
+        }
+
         if ($time instanceof DateInterval) {
-            $this->ttl = (new DateTime())->add($time)->getTimestamp() - time();
-
-            return $this;
+            $this->expiresAt = (new DateTimeImmutable())->add($time);
         }
 
-        if (is_numeric($time)) {
-            $this->ttl = $time;
-
-            return $this;
+        if (is_int($time)) {
+            $this->expiresAt = (new DateTimeImmutable())->modify("+{$time} seconds");
         }
-
-        $this->ttl = null;
 
         return $this;
+    }
+
+    public function setIsHit(bool $isHit): void
+    {
+        $this->isHit = $isHit;
+    }
+
+    public function getExpiration(): ?DateTimeInterface
+    {
+        return $this->expiresAt;
     }
 }

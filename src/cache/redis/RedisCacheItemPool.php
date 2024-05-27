@@ -7,41 +7,44 @@ namespace trinity\cache\redis;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\CacheItemInterface;
 use Redis;
-use RedisException;
 
 final class RedisCacheItemPool implements CacheItemPoolInterface
 {
-    private array $deferred = [];
+    private array $deferredItems;
 
-    public function __construct(private readonly Redis $redis)
-    {
+    public function __construct(
+        private readonly Redis $redis,
+    ) {
     }
 
     /**
-     * @param string $key
-     * @return CacheItemInterface
-     * @throws RedisException
+     * @inheritDoc
      */
     public function getItem(string $key): CacheItemInterface
     {
-        $value = $this->redis->get($key);
         $item = new RedisCacheItem($key);
+        $value = $this->redis->get($key);
 
         if ($value !== false) {
-            $item->set(unserialize($value))->isHit = true;
+            $item->set(unserialize($value));
+            $item->expiresAt($this->redis->ttl($key) > 0 ? new \DateTimeImmutable('+' . $this->redis->ttl($key) . ' seconds') : null);
+            $item->setIsHit(true);
         }
 
         return $item;
     }
 
     /**
-     * @param array $keys
-     * @return iterable
-     * @throws RedisException
+     * @inheritDoc
      */
     public function getItems(array $keys = []): iterable
     {
+        if (count($keys) === 0) {
+            return $this->getAllItems();
+        }
+
         $items = [];
+
         foreach ($keys as $key) {
             $items[$key] = $this->getItem($key);
         }
@@ -50,18 +53,15 @@ final class RedisCacheItemPool implements CacheItemPoolInterface
     }
 
     /**
-     * @param string $key
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function hasItem(string $key): bool
     {
-        return $this->redis->exists($key) > 0;
+        return $this->redis->exists($key);
     }
 
     /**
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function clear(): bool
     {
@@ -69,9 +69,7 @@ final class RedisCacheItemPool implements CacheItemPoolInterface
     }
 
     /**
-     * @param string $key
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function deleteItem(string $key): bool
     {
@@ -79,55 +77,92 @@ final class RedisCacheItemPool implements CacheItemPoolInterface
     }
 
     /**
-     * @param array $keys
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function deleteItems(array $keys): bool
     {
-        return $this->redis->del($keys) === count($keys);
+        $deletedCount = $this->redis->del($keys);
+
+        return $deletedCount === count($keys);
     }
 
     /**
-     * @param CacheItemInterface $item
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function save(CacheItemInterface $item): bool
     {
         $key = $item->getKey();
-        $value = serialize($item->get());
+        $value = $item->get();
+        $expiration = $item->getExpiration();
 
-        if ($item->ttl !== null) {
-            return $this->redis->setex($key, $item->ttl, $value);
+        $seconds = null;
+
+        if (is_array($value) || is_object($value)) {
+            $value = serialize($value);
         }
 
-        return $this->redis->set($key, $value);
+        if ($seconds === null) {
+            return $this->redis->set($key, $value);
+        }
+
+        if ($expiration instanceof \DateTimeInterface) {
+            $seconds = $expiration->getTimestamp() - time();
+        }
+
+        if ($seconds !== null && $seconds > 0) {
+            return $this->redis->setex($key, $seconds, $value);
+        }
+
+        return false;
     }
 
     /**
-     * @param CacheItemInterface $item
-     * @return bool
+     * @inheritDoc
      */
     public function saveDeferred(CacheItemInterface $item): bool
     {
-        $this->deferred[$item->getKey()] = $item;
+        $this->deferredItems[] = $item;
 
         return true;
     }
 
     /**
-     * @return bool
-     * @throws RedisException
+     * @inheritDoc
      */
     public function commit(): bool
     {
-        foreach ($this->deferred as $item) {
-            $this->save($item);
+        foreach ($this->deferredItems as $item) {
+            if ($this->save($item) === false) {
+                return false;
+            }
         }
 
-        $this->deferred = [];
+        $this->deferredItems = [];
 
         return true;
+    }
+
+    public function getAllItems(): array
+    {
+        $items = [];
+
+        $keys = $this->getKeys();
+
+        foreach ($keys as $key) {
+            $item = $this->getItem($key);
+
+            if ($item instanceof CacheItemInterface) {
+                $items[$key] = $item;
+            }
+        }
+
+        return $items;
+    }
+
+    public function getKeys(): array
+    {
+        $keys = $this->redis->keys('*');
+
+        return $keys ?: [];
     }
 }
