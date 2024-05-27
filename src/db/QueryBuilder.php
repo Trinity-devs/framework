@@ -1,47 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace trinity\db;
 
-use Throwable;
 use trinity\contracts\database\DatabaseConnectionInterface;
 use trinity\contracts\database\QueryBuilderInterface;
-use trinity\exception\databaseException\PDOException;
 
 class QueryBuilder implements QueryBuilderInterface
 {
-    private string $select = '';
+    private string $select = '*';
     private string $table = '';
     private string $where = '';
     private array $bindings = [];
     private array $values = [];
     private array $join = [];
+    private string $orderBy = '';
+    private string $limit = '';
+    private string $like = '';
 
     public function __construct(
         private readonly DatabaseConnectionInterface $connection
     ) {
     }
 
-    /**
-     * @param array|string $columns
-     * @return $this
-     */
     public function select(array|string $columns = '*'): self
     {
-        if (is_array($columns) === true) {
-            $this->select = implode(', ', $columns);
-        }
-
-        if (is_array($columns) === false) {
-            $this->select = $columns;
-        }
+        $this->select = is_array($columns) ? implode(', ', $columns) : $columns;
 
         return $this;
     }
 
-    /**
-     * @param string $table
-     * @return $this
-     */
     public function from(string $table): self
     {
         $this->table = trim($table);
@@ -49,384 +38,264 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    /**
-     * @param array $conditions
-     * @return $this
-     */
     public function where(array $conditions): self
     {
+        $this->where = $this->prepareBindings($conditions);
+
+        return $this;
+    }
+
+    public function andWhere(array $conditions): self
+    {
+        return $this->appendWhere($conditions, 'AND');
+    }
+
+    public function orWhere(array $conditions): self
+    {
+        return $this->appendWhere($conditions, 'OR');
+    }
+
+    private function appendWhere(array $conditions, string $operator): self
+    {
         $whereClause = $this->prepareBindings($conditions);
+        if ($this->where !== '') {
+            $this->where .= " $operator $whereClause";
+
+            return $this;
+        }
 
         $this->where = $whereClause;
 
         return $this;
     }
 
-    /**
-     * @param array $conditions
-     * @return $this
-     */
-    public function andWhere(array $conditions): self
+    public function join(string $table, string $first, string $operator, string $second): self
     {
-        $whereClause = $this->prepareBindings(array_merge($this->bindings, $conditions));
-
-        if ($this->where !== '') {
-            $this->where .= " AND $whereClause";
-        }
-
-        if ($this->where === '') {
-            $this->where = $whereClause;
-        }
+        $this->join[] = "JOIN $table ON $first $operator $second";
 
         return $this;
     }
 
-    /**
-     * @param array $conditions
-     * @return $this
-     */
-    public function orWhere(array $conditions): self
+    public function leftJoin(string $table, string $first, string $operator, string $second): self
     {
-        $whereClause = $this->prepareBindings(array_merge($this->bindings, $conditions));
-
-        if ($this->where !== '') {
-            $this->where .= " OR $whereClause";
-        }
-
-        if ($this->where === '') {
-            $this->where = $whereClause;
-        }
+        $this->join[] = "LEFT JOIN $table ON $first $operator $second";
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
+    public function rightJoin(string $table, string $first, string $operator, string $second): self
+    {
+        $this->join[] = "RIGHT JOIN $table ON $first $operator $second";
+
+        return $this;
+    }
+
+    public function limit(int $limit): self
+    {
+        $this->limit = "LIMIT $limit";
+
+        return $this;
+    }
+
+    public function orderBy(string $column, string $direction = 'ASC'): self
+    {
+        $this->orderBy = "ORDER BY $column $direction";
+
+        return $this;
+    }
+
+    public function like(string $column, string $pattern): self
+    {
+        $this->like = "$column LIKE ?";
+        $this->bindings[] = $pattern;
+
+        return $this;
+    }
+
+    private function prepareBindings(array $conditions): string
+    {
+        $bindings = [];
+        foreach ($conditions as $column => $value) {
+            $bindings[] = "$column = ?";
+            $this->bindings[] = $value;
+        }
+
+        return implode(' AND ', $bindings);
+    }
+
+    private function get(): array
+    {
+        $query = "SELECT $this->select FROM $this->table ";
+
+        if (empty($this->join) === false) {
+            $query .= implode(' ', $this->join) . ' ';
+        }
+
+        if ($this->where !== '') {
+            $query .= "WHERE $this->where ";
+        }
+
+        if ($this->like !== '') {
+            $query .= ($this->where !== '' ? 'AND ' : 'WHERE ') . $this->like . ' ';
+        }
+
+        if ($this->orderBy !== '') {
+            $query .= $this->orderBy . ' ';
+        }
+
+        if ($this->limit !== '') {
+            $query .= $this->limit . ' ';
+        }
+
+        return $this->connection->execute($query, $this->bindings);
+    }
+
     public function one(): array
     {
-        try {
-            $query = $this->prepareQuery();
+        $this->limit(1);
+        $results = $this->get();
 
-            $result = $this->fetch($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-
-        if ($result !== []) {
-            return array_shift($result);
-        }
-
-        return $result;
+        return $results[0] ?? [];
     }
 
-    /**
-     * @return array
-     */
     public function all(): array
     {
-        try {
-            $query = $this->prepareQuery();
-
-            return $this->fetch($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
+        return $this->get();
     }
 
-    /**
-     * @param string $query
-     * @param array $bindings
-     * @return int
-     */
-    public function exec(string $query, array $bindings = []): int
+    public function scalar(): mixed
     {
-        try {
-            return $this->connection->exec($query, $bindings);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
+        $this->limit(1);
+        $results = $this->get();
+        $firstRow = $results[0] ?? [];
+
+        return reset($firstRow) ?: null;
     }
 
-    /**
-     * @param string $query
-     * @param array $bindings
-     * @return false|array
-     */
-    public function execute(string $query, array $bindings = []): false|array
+    public function delete(): int
     {
-        try {
-            return $this->connection->execute($query, $bindings);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
+        $query = "DELETE FROM $this->table ";
+        if ($this->where !== '') {
+            $query .= "WHERE $this->where ";
         }
+        
+        return $this->connection->exec($query, $this->bindings);
     }
 
-    /**
-     * @param string $tableName
-     * @param array $values
-     * @param string|null $condition
-     * @param array $bindings
-     * @return int
-     */
+    public function update(array $values): int
+    {
+        $setClause = implode(', ', array_map(fn($col) => "$col = ?", array_keys($values)));
+        $query = "UPDATE $this->table SET $setClause ";
+        if ($this->where !== '') {
+            $query .= "WHERE $this->where ";
+        }
+
+        return $this->connection->exec($query, array_merge(array_values($values), $this->bindings));
+    }
+
     public function insert(string $tableName, array $values, string $condition = null, array $bindings = []): int
     {
-        try {
-            return $this->connection->insert($tableName, $values, $condition, $bindings);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
+        $columns = implode(", ", array_keys($values));
+        $placeholders = implode(", ", array_fill(0, count($values), "?"));
+        $query = "INSERT INTO $tableName ($columns) VALUES ($placeholders)";
+
+        if ($condition !== null) {
+            $query .= " $condition";
         }
+
+        return $this->connection->exec($query, array_merge(array_values($values), $bindings));
     }
 
     public function batchInsert(string $tableName, array $values, array $bindings = []): int
     {
-        $this->table = $tableName;
-        $this->values = $values;
-        $this->where = $this->prepareBindings($bindings);
+        $columns = implode(", ", array_keys($values[0]));
+        $placeholders = implode(", ", array_fill(0, count($values[0]), "?"));
+        $allPlaceholders = implode(", ", array_fill(0, count($values), "($placeholders)"));
+        $query = "INSERT INTO $tableName ($columns) VALUES $allPlaceholders";
 
-        $setValues = [];
-        $columnImplode = [];
-
-        foreach ($values as $column => $value) {
-            $columnImplode[] = $column;
-            $setValues[] = ":$column";
-        }
-
-        $columns = implode(", ", $columnImplode);
-        $placeholders = implode(", ", $setValues);
-
-        $query = "INSERT INTO $this->table ($columns) VALUES ($placeholders)";
-
-        if ($this->where !== '') {
-            $query .= " WHERE $this->where";
-        }
-
-        try {
-            return $this->fetchCount($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $tableName
-     * @param array $values
-     * @param array $bindings
-     * @return int
-     */
-    public function update(string $tableName, array $values, array $bindings = []): int
-    {
-        $this->table = $tableName;
-        $whereClause = $this->prepareBindings($bindings);
-        $this->values = $values;
-
-        $this->where = $whereClause;
-
-        $setValues = [];
-        foreach ($values as $column => $value) {
-            $setValues[] .= "$column=:$column";
-        }
-
-        $query = "UPDATE $this->table SET " . implode(", ", $setValues);
-
-        if ($this->bindings !== null) {
-            $query .= " WHERE $this->where";
-        }
-
-        try {
-            return $this->fetchCount($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $tableName
-     * @param array $bindings
-     * @return int
-     */
-    public function delete(string $tableName, array $bindings = []): int
-    {
-        $this->table = $tableName;
-
-        $this->where = $this->prepareBindings($bindings);
-
-        $query = "DELETE FROM $this->table WHERE $this->where";
-
-        try {
-            return $this->fetchCount($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $query
-     * @return array
-     */
-    private function fetch(string $query): array
-    {
-        try {
-            return $this->connection->fetch($query, $this->bindings);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-    }
-
-    /**
-     * @return string
-     */
-    private function prepareQuery(): string
-    {
-        $query = "SELECT $this->select FROM $this->table";
-
-        if ($this->join !== []) {
-            foreach ($this->join as $join) {
-                $on = $join['on'];
-                $query .= " $join[type] $join[table] ON $on";
+        $flatValues = [];
+        foreach ($values as $valueSet) {
+            foreach ($valueSet as $value) {
+                $flatValues[] = $value;
             }
         }
 
+        return $this->connection->exec($query, array_merge($flatValues, $bindings));
+    }
+
+    public function getRawSql(): string
+    {
+        $query = "SELECT $this->select FROM $this->table ";
+        if (empty($this->join) === false) {
+            $query .= implode(' ', $this->join) . ' ';
+        }
         if ($this->where !== '') {
-            $query .= " WHERE $this->where";
+            $query .= "WHERE $this->where ";
+        }
+        if ($this->like !== '') {
+            $query .= ($this->where !== '' ? 'AND ' : 'WHERE ') . $this->like . ' ';
+        }
+        if ($this->orderBy !== '') {
+            $query .= $this->orderBy . ' ';
+        }
+        if ($this->limit !== '') {
+            $query .= $this->limit . ' ';
+        }
+
+        $indexedBindings = array_values($this->bindings);
+
+        foreach ($indexedBindings as $index => $value) {
+            $query = preg_replace('/\?/', $this->quote($value), $query, 1);
         }
 
         return $query;
     }
 
-    /**
-     * @param array $inputArray
-     * @return string
-     */
-    private function prepareBindings(array $inputArray = []): string
+    private function quote($value): string
     {
-        $this->bindings = $inputArray;
-
-        $whereClause = '';
-        $count = count($inputArray);
-
-        if ($count === 1) {
-            $column = key($inputArray);
-            $whereClause = "$column=:$column";
+        if (is_int($value) || is_float($value)) {
+            return (string)$value;
         }
-        if ($count > 1) {
-            $preparedConditions = [];
-            foreach ($inputArray as $column => $value) {
-                $preparedConditions[] = "$column=:$column";
-            }
+        return "'" . str_replace("'", "''", $value) . "'";
+    }
 
-            $whereClause = implode(' AND ', $preparedConditions);
+    public function count(): int
+    {
+        $query = "SELECT COUNT(*) as count FROM $this->table ";
+        if (empty($this->join) === false) {
+            $query .= implode(' ', $this->join) . ' ';
         }
 
-        return $whereClause;
-    }
-
-    /**
-     * Возвращает $statement->rowCount()
-     *
-     * @param string $query
-     * @return int
-     */
-    private function fetchCount(string $query): int
-    {
-        try {
-            return $this->connection->fetchCount($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
-        }
-    }
-
-    /**
-     * @return mixed
-     */
-    public function scalar(): mixed
-    {
-        try {
-            $query = $this->prepareQuery();
-
-            $result = $this->fetch($query);
-        } catch (Throwable $e) {
-            throw new PDOException($e->getMessage());
+        if ($this->where !== '') {
+            $query .= "WHERE $this->where ";
         }
 
-        if (empty($result) === true) {
-            return '';
+        if ($this->like !== '') {
+            $query .= ($this->where !== '' ? 'AND ' : 'WHERE ') . $this->like . ' ';
         }
 
-        return reset($result[0]);
+        $result = $this->connection->execute($query, $this->bindings);
+
+        return $result[0]['count'] ?? 0;
     }
 
-
-    /**
-     * @param string $table
-     * @param array|string $on
-     * @return $this
-     */
-    public function join(string $table, array|string $on = ''): self
+    public function exec(string $query, array $bindings = []): int
     {
-        $this->resultJoin('JOIN', $table, $on);
-
-        return $this;
+        return $this->connection->exec($query, $bindings);
     }
 
-    /**
-     * @param string $table
-     * @param array|string $on
-     * @return $this
-     */
-    public function leftJoin(string $table, array|string $on = ''): self
+    public function execute(string $query, array $bindings = []): false|array
     {
-        $this->resultJoin('LEFT JOIN', $table, $on);
-
-        return $this;
+        return $this->connection->execute($query, $bindings);
     }
 
-    /**
-     * @param string $table
-     * @param array|string $on
-     * @return $this
-     */
-    public function rightJoin(string $table, array|string $on = ''): self
+    public function fetch(string $query, array $bindings = []): array
     {
-        $this->resultJoin('RIGHT JOIN', $table, $on);
-
-        return $this;
+      return $this->connection->fetch($query, $bindings);
     }
 
-    /**
-     * @param string $type
-     * @param string $table
-     * @param array|string $on
-     * @return void
-     */
-    private function resultJoin(string $type, string $table, array|string $on = ''): void
+    public function fetchCount(string $query, array $values = [], array $bindings = []): int
     {
-        $this->join[] = ['type' => $type, 'table' => $table, 'on' => $on];
-    }
-
-    /**
-     * @return $this
-     */
-    public function beginTransaction(): self
-    {
-        $this->fetch('START TRANSACTION;');
-
-        return $this;
-    }
-
-    /**
-     * @return void
-     */
-    public function commit(): void
-    {
-        $this->fetch('COMMIT;');
-    }
-
-    /**
-     * @return void
-     */
-    public function rollback(): void
-    {
-        $this->fetch('ROLLBACK;');
+        return $this->connection->fetchCount($query, $values, $bindings);
     }
 }
