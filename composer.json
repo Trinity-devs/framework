@@ -1,6 +1,8 @@
 {
   "name": "trinity-devs/framework",
-  "version": "0.9.1",
+  "type": "library",
+  "license": "MIT",
+  "version": "0.9.2",
   "authors": [
     {
       "name": "Roman Alborov",
@@ -24,6 +26,6 @@
   "require": {
     "php": "^8.2",
     "psr/cache": "^3.0",
-    "guzzlehttp/psr7": "^2.6"
+    "guzzlehttp/psr7": "^2.6.2"
   }
 }
